@@ -1,0 +1,106 @@
+name: PokéFC TacticMesh calibration baseline
+
+on:
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: 'smoke: fast checks only; aggressive: 6 complete 90-minute matches'
+        type: choice
+        required: true
+        default: aggressive
+        options:
+          - aggressive
+          - smoke
+
+permissions:
+  contents: read
+
+jobs:
+  preflight:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: TacticMesh seed replay and checkpoint parity
+        run: node scripts/checkpoint-smoke.cjs
+      - name: Native short smoke match
+        run: |
+          mkdir -p results
+          node engines/tacticmesh/tools/batch.cjs --matches 1 --seed 847291 --half-seconds 90 --out results/smoke.json > /dev/null
+          node -e "const r=require('./results/smoke.json'); if(r.completedMatches!==1) process.exit(1); console.log('SMOKE PASS', r.matchesData[0].scoreline)"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: preflight
+          path: results/smoke.json
+          retention-days: 30
+
+  reference:
+    if: ${{ github.event.inputs.mode == 'aggressive' }}
+    needs: preflight
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    strategy:
+      fail-fast: false
+      max-parallel: 6
+      matrix:
+        include:
+          - { id: '01-balanced', seed: 847291, home: balanced, away: balanced }
+          - { id: '02-press', seed: 847292, home: press, away: balanced }
+          - { id: '03-possession', seed: 847293, home: possession, away: direct }
+          - { id: '04-direct', seed: 847294, home: direct, away: possession }
+          - { id: '05-counterpress', seed: 847295, home: balanced, away: press }
+          - { id: '06-generated', seed: 847296, home: generated, away: generated }
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Full match (90 min), fixed seed
+        env:
+          SEED: ${{ matrix.seed }}
+          HOME_STYLE: ${{ matrix.home }}
+          AWAY_STYLE: ${{ matrix.away }}
+          ID: ${{ matrix.id }}
+        run: |
+          mkdir -p results
+          if [[ "$HOME_STYLE" == "generated" ]]; then
+            node engines/tacticmesh/tools/batch.cjs --matches 1 --seed "$SEED" --half-seconds 2700 --generated-defaults --out "results/reference-${ID}.json" > /dev/null
+          else
+            node engines/tacticmesh/tools/batch.cjs --matches 1 --seed "$SEED" --half-seconds 2700 --home-style "$HOME_STYLE" --away-style "$AWAY_STYLE" --out "results/reference-${ID}.json" > /dev/null
+          fi
+          node scripts/verify-reference.cjs "results/reference-${ID}.json" "$SEED"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: reference-${{ matrix.id }}
+          path: results/reference-*.json
+          if-no-files-found: warn
+          retention-days: 30
+
+  summary:
+    if: ${{ always() && github.event.inputs.mode == 'aggressive' }}
+    needs: reference
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: reference-*
+          path: results/input
+          merge-multiple: true
+      - name: Validate and summarize all six full-length reference matches
+        run: |
+          node scripts/summarize.cjs results/input results/summary
+          node -e "const s=require('./results/summary/reference-summary.json'); if(s.referenceMatches!==6 || !s.completed) throw Error('Incomplete reference baseline')"
+          cat results/summary/reference-report.md >> "$GITHUB_STEP_SUMMARY"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: pokefc-reference-report
+          path: results/summary/
+          if-no-files-found: warn
+          retention-days: 90
