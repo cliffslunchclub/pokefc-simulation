@@ -2,7 +2,7 @@
   "use strict";
   var TF = root.TF = root.TF || {};
   var MAX_DECISIONS = 160, MAX_EVENTS = 256, MAX_AUDIT = 120;
-  var EVENT_TYPES = ["passAttempt", "passComplete", "progressivePass", "lineBreak", "throughBall", "carry", "dribble", "runStarted", "runReceived", "pressStarted", "pressSuccess", "pressBypassed", "interception", "tackle", "shot", "save", "goal", "foul", "offside", "turnover", "finalThirdEntry", "boxEntry", "corner", "possessionSeconds", "xG", "repetitiveCirculation", "needlessRetreat", "passLoop", "defensiveError", "yellowCards", "redCards", "possessionCount", "possessionDurationSeconds", "passChainPasses"];
+  var EVENT_TYPES = ["passAttempt", "passComplete", "progressivePass", "lineBreak", "throughBall", "carry", "dribble", "runStarted", "runReceived", "pressStarted", "pressSuccess", "pressBypassed", "interception", "tackle", "tackleSuccess", "tackleFailure", "tackleUnknown", "shot", "save", "goal", "foul", "offside", "turnover", "finalThirdEntry", "boxEntry", "corner", "possessionSeconds", "xG", "repetitiveCirculation", "needlessRetreat", "passLoop", "defensiveError", "yellowCards", "redCards", "possessionCount", "possessionDurationSeconds", "passChainPasses"];
   function clamp(n, a, b) { return Math.max(a, Math.min(b, n)); }
   function distance(a, b) { var x = a.x - b.x, y = a.y - b.y; return Math.sqrt(x * x + y * y); }
   function init(match) {
@@ -181,7 +181,7 @@
     }
     else if (type === "foul" || type === "advantage") bump(match, tid, "foul");
     else if (type === "offside") bump(match, tid, "offside");
-    else if (type === "tackle") bump(match, tid, "tackle");
+    else if (type === "tackle") { bump(match, tid, "tackle"); bump(match, tid, event.success === true ? "tackleSuccess" : event.success === false ? "tackleFailure" : "tackleUnknown"); }
     else if (type === "restart-awarded" && event.restartType === "corner") bump(match, tid, "corner");
     else if (type === "press-started") bump(match, tid, "pressStarted");
     else if (type === "press-success") bump(match, tid, "pressSuccess");
