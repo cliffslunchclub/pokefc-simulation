@@ -55,6 +55,9 @@ const count = Math.max(1, Math.floor(Number(arg('matches', '1')) || 1));
 const halfSeconds = Math.max(1, Number(arg('half-seconds', '2700')) || 2700);
 const firstSeed = Number(arg('seed', '20261006'));
 const identical = has('identical-teams');
+const strengthProfile = arg('strength-profile', 'independent');
+if (!['independent', 'equal', 'home-strong', 'away-strong', 'generated'].includes(strengthProfile)) throw new Error('Invalid strength profile: ' + strengthProfile);
+function boostAttributes(players, delta) { players.forEach(p => Object.keys(p.attributes || {}).forEach(k => { p.attributes[k] = Math.max(10, Math.min(99, Math.round(p.attributes[k] + delta))); })); }
 const homeFormation = arg('home-formation', '4-3-3');
 const awayFormation = identical ? homeFormation : arg('away-formation', '4-3-3');
 const generatedDefaults = has('generated-defaults');
@@ -82,7 +85,9 @@ for (let index = 0; index < count; index++) {
     home: { id: core.match.teams[0].id, name: core.match.teams[0].name, formation: core.match.teams[0].formation, style: homeStyle, tacticsSource: homeStyle === 'generated' ? 'shipped-world-defaults' : 'explicit-batch-style', tactics: JSON.parse(JSON.stringify(core.match.teams[0].tactics)), colors: JSON.parse(JSON.stringify(core.match.teams[0].colors)), roster: { squadSize: core.match.teams[0].players.length, activeCount: core.match.teams[0].activePlayers.length, benchCount: core.match.teams[0].bench.length } },
     away: { id: core.match.teams[1].id, name: core.match.teams[1].name, formation: core.match.teams[1].formation, style: awayStyle, tacticsSource: awayStyle === 'generated' ? 'shipped-world-defaults' : 'explicit-batch-style', tactics: JSON.parse(JSON.stringify(core.match.teams[1].tactics)), colors: JSON.parse(JSON.stringify(core.match.teams[1].colors)), roster: { squadSize: core.match.teams[1].players.length, activeCount: core.match.teams[1].activePlayers.length, benchCount: core.match.teams[1].bench.length } }
   };
-  if (identical) mirrorProfiles(core.match);
+  if (identical || strengthProfile === 'equal') mirrorProfiles(core.match);
+  if (strengthProfile === 'home-strong') boostAttributes(core.match.teams[0].players, 12);
+  if (strengthProfile === 'away-strong') boostAttributes(core.match.teams[1].players, 12);
   const started = performance.now();
   const firstHalfStarted = performance.now();
   runHalf(core);
@@ -138,7 +143,7 @@ for (let index = 0; index < count; index++) {
   distributions.eventCounts.push(item.eventCount); distributions.firstHalfRuntimeMs.push(item.firstHalfRuntimeMs); distributions.secondHalfRuntimeMs.push(item.secondHalfRuntimeMs);
 }
 const report = {
-  kind: 'batch-simulation', engineVersion: TF.VERSION, sourceHash: TF.VERSION, seedPolicy: `${firstSeed} + matchIndex`,
+  kind: 'batch-simulation', engineVersion: TF.VERSION, sourceHash: TF.VERSION, strengthProfile, attributeBoost: strengthProfile === 'home-strong' || strengthProfile === 'away-strong' ? 12 : 0, seedPolicy: `${firstSeed} + matchIndex`,
   runner: { file: path.basename(__filename), sha256: runnerSha256AtStart, shaCapturedAt: 'process start before runtime module loading' },
   matches: count, completedMatches, halfSeconds, fullRegulation: halfSeconds === 2700,
   shortenedForTesting: halfSeconds !== 2700, identicalTeams: identical, generatedDefaults,
