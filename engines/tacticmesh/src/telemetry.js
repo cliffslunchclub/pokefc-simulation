@@ -151,6 +151,9 @@
       q.pendingPasses.length = 0;
       q.pendingPasses.push({ teamId: tid, playerId: event.playerId, targetId: event.targetId || null, tick: event.tick, x: origin ? origin.x : 0, y: origin ? origin.y : 0, line: line, direction: dir, through: kind.indexOf("through") >= 0, underPressure: underPressure });
     } else if (type === "ball-control") {
+      // Count a defender's real physical control of the opponent's deliberate
+      // pass separately from broad possession-change 'interceptions'.
+      if (event.opposingPassInterception === true) bump(match, tid, "directPassInterceptionControl");
       var pending = q.pendingPasses[q.pendingPasses.length - 1];
       if (!pending) return;
       q.pendingPasses.length = 0;
@@ -158,6 +161,8 @@
       // Loose-ball deflections can delay a receiver; every terminal control
       // consumes the attempt, and completePass only credits another teammate.
       completePass(match, pending, event.playerId, event.contactPoint || event.origin);
+    } else if (type === "ball-deflection") {
+      if (event.opposingPassInterception === true) bump(match, tid, "directPassInterceptionDeflection");
     } else if (type === "shot") {
       // A direct shot is terminal for an unresolved attempt. Normal one-touch
       // shots have already resolved on their preceding ball-played event.
