@@ -4,6 +4,7 @@ on:
     branches: [main]
     paths: ['.github/workflows/phase6-keeper.yml']
   workflow_dispatch:
+# Rerun after registering Phase 6 calibration variants in batch runner.
 permissions:
   contents: read
 jobs:
