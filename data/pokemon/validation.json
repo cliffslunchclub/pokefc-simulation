@@ -1,0 +1,127 @@
+{
+  "created": "2026-11-03",
+  "sources": [
+    "https://raw.githubusercontent.com/PokeAPI/pokeapi/master/data/v2/csv/pokemon_species.csv",
+    "https://raw.githubusercontent.com/PokeAPI/pokeapi/master/data/v2/csv/pokemon.csv",
+    "https://raw.githubusercontent.com/PokeAPI/pokeapi/master/data/v2/csv/pokemon_stats.csv",
+    "https://raw.githubusercontent.com/PokeAPI/pokeapi/master/data/v2/csv/pokemon_types.csv",
+    "https://raw.githubusercontent.com/PokeAPI/pokeapi/master/data/v2/csv/types.csv",
+    "https://raw.githubusercontent.com/PokeAPI/pokeapi/master/data/v2/csv/pokemon_species_names.csv"
+  ],
+  "species_count": 1025,
+  "gen_counts": {
+    "1": 151,
+    "2": 100,
+    "3": 135,
+    "4": 107,
+    "5": 156,
+    "6": 72,
+    "7": 88,
+    "8": 96,
+    "9": 120
+  },
+  "gen1_to_4_count": 493,
+  "gen5_to_9_count": 532,
+  "missing_default_forms": 0,
+  "missing_stats": 0,
+  "ratings_min": 25,
+  "ratings_max": 99,
+  "mean_core_ratings": {
+    "pace": 66.18,
+    "shooting": 68.51,
+    "passing": 66.75,
+    "dribbling": 67.15,
+    "defending": 67.54,
+    "physical": 68.38
+  },
+  "example_pokemon": [
+    {
+      "dex": 25,
+      "name": "Pikachu",
+      "bst": 320,
+      "ratings": {
+        "pace": 73,
+        "shooting": 61,
+        "passing": 59,
+        "dribbling": 67,
+        "defending": 55,
+        "physical": 50
+      }
+    },
+    {
+      "dex": 150,
+      "name": "Mewtwo",
+      "bst": 680,
+      "ratings": {
+        "pace": 88,
+        "shooting": 87,
+        "passing": 87,
+        "dribbling": 88,
+        "defending": 80,
+        "physical": 82
+      }
+    },
+    {
+      "dex": 493,
+      "name": "Arceus",
+      "bst": 720,
+      "ratings": {
+        "pace": 86,
+        "shooting": 86,
+        "passing": 86,
+        "dribbling": 86,
+        "defending": 86,
+        "physical": 86
+      }
+    },
+    {
+      "dex": 700,
+      "name": "Sylveon",
+      "bst": 525,
+      "ratings": {
+        "pace": 68,
+        "shooting": 77,
+        "passing": 82,
+        "dribbling": 77,
+        "defending": 78,
+        "physical": 77
+      }
+    },
+    {
+      "dex": 1007,
+      "name": "Koraidon",
+      "bst": 670,
+      "ratings": {
+        "pace": 88,
+        "shooting": 85,
+        "passing": 81,
+        "dribbling": 85,
+        "defending": 84,
+        "physical": 84
+      }
+    },
+    {
+      "dex": 1025,
+      "name": "Pecharunt",
+      "bst": 600,
+      "ratings": {
+        "pace": 78,
+        "shooting": 78,
+        "passing": 80,
+        "dribbling": 78,
+        "defending": 86,
+        "physical": 81
+      }
+    }
+  ],
+  "checks": [
+    "1025 contiguous national dex IDs",
+    "493 Gen1-4 eligible",
+    "6 base stats per species",
+    "BST equals sum of 6 stats",
+    "6 core ratings based on 4 source stats each",
+    "weights sum to 100% each",
+    "1-99 valid provisional ratings",
+    "no default form duplicates"
+  ]
+}
