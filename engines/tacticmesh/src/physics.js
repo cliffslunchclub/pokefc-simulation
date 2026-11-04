@@ -185,7 +185,7 @@
       // Phase 9 dual-engine scoring experiments: no scripted or post-hoc goals.
       if (TF.CALIBRATION_VARIANT === 'phase9-dual-balanced') shotExecutionMultiplier = 1.55;
       if (TF.CALIBRATION_VARIANT === 'phase9-dual-fortified') shotExecutionMultiplier = 1.75;
-      if (TF.CALIBRATION_VARIANT === 'phase9-dual-stabilized') shotExecutionMultiplier = 1.65;
+      if (TF.CALIBRATION_VARIANT === 'phase9-dual-stabilized' || TF.CALIBRATION_VARIANT === 'phase9-dual-reach55') shotExecutionMultiplier = 1.65;
     }
     var error = bodyBias + (1 - precision) * (rng ? (rng.next() - 0.5) : 0) * 0.42 * shotExecutionMultiplier;
     var c = Math.cos(error), s = Math.sin(error), vx = (dir.x * c - dir.y * s), vy = (dir.x * s + dir.y * c);
@@ -570,7 +570,7 @@
        // Standing collision radius and keeper challenges remain unchanged.
        if (['phase6-keeper-reach40','phase7-keeper-precision','phase7-combo-balanced','phase7-combo-possession','phase7-combo-scorer','phase9-dual-balanced'].includes(TF.CALIBRATION_VARIANT)) diveReach *= 1.4;
        if (TF.CALIBRATION_VARIANT === 'phase9-dual-fortified') diveReach *= 1.65;
-       if (TF.CALIBRATION_VARIANT === 'phase9-dual-stabilized') diveReach *= 1.55;
+       if (TF.CALIBRATION_VARIANT === 'phase9-dual-stabilized' || TF.CALIBRATION_VARIANT === 'phase9-dual-reach55') diveReach *= 1.55;
        var saveReach = 1.25 + (isCommittedSave ? diveReach : 0);
       if (d > saveReach || b.position.z > (isCommittedSave ? 2.65 : 2.35)) continue;
       // Handling is legal only when the ball itself is inside the keeper's
@@ -710,6 +710,7 @@
       // same-team receptions, tackles, loose-ball claims, shots, and keepers
       // keep exactly the original 0.67m contact radius.
       var passInterceptionReachScale =
+        TF.CALIBRATION_VARIANT === 'phase9-dual-reach55' ? 0.45 :
         TF.CALIBRATION_VARIANT === 'phase8-reach15' ? 0.85 :
         TF.CALIBRATION_VARIANT === 'phase8-reach25' ? 0.75 :
         (TF.CALIBRATION_VARIANT === 'phase8-reach40' ||
