@@ -176,6 +176,13 @@
     // Poor balance while still turning leaves a small, directional contact error.
     var bodyBias = clamp(-orientation * (0.08 + (1 - bodyBalance) * 0.32), -0.24, 0.24);
     var shotExecutionMultiplier = type === 'shoot' && ['shot-execution','phase4-combined'].includes(TF.CALIBRATION_VARIANT) ? 1.25 : 1;
+    if (type === 'shoot') {
+      // Execution scatter changes only; no scripted misses or post-hoc goal suppression.
+      if (TF.CALIBRATION_VARIANT === 'phase7-shot-precision' || TF.CALIBRATION_VARIANT === 'phase7-keeper-precision') shotExecutionMultiplier = 1.55;
+      if (TF.CALIBRATION_VARIANT === 'phase7-combo-balanced') shotExecutionMultiplier = 1.45;
+      if (TF.CALIBRATION_VARIANT === 'phase7-combo-possession') shotExecutionMultiplier = 1.60;
+      if (TF.CALIBRATION_VARIANT === 'phase7-combo-scorer') shotExecutionMultiplier = 1.75;
+    }
     var error = bodyBias + (1 - precision) * (rng ? (rng.next() - 0.5) : 0) * 0.42 * shotExecutionMultiplier;
     var c = Math.cos(error), s = Math.sin(error), vx = (dir.x * c - dir.y * s), vy = (dir.x * s + dir.y * c);
     var requestedPower = clamp(Number(i.power == null ? (type === "shoot" ? 0.83 : 0.62) : i.power), 0.1, 1);
@@ -557,7 +564,7 @@
       var diveReach = (attr(p, "diving", 55) * 0.012 + attr(p, "reach", 55) * 0.004 + calibratedReach) * diveProgress;
        // Phase 6 experiment: extend committed diving reach by 40%.
        // Standing collision radius and keeper challenges remain unchanged.
-       if (TF.CALIBRATION_VARIANT === "phase6-keeper-reach40") diveReach *= 1.4;
+       if (['phase6-keeper-reach40','phase7-keeper-precision','phase7-combo-balanced','phase7-combo-possession','phase7-combo-scorer'].includes(TF.CALIBRATION_VARIANT)) diveReach *= 1.4;
        var saveReach = 1.25 + (isCommittedSave ? diveReach : 0);
       if (d > saveReach || b.position.z > (isCommittedSave ? 2.65 : 2.35)) continue;
       // Handling is legal only when the ball itself is inside the keeper's
@@ -708,10 +715,14 @@
         var speed = hypot(b.velocity.x, b.velocity.y), face = p.facing || { x: 1, y: 0 };
         var incoming = speed > 0.25 ? norm(-b.velocity.x, -b.velocity.y) : norm(face.x, face.y);
         var facingQuality = clamp((face.x * incoming.x + face.y * incoming.y + 1) * 0.5, 0, 1), pressureValue = localPressure(m, p, 3);
-        var calibrationControlBonus = (TF.CALIBRATION_VARIANT === 'passing' || TF.CALIBRATION_VARIANT === 'combined' || String(TF.CALIBRATION_VARIANT || '').startsWith('phase4-') || String(TF.CALIBRATION_VARIANT || '').startsWith('phase6-') || ['keeper-reach','keeper-handling','shot-execution'].includes(TF.CALIBRATION_VARIANT)) ? 0.07 : 0;
+        var calibrationControlBonus = (TF.CALIBRATION_VARIANT === 'passing' || TF.CALIBRATION_VARIANT === 'combined' || String(TF.CALIBRATION_VARIANT || '').startsWith('phase4-') || String(TF.CALIBRATION_VARIANT || '').startsWith('phase6-') || String(TF.CALIBRATION_VARIANT || '').startsWith('phase7-') || ['keeper-reach','keeper-handling','shot-execution'].includes(TF.CALIBRATION_VARIANT)) ? 0.07 : 0;
         // Isolated Phase 6 possession experiment: substantially improve first-touch
         // reliability while preserving pressure, speed, fatigue and skill effects.
         if (TF.CALIBRATION_VARIANT === 'phase6-possession') calibrationControlBonus += 0.22;
+        // Smaller first-touch experiments retain all physical pressure and skill penalties.
+        if (TF.CALIBRATION_VARIANT === 'phase7-pass-light' || TF.CALIBRATION_VARIANT === 'phase7-combo-scorer') calibrationControlBonus += 0.08;
+        if (TF.CALIBRATION_VARIANT === 'phase7-pass-medium' || TF.CALIBRATION_VARIANT === 'phase7-combo-possession') calibrationControlBonus += 0.15;
+        if (TF.CALIBRATION_VARIANT === 'phase7-pass-support' || TF.CALIBRATION_VARIANT === 'phase7-combo-balanced') calibrationControlBonus += 0.10;
         var control = clamp(0.96 + calibrationControlBonus + (attr(p, "firstTouch", 57) - 55) * 0.001 + (attr(p, "balance", 55) - 55) * 0.0006
           - Math.max(0, speed - 2) * 0.016 - (1 - facingQuality) * 0.22 - Math.max(0, b.position.z - 0.2) * 0.12
           - Math.min(0.32, pressureValue * 0.11) - (1 - clamp(Number(p.stamina) || 1, 0, 1)) * 0.1, 0.12, 0.995);
