@@ -791,6 +791,11 @@
         // the defensive line for an onside runner.
         var offsidePenalty = thisOffsideRisk(team, mp, opponents, pitch, seenMate, bp.x);
         basic -= offsidePenalty * (0.18 + attrs.anticipation * 0.2);
+        // Phase 6 possession trial: reward safe, reachable ordinary passes.
+        // Risky lanes and uncertain receivers retain their penalties.
+        if (TF.CALIBRATION_VARIANT === 'phase6-possession') {
+          basic += 0.20 * receiverSafety * (1 - laneRisk) * (1 - clamp(receiverArrivalDeficit, 0, 1));
+        }
         var throughEligible = isForward(mate) || progress(team, pos, mp) > 6;
         var runSpace = Math.max(0, minOpponentDistance(predicted, opponents) - 5);
         var runSpeed = (Number(seenMate.velocity.x) || 0) * dir;
@@ -1267,6 +1272,7 @@
           if (ballGap <= 1.75 && challengeDistance <= 1.35 && facingBall >= 0.35 && !carrierBlocksFootPath) {
             var discipline = attr(p, 'discipline', 0.5), tackleSkill = attr(p, 'tackling', 0.5), foulRisk = clamp((1 - discipline) * 0.42 + (1 - attr(p, 'balance', 0.75)) * 0.18 + Math.max(0, 1.25 - facingBall) * 0.08, 0, 0.7);
             var challengeCalibrationPenalty = (TF.CALIBRATION_VARIANT === 'defense' || TF.CALIBRATION_VARIANT === 'combined' || String(TF.CALIBRATION_VARIANT || '').startsWith('phase4-') || ['keeper-reach','keeper-handling','shot-execution'].includes(TF.CALIBRATION_VARIANT)) ? 0.09 : 0;
+            if (TF.CALIBRATION_VARIANT === 'phase6-possession') challengeCalibrationPenalty += 0.22;
             var challengeScore = 0.61 - challengeCalibrationPenalty + tackleSkill * 0.13 + discipline * 0.055 + attr(p, 'aggression', 0.5) * 0.035 + clamp(facingBall, 0, 1) * 0.045 + perceivedOwnerBelief.confidence * 0.035 - foulRisk * 0.12;
             pushCandidate(candidates, 'challenge', clampPoint(bp, pitch, 0.5), challengeScore, { targetId: perceivedOwnerId, physicsAction: 'standingtackle', tackleSkill: tackleSkill, foulRisk: foulRisk, facingBall: facingBall, carrierBlocksFootPath: carrierBlocksFootPath, responsibility: 'ball-carrier' });
           }
