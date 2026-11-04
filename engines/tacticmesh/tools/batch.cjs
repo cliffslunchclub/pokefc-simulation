@@ -12,6 +12,9 @@ const loadedVersion = require('./version.cjs');
 if (loadedVersion !== version) throw new Error(`Source changed while batch runtime loaded: ${version} -> ${loadedVersion}`);
 const TF = globalThis.TF;
 TF.VERSION = version;
+const calibrationVariant = (() => { const i = process.argv.indexOf('--calibration-variant'); return i >= 0 ? process.argv[i+1] : 'baseline'; })();
+if (!['baseline', 'passing', 'defense', 'shot-selection', 'combined'].includes(calibrationVariant)) throw new Error('Unknown calibration variant: ' + calibrationVariant);
+TF.CALIBRATION_VARIANT = calibrationVariant;
 function arg(name, fallback) { const i = process.argv.indexOf('--' + name); return i >= 0 ? process.argv[i + 1] : fallback; }
 function has(name) { return process.argv.includes('--' + name); }
 function merge(target, source) { Object.keys(source || {}).forEach(k => { target[k] = source[k]; }); return target; }
@@ -143,7 +146,7 @@ for (let index = 0; index < count; index++) {
   distributions.eventCounts.push(item.eventCount); distributions.firstHalfRuntimeMs.push(item.firstHalfRuntimeMs); distributions.secondHalfRuntimeMs.push(item.secondHalfRuntimeMs);
 }
 const report = {
-  kind: 'batch-simulation', engineVersion: TF.VERSION, sourceHash: TF.VERSION, strengthProfile, attributeBoost: strengthProfile === 'home-strong' || strengthProfile === 'away-strong' ? 12 : 0, seedPolicy: `${firstSeed} + matchIndex`,
+  kind: 'batch-simulation', engineVersion: TF.VERSION, sourceHash: TF.VERSION, calibrationVariant, strengthProfile, attributeBoost: strengthProfile === 'home-strong' || strengthProfile === 'away-strong' ? 12 : 0, seedPolicy: `${firstSeed} + matchIndex`,
   runner: { file: path.basename(__filename), sha256: runnerSha256AtStart, shaCapturedAt: 'process start before runtime module loading' },
   matches: count, completedMatches, halfSeconds, fullRegulation: halfSeconds === 2700,
   shortenedForTesting: halfSeconds !== 2700, identicalTeams: identical, generatedDefaults,
