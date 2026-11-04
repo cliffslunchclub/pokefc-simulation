@@ -702,7 +702,7 @@
           // conditional on that physical placement chance; keeper/lane risks
           // remain separate observed costs and are each charged once.
           var positiveShotBenefit = Math.max(0, shotBase + shotAngle * 0.25);
-          var shotSelectionPenalty = (TF.CALIBRATION_VARIANT === 'shot-selection' || TF.CALIBRATION_VARIANT === 'combined' || String(TF.CALIBRATION_VARIANT || '').startsWith('phase4-') || ['keeper-reach','keeper-handling','shot-execution'].includes(TF.CALIBRATION_VARIANT)) ? 0.13 : 0;
+          var shotSelectionPenalty = (TF.CALIBRATION_VARIANT === 'shot-selection' || TF.CALIBRATION_VARIANT === 'combined' || String(TF.CALIBRATION_VARIANT || '').startsWith('phase4-') || String(TF.CALIBRATION_VARIANT || '').startsWith('phase6-') || ['keeper-reach','keeper-handling','shot-execution'].includes(TF.CALIBRATION_VARIANT)) ? 0.13 : 0;
           var candidateUtility = clamp(positiveShotBenefit * candidatePlacement - candidateKeeperRisk * 0.35 - candidateLaneRisk * 0.24 - shotSelectionPenalty, 0.02, 0.88);
           if (candidateUtility > shot) {
             shot = candidateUtility; shotTarget = candidateTarget; shotPlacementChance = candidatePlacement;
@@ -1271,8 +1271,8 @@
           // does not run through the observed carrier to a far-side ball.
           if (ballGap <= 1.75 && challengeDistance <= 1.35 && facingBall >= 0.35 && !carrierBlocksFootPath) {
             var discipline = attr(p, 'discipline', 0.5), tackleSkill = attr(p, 'tackling', 0.5), foulRisk = clamp((1 - discipline) * 0.42 + (1 - attr(p, 'balance', 0.75)) * 0.18 + Math.max(0, 1.25 - facingBall) * 0.08, 0, 0.7);
-            var challengeCalibrationPenalty = (TF.CALIBRATION_VARIANT === 'defense' || TF.CALIBRATION_VARIANT === 'combined' || String(TF.CALIBRATION_VARIANT || '').startsWith('phase4-') || ['keeper-reach','keeper-handling','shot-execution'].includes(TF.CALIBRATION_VARIANT)) ? 0.09 : 0;
-            if (TF.CALIBRATION_VARIANT === 'phase6-possession') challengeCalibrationPenalty += 0.22;
+            var challengeCalibrationPenalty = (TF.CALIBRATION_VARIANT === 'defense' || TF.CALIBRATION_VARIANT === 'combined' || String(TF.CALIBRATION_VARIANT || '').startsWith('phase4-') || String(TF.CALIBRATION_VARIANT || '').startsWith('phase6-') || ['keeper-reach','keeper-handling','shot-execution'].includes(TF.CALIBRATION_VARIANT)) ? 0.09 : 0;
+            if (TF.CALIBRATION_VARIANT === 'phase6-possession') challengeCalibrationPenalty += 0.05;
             var challengeScore = 0.61 - challengeCalibrationPenalty + tackleSkill * 0.13 + discipline * 0.055 + attr(p, 'aggression', 0.5) * 0.035 + clamp(facingBall, 0, 1) * 0.045 + perceivedOwnerBelief.confidence * 0.035 - foulRisk * 0.12;
             pushCandidate(candidates, 'challenge', clampPoint(bp, pitch, 0.5), challengeScore, { targetId: perceivedOwnerId, physicsAction: 'standingtackle', tackleSkill: tackleSkill, foulRisk: foulRisk, facingBall: facingBall, carrierBlocksFootPath: carrierBlocksFootPath, responsibility: 'ball-carrier' });
           }
