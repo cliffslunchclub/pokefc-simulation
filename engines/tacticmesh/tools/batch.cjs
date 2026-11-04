@@ -13,7 +13,7 @@ if (loadedVersion !== version) throw new Error(`Source changed while batch runti
 const TF = globalThis.TF;
 TF.VERSION = version;
 const calibrationVariant = (() => { const i = process.argv.indexOf('--calibration-variant'); return i >= 0 ? process.argv[i+1] : 'baseline'; })();
-if (!['baseline', 'passing', 'defense', 'shot-selection', 'combined', 'phase4-control', 'keeper-reach', 'keeper-handling', 'shot-execution', 'phase4-combined', 'phase6-keeper-reach40', 'phase6-possession', 'phase7-pass-light', 'phase7-pass-medium', 'phase7-pass-support', 'phase7-support', 'phase7-defense-01', 'phase7-defense-025', 'phase7-shot-precision', 'phase7-keeper-precision', 'phase7-combo-balanced', 'phase7-combo-possession', 'phase7-combo-scorer', 'phase8-reach15', 'phase8-reach25', 'phase8-reach40'].includes(calibrationVariant)) throw new Error('Unknown calibration variant: ' + calibrationVariant);
+if (!['baseline', 'passing', 'defense', 'shot-selection', 'combined', 'phase4-control', 'keeper-reach', 'keeper-handling', 'shot-execution', 'phase4-combined', 'phase6-keeper-reach40', 'phase6-possession', 'phase7-pass-light', 'phase7-pass-medium', 'phase7-pass-support', 'phase7-support', 'phase7-defense-01', 'phase7-defense-025', 'phase7-shot-precision', 'phase7-keeper-precision', 'phase7-combo-balanced', 'phase7-combo-possession', 'phase7-combo-scorer', 'phase8-reach15', 'phase8-reach25', 'phase8-reach40', 'phase9-dual-balanced', 'phase9-dual-fortified', 'phase9-dual-stabilized'].includes(calibrationVariant)) throw new Error('Unknown calibration variant: ' + calibrationVariant);
 TF.CALIBRATION_VARIANT = calibrationVariant;
 function arg(name, fallback) { const i = process.argv.indexOf('--' + name); return i >= 0 ? process.argv[i + 1] : fallback; }
 function has(name) { return process.argv.includes('--' + name); }
@@ -125,6 +125,15 @@ for (let index = 0; index < count; index++) {
   if (strengthProfile === 'away-strong') boostAttributes(core.match.teams[1].players, 12);
   offsetRelevantAttributes(core.match.teams[0].players, homeRatingOffset);
   offsetRelevantAttributes(core.match.teams[1].players, awayRatingOffset);
+  if (calibrationVariant === 'phase9-dual-stabilized') {
+    // Phase 9 isolated ratings-sensitivity experiment: preserve player order
+    // while reducing extreme AI/physics sensitivity to weak vs elite teams.
+    // Only applied inside this selected batch variant, never in the live game.
+    for (const player of core.match.players) for (const [key, value] of Object.entries(player.attributes || {})) {
+      if (!player.isGoalkeeper && keeperOnly.has(key)) continue;
+      player.attributes[key] = Math.max(20, Math.min(99, Math.round(60 + (value - 60) * 0.70)));
+    }
+  }
   const quickSimFixture = includeQuickSimFixtures ? quickSimPreview(core.match, seed) : null;
   const started = performance.now();
   const firstHalfStarted = performance.now();
