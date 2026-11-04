@@ -57,10 +57,42 @@ function progress(index, seed, period, label, core, started) {
 const count = Math.max(1, Math.floor(Number(arg('matches', '1')) || 1));
 const halfSeconds = Math.max(1, Number(arg('half-seconds', '2700')) || 2700);
 const firstSeed = Number(arg('seed', '20261006'));
+const homeRatingOffset = Number(arg('home-rating-offset', '0'));
+const awayRatingOffset = Number(arg('away-rating-offset', '0'));
+const includeQuickSimFixtures = has('include-quick-sim-fixtures');
+if (![homeRatingOffset, awayRatingOffset].every(n => Number.isInteger(n) && n >= -25 && n <= 25)) throw Error('Rating offset must be an integer from -25 to +25');
 const identical = has('identical-teams');
 const strengthProfile = arg('strength-profile', 'independent');
 if (!['independent', 'equal', 'home-strong', 'away-strong', 'generated'].includes(strengthProfile)) throw new Error('Invalid strength profile: ' + strengthProfile);
 function boostAttributes(players, delta) { players.forEach(p => Object.keys(p.attributes || {}).forEach(k => { p.attributes[k] = Math.max(10, Math.min(99, Math.round(p.attributes[k] + delta))); })); }
+// Experimental player-strength profiles: preserve outfield/GK specialization
+// by not boosting goalkeeper-only skills on outfield players.
+const keeperOnly = new Set(['handling','reflexes','catching','parrying','diving','oneOnOne','aerialCommand','sweeping','throwing','kicking']);
+function offsetRelevantAttributes(players, delta) {
+  if (!delta) return;
+  for (const p of players) {
+    for (const k of Object.keys(p.attributes || {})) {
+      if (!p.isGoalkeeper && keeperOnly.has(k)) continue;
+      p.attributes[k] = Math.max(20, Math.min(99, Math.round(p.attributes[k] + delta)));
+    }
+  }
+}
+// Quick Sim's private implementation is not vendored into this public repository.
+// These public, deterministic fixture descriptors can be consumed privately by
+// PokeFC/quick-sim.js to benchmark exactly the same starting XI and attributes.
+function quickSimPreview(match, seed) {
+  const team = (t) => ({
+    id: t.id, name: t.name, tactic: 'balanced',
+    lineup: t.activePlayers.map(p => ({
+      id: p.id, name: p.name,
+      pos: p.positionFamily === 'GK' ? 'GK'
+        : p.positionFamily === 'DEF' ? 'DEF'
+        : p.positionFamily === 'MID' ? 'MID' : 'FWD',
+      main: { ...p.attributes }, detail: { ...p.attributes }
+    }))
+  });
+  return { seed: String(seed), home: team(match.teams[0]), away: team(match.teams[1]) };
+}
 const homeFormation = arg('home-formation', '4-3-3');
 const awayFormation = identical ? homeFormation : arg('away-formation', '4-3-3');
 const generatedDefaults = has('generated-defaults');
@@ -91,6 +123,9 @@ for (let index = 0; index < count; index++) {
   if (identical || strengthProfile === 'equal') mirrorProfiles(core.match);
   if (strengthProfile === 'home-strong') boostAttributes(core.match.teams[0].players, 12);
   if (strengthProfile === 'away-strong') boostAttributes(core.match.teams[1].players, 12);
+  offsetRelevantAttributes(core.match.teams[0].players, homeRatingOffset);
+  offsetRelevantAttributes(core.match.teams[1].players, awayRatingOffset);
+  const quickSimFixture = includeQuickSimFixtures ? quickSimPreview(core.match, seed) : null;
   const started = performance.now();
   const firstHalfStarted = performance.now();
   runHalf(core);
@@ -132,6 +167,7 @@ for (let index = 0; index < count; index++) {
     finished: m.state.finished, shortenedForTesting: m.clock.shortenedForTesting, runtimeMs: Number(runtimeMs.toFixed(2)),
     firstHalfRuntimeMs: Number(firstHalfRuntimeMs.toFixed(2)), secondHalfRuntimeMs: Number(secondHalfRuntimeMs.toFixed(2)), eventCount: m.events.length
   };
+  if (quickSimFixture) item.quickSimFixture = quickSimFixture;
   matches.push(item); totalRuntimeMs += runtimeMs; totalTicks += m.tick; completedMatches += m.state.finished ? 1 : 0;
   scorelines[item.scoreline] = (scorelines[item.scoreline] || 0) + 1;
   distributions.goals.push(item.goals); distributions.shots.push(item.shots); distributions.xG.push(item.xG);
@@ -146,7 +182,9 @@ for (let index = 0; index < count; index++) {
   distributions.eventCounts.push(item.eventCount); distributions.firstHalfRuntimeMs.push(item.firstHalfRuntimeMs); distributions.secondHalfRuntimeMs.push(item.secondHalfRuntimeMs);
 }
 const report = {
-  kind: 'batch-simulation', engineVersion: TF.VERSION, sourceHash: TF.VERSION, calibrationVariant, strengthProfile, attributeBoost: strengthProfile === 'home-strong' || strengthProfile === 'away-strong' ? 12 : 0, seedPolicy: `${firstSeed} + matchIndex`,
+  kind: 'batch-simulation', engineVersion: TF.VERSION, sourceHash: TF.VERSION, calibrationVariant, strengthProfile,
+  homeRatingOffset, awayRatingOffset, includesQuickSimFixtures: includeQuickSimFixtures,
+  attributeBoost: strengthProfile === 'home-strong' || strengthProfile === 'away-strong' ? 12 : 0, seedPolicy: `${firstSeed} + matchIndex`,
   runner: { file: path.basename(__filename), sha256: runnerSha256AtStart, shaCapturedAt: 'process start before runtime module loading' },
   matches: count, completedMatches, halfSeconds, fullRegulation: halfSeconds === 2700,
   shortenedForTesting: halfSeconds !== 2700, identicalTeams: identical, generatedDefaults,
