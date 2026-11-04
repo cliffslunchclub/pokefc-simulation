@@ -702,7 +702,7 @@
           // conditional on that physical placement chance; keeper/lane risks
           // remain separate observed costs and are each charged once.
           var positiveShotBenefit = Math.max(0, shotBase + shotAngle * 0.25);
-          var shotSelectionPenalty = (TF.CALIBRATION_VARIANT === 'shot-selection' || TF.CALIBRATION_VARIANT === 'combined' || String(TF.CALIBRATION_VARIANT || '').startsWith('phase4-') || String(TF.CALIBRATION_VARIANT || '').startsWith('phase6-') || ['keeper-reach','keeper-handling','shot-execution'].includes(TF.CALIBRATION_VARIANT)) ? 0.13 : 0;
+          var shotSelectionPenalty = (TF.CALIBRATION_VARIANT === 'shot-selection' || TF.CALIBRATION_VARIANT === 'combined' || String(TF.CALIBRATION_VARIANT || '').startsWith('phase4-') || String(TF.CALIBRATION_VARIANT || '').startsWith('phase6-') || String(TF.CALIBRATION_VARIANT || '').startsWith('phase7-') || ['keeper-reach','keeper-handling','shot-execution'].includes(TF.CALIBRATION_VARIANT)) ? 0.13 : 0;
           var candidateUtility = clamp(positiveShotBenefit * candidatePlacement - candidateKeeperRisk * 0.35 - candidateLaneRisk * 0.24 - shotSelectionPenalty, 0.02, 0.88);
           if (candidateUtility > shot) {
             shot = candidateUtility; shotTarget = candidateTarget; shotPlacementChance = candidatePlacement;
@@ -793,8 +793,16 @@
         basic -= offsidePenalty * (0.18 + attrs.anticipation * 0.2);
         // Phase 6 possession trial: reward safe, reachable ordinary passes.
         // Risky lanes and uncertain receivers retain their penalties.
-        if (TF.CALIBRATION_VARIANT === 'phase6-possession') {
-          basic += 0.20 * receiverSafety * (1 - laneRisk) * (1 - clamp(receiverArrivalDeficit, 0, 1));
+        var passSafetyBonus = TF.CALIBRATION_VARIANT === 'phase6-possession' ? 0.20 :
+          TF.CALIBRATION_VARIANT === 'phase7-pass-light' ? 0.10 :
+          TF.CALIBRATION_VARIANT === 'phase7-pass-medium' ? 0.17 :
+          TF.CALIBRATION_VARIANT === 'phase7-pass-support' ? 0.15 :
+          TF.CALIBRATION_VARIANT === 'phase7-combo-balanced' ? 0.14 :
+          TF.CALIBRATION_VARIANT === 'phase7-combo-possession' ? 0.20 :
+          TF.CALIBRATION_VARIANT === 'phase7-combo-scorer' ? 0.10 : 0;
+        if (passSafetyBonus > 0) {
+          // Prefer observed safe lanes and reachable teammates, not an unconditional completion boost.
+          basic += passSafetyBonus * receiverSafety * (1 - laneRisk) * (1 - clamp(receiverArrivalDeficit, 0, 1));
         }
         var throughEligible = isForward(mate) || progress(team, pos, mp) > 6;
         var runSpace = Math.max(0, minOpponentDistance(predicted, opponents) - 5);
@@ -1191,6 +1199,11 @@
             + clamp((13 - Math.abs(outletDistance - 10)) / 13, 0, 1) * 0.045
             - outletPressure * 0.12 - laneRisk * 0.11;
           if ((teamIntent === 'retain' || teamIntent === 'protect') && option.purpose === 'support-recycle') outletScore += 0.025;
+          if (['phase7-support', 'phase7-pass-support', 'phase7-combo-balanced', 'phase7-combo-possession', 'phase7-combo-scorer'].includes(TF.CALIBRATION_VARIANT)) {
+            // Reward a credible, open off-ball outlet; avoid bunching or unsafe lanes.
+            var supportBoost = TF.CALIBRATION_VARIANT === 'phase7-combo-scorer' ? 0.06 : 0.10;
+            outletScore += supportBoost * spacing * (1 - laneRisk) * (1 - clamp(outletPressure, 0, 1));
+          }
           pushCandidate(candidates, 'support', outlet, outletScore, { purpose: option.purpose, outletDistance: outletDistance, pressure: outletPressure, laneInterceptionRisk: laneRisk, spacing: nearestOutletMate });
         });
         if ((isForward(p) || /wing|attack|striker|midfielder/.test(roleName(p))) && progress(team, ballPoint, anchor) > -4) {
@@ -1271,8 +1284,11 @@
           // does not run through the observed carrier to a far-side ball.
           if (ballGap <= 1.75 && challengeDistance <= 1.35 && facingBall >= 0.35 && !carrierBlocksFootPath) {
             var discipline = attr(p, 'discipline', 0.5), tackleSkill = attr(p, 'tackling', 0.5), foulRisk = clamp((1 - discipline) * 0.42 + (1 - attr(p, 'balance', 0.75)) * 0.18 + Math.max(0, 1.25 - facingBall) * 0.08, 0, 0.7);
-            var challengeCalibrationPenalty = (TF.CALIBRATION_VARIANT === 'defense' || TF.CALIBRATION_VARIANT === 'combined' || String(TF.CALIBRATION_VARIANT || '').startsWith('phase4-') || String(TF.CALIBRATION_VARIANT || '').startsWith('phase6-') || ['keeper-reach','keeper-handling','shot-execution'].includes(TF.CALIBRATION_VARIANT)) ? 0.09 : 0;
+            var challengeCalibrationPenalty = (TF.CALIBRATION_VARIANT === 'defense' || TF.CALIBRATION_VARIANT === 'combined' || String(TF.CALIBRATION_VARIANT || '').startsWith('phase4-') || String(TF.CALIBRATION_VARIANT || '').startsWith('phase6-') || String(TF.CALIBRATION_VARIANT || '').startsWith('phase7-') || ['keeper-reach','keeper-handling','shot-execution'].includes(TF.CALIBRATION_VARIANT)) ? 0.09 : 0;
             if (TF.CALIBRATION_VARIANT === 'phase6-possession') challengeCalibrationPenalty += 0.05;
+            if (TF.CALIBRATION_VARIANT === 'phase7-defense-01' || TF.CALIBRATION_VARIANT === 'phase7-combo-balanced') challengeCalibrationPenalty += 0.01;
+            if (TF.CALIBRATION_VARIANT === 'phase7-defense-025') challengeCalibrationPenalty += 0.025;
+            if (TF.CALIBRATION_VARIANT === 'phase7-combo-possession') challengeCalibrationPenalty += 0.015;
             var challengeScore = 0.61 - challengeCalibrationPenalty + tackleSkill * 0.13 + discipline * 0.055 + attr(p, 'aggression', 0.5) * 0.035 + clamp(facingBall, 0, 1) * 0.045 + perceivedOwnerBelief.confidence * 0.035 - foulRisk * 0.12;
             pushCandidate(candidates, 'challenge', clampPoint(bp, pitch, 0.5), challengeScore, { targetId: perceivedOwnerId, physicsAction: 'standingtackle', tackleSkill: tackleSkill, foulRisk: foulRisk, facingBall: facingBall, carrierBlocksFootPath: carrierBlocksFootPath, responsibility: 'ball-carrier' });
           }
