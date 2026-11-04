@@ -708,7 +708,7 @@
         var speed = hypot(b.velocity.x, b.velocity.y), face = p.facing || { x: 1, y: 0 };
         var incoming = speed > 0.25 ? norm(-b.velocity.x, -b.velocity.y) : norm(face.x, face.y);
         var facingQuality = clamp((face.x * incoming.x + face.y * incoming.y + 1) * 0.5, 0, 1), pressureValue = localPressure(m, p, 3);
-        var calibrationControlBonus = (TF.CALIBRATION_VARIANT === 'passing' || TF.CALIBRATION_VARIANT === 'combined' || String(TF.CALIBRATION_VARIANT || '').startsWith('phase4-') || ['keeper-reach','keeper-handling','shot-execution'].includes(TF.CALIBRATION_VARIANT)) ? 0.07 : 0;
+        var calibrationControlBonus = (TF.CALIBRATION_VARIANT === 'passing' || TF.CALIBRATION_VARIANT === 'combined' || String(TF.CALIBRATION_VARIANT || '').startsWith('phase4-') || String(TF.CALIBRATION_VARIANT || '').startsWith('phase6-') || ['keeper-reach','keeper-handling','shot-execution'].includes(TF.CALIBRATION_VARIANT)) ? 0.07 : 0;
         // Isolated Phase 6 possession experiment: substantially improve first-touch
         // reliability while preserving pressure, speed, fatigue and skill effects.
         if (TF.CALIBRATION_VARIANT === 'phase6-possession') calibrationControlBonus += 0.22;
