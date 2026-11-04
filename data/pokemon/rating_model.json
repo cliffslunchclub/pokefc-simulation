@@ -1,0 +1,65 @@
+{
+  "model_id": "pokefc-core-six-v0.1",
+  "status": "provisional-calibration",
+  "description": "Four Pokemon base stats per soccer rating; 100% weights each. No separate BST bonus. No type bonus or individual variation applied. Normalization not finalized.",
+  "raw_formula": "sum(base_stat * weight)",
+  "normalization_provisional": {
+    "for_raw_lte_80": "20 + 0.70 * raw",
+    "for_raw_gt_80": "76 + 0.25 * (raw - 80)",
+    "round": "nearest integer (Math.round)",
+    "clamp": [
+      1,
+      99
+    ]
+  },
+  "input_fields": [
+    "hp",
+    "attack",
+    "defense",
+    "special_attack",
+    "special_defense",
+    "speed"
+  ],
+  "core_attributes": {
+    "pace": {
+      "speed": 0.65,
+      "attack": 0.15,
+      "hp": 0.1,
+      "special_attack": 0.1
+    },
+    "shooting": {
+      "attack": 0.45,
+      "special_attack": 0.3,
+      "speed": 0.15,
+      "special_defense": 0.1
+    },
+    "passing": {
+      "special_attack": 0.45,
+      "special_defense": 0.3,
+      "speed": 0.15,
+      "defense": 0.1
+    },
+    "dribbling": {
+      "speed": 0.4,
+      "special_attack": 0.3,
+      "attack": 0.2,
+      "special_defense": 0.1
+    },
+    "defending": {
+      "defense": 0.45,
+      "special_defense": 0.3,
+      "speed": 0.15,
+      "hp": 0.1
+    },
+    "physical": {
+      "hp": 0.45,
+      "attack": 0.3,
+      "defense": 0.15,
+      "special_defense": 0.1
+    }
+  },
+  "role_overall_status": "not_calculated_pending_position_weight_rules",
+  "tacticmesh_46_attribute_status": "pending_approved_mapping",
+  "sprite_status": "asset_manifest_pending_validation",
+  "form_policy": "one default form per National Pokedex species; alternate forms not duplicated in v1"
+}
