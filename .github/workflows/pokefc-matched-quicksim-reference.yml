@@ -37,6 +37,7 @@ jobs:
       max-parallel: 4
       matrix:
         seed: [991101, 991102, 991103, 991104]
+        profile: [avg-avg, weak-weak, elite-elite, elite-weak]
         include:
           - profile: avg-avg
             home_offset: 0
