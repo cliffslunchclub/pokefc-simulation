@@ -175,7 +175,8 @@
     var precision = (attr(p, skill, 58) / 100) * (0.95 - pressure * 0.075) * Math.max(0.55, Number(p.stamina) || 1) * stability;
     // Poor balance while still turning leaves a small, directional contact error.
     var bodyBias = clamp(-orientation * (0.08 + (1 - bodyBalance) * 0.32), -0.24, 0.24);
-    var error = bodyBias + (1 - precision) * (rng ? (rng.next() - 0.5) : 0) * 0.42;
+    var shotExecutionMultiplier = type === 'shoot' && ['shot-execution','phase4-combined'].includes(TF.CALIBRATION_VARIANT) ? 1.25 : 1;
+    var error = bodyBias + (1 - precision) * (rng ? (rng.next() - 0.5) : 0) * 0.42 * shotExecutionMultiplier;
     var c = Math.cos(error), s = Math.sin(error), vx = (dir.x * c - dir.y * s), vy = (dir.x * s + dir.y * c);
     var requestedPower = clamp(Number(i.power == null ? (type === "shoot" ? 0.83 : 0.62) : i.power), 0.1, 1);
     var powerError = (rng ? rng.next() - 0.5 : 0) * (0.035 + (1 - precision) * 0.17 + Math.min(0.12, pressure * 0.02));
@@ -552,13 +553,15 @@
       var keeperIntent = p.motor || p.intent || {}, isCommittedSave = String(keeperIntent.type || keeperIntent.action || "").toLowerCase() === "save";
       var saveStartTick = p._keeperDiveState ? p._keeperDiveState.startTick : Number.isFinite(Number(keeperIntent.createdTick)) ? Number(keeperIntent.createdTick) : m.tick;
       var diveProgress = isCommittedSave ? clamp((m.tick - saveStartTick + 1) / 10, 0, 1) : 0;
-      var saveReach = 1.25 + (isCommittedSave ? (attr(p, "diving", 55) * 0.012 + attr(p, "reach", 55) * 0.004) * diveProgress : 0);
+      var calibratedReach = ['keeper-reach','phase4-combined'].includes(TF.CALIBRATION_VARIANT) ? 0.18 : 0;
+      var saveReach = 1.25 + (isCommittedSave ? (attr(p, "diving", 55) * 0.012 + attr(p, "reach", 55) * 0.004 + calibratedReach) * diveProgress : 0);
       if (d > saveReach || b.position.z > (isCommittedSave ? 2.65 : 2.35)) continue;
       // Handling is legal only when the ball itself is inside the keeper's
       // penalty area. Keeper proximity alone must not extend the box by 5m.
       var ballInsideOwnBox = dir > 0 ? b.position.x <= 16.5 : b.position.x >= field.length - 16.5;
       if (!ballInsideOwnBox || Math.abs(b.position.y - field.width / 2) > 20.16) continue;
-      var quality = clamp((attr(p, "handling", 55) + attr(p, "catching", 55) + attr(p, "reflexes", 55)) / 3 / 100 - hypot(b.velocity.x, b.velocity.y) * 0.006 - b.position.z * 0.025 - Math.max(0, d - 1.25) / Math.max(1, saveReach - 1.25) * (isCommittedSave ? 0.18 : 0), 0.12, 0.93);
+      var calibratedHandling = ['keeper-handling','phase4-combined'].includes(TF.CALIBRATION_VARIANT) ? 0.08 : 0;
+      var quality = clamp(calibratedHandling + (attr(p, "handling", 55) + attr(p, "catching", 55) + attr(p, "reflexes", 55)) / 3 / 100 - hypot(b.velocity.x, b.velocity.y) * 0.006 - b.position.z * 0.025 - Math.max(0, d - 1.25) / Math.max(1, saveReach - 1.25) * (isCommittedSave ? 0.18 : 0), 0.12, 0.93);
       var r = p.rng && p.rng.next ? p.rng.next() : 0.5;
       var shotOnTarget = b._lastShotType === "shot" && !!b._lastShotId;
       var shotPlayerId = shotOnTarget ? b._lastShotId : null;
@@ -701,7 +704,7 @@
         var speed = hypot(b.velocity.x, b.velocity.y), face = p.facing || { x: 1, y: 0 };
         var incoming = speed > 0.25 ? norm(-b.velocity.x, -b.velocity.y) : norm(face.x, face.y);
         var facingQuality = clamp((face.x * incoming.x + face.y * incoming.y + 1) * 0.5, 0, 1), pressureValue = localPressure(m, p, 3);
-        var calibrationControlBonus = (TF.CALIBRATION_VARIANT === 'passing' || TF.CALIBRATION_VARIANT === 'combined') ? 0.07 : 0;
+        var calibrationControlBonus = (TF.CALIBRATION_VARIANT === 'passing' || TF.CALIBRATION_VARIANT === 'combined' || String(TF.CALIBRATION_VARIANT || '').startsWith('phase4-') || ['keeper-reach','keeper-handling','shot-execution'].includes(TF.CALIBRATION_VARIANT)) ? 0.07 : 0;
         var control = clamp(0.96 + calibrationControlBonus + (attr(p, "firstTouch", 57) - 55) * 0.001 + (attr(p, "balance", 55) - 55) * 0.0006
           - Math.max(0, speed - 2) * 0.016 - (1 - facingQuality) * 0.22 - Math.max(0, b.position.z - 0.2) * 0.12
           - Math.min(0.32, pressureValue * 0.11) - (1 - clamp(Number(p.stamina) || 1, 0, 1)) * 0.1, 0.12, 0.995);
