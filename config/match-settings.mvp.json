@@ -1,0 +1,47 @@
+{
+  "schemaVersion": 1,
+  "status": "proposed-not-engine-integrated",
+  "match": {
+    "regulationMinutes": 90,
+    "halves": 2,
+    "playback": {
+      "default": 1,
+      "options": [
+        1,
+        2,
+        4
+      ],
+      "pause": true
+    },
+    "simulation": {
+      "watchedEngine": "tacticmesh",
+      "quickSimEngine": "pending-adapter",
+      "allowWatchedToQuickSim": true,
+      "allowQuickSimToWatched": false
+    },
+    "substitutions": {
+      "maximum": 5,
+      "regulationWindows": 3,
+      "halftimeWindowExempt": true,
+      "competitionOverride": true
+    },
+    "competition": {
+      "extraTimeMinutesPerHalf": 15,
+      "penaltiesInitialAttempts": 5,
+      "extraTimeAndPenaltiesOnlyWhenRequired": true
+    },
+    "weather": {
+      "gameplayEffect": false
+    },
+    "autosaveCheckpoints": [
+      "match-start",
+      "halftime",
+      "before-quick-sim-handoff",
+      "full-time"
+    ],
+    "seed": {
+      "deterministic": true,
+      "persistRngState": true
+    }
+  }
+}
