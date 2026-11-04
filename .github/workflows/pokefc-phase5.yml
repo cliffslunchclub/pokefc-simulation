@@ -2,7 +2,7 @@ name: PokéFC Phase 5 — passing and scoring diagnostics
 on:
   push:
     branches: [main]
-    paths: ['.github/workflows/pokefc-phase4.yml']
+    paths: ['.github/workflows/pokefc-phase5.yml']
   workflow_dispatch:
 permissions:
   contents: read
@@ -82,7 +82,7 @@ jobs:
           merge-multiple: true
       - name: Summarize diagnostic baseline
         run: |
-          node scripts/summarize-phase5.cjs results/input results/phase4
+          node scripts/summarize-phase5.cjs results/input results/phase5
           cat results/phase5/phase5-report.md >> "$GITHUB_STEP_SUMMARY"
       - name: Preserve Phase 5 report
         if: always()
