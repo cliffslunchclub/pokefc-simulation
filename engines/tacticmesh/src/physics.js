@@ -182,6 +182,10 @@
       if (TF.CALIBRATION_VARIANT === 'phase7-combo-balanced') shotExecutionMultiplier = 1.45;
       if (TF.CALIBRATION_VARIANT === 'phase7-combo-possession') shotExecutionMultiplier = 1.60;
       if (TF.CALIBRATION_VARIANT === 'phase7-combo-scorer') shotExecutionMultiplier = 1.75;
+      // Phase 9 dual-engine scoring experiments: no scripted or post-hoc goals.
+      if (TF.CALIBRATION_VARIANT === 'phase9-dual-balanced') shotExecutionMultiplier = 1.55;
+      if (TF.CALIBRATION_VARIANT === 'phase9-dual-fortified') shotExecutionMultiplier = 1.75;
+      if (TF.CALIBRATION_VARIANT === 'phase9-dual-stabilized') shotExecutionMultiplier = 1.65;
     }
     var error = bodyBias + (1 - precision) * (rng ? (rng.next() - 0.5) : 0) * 0.42 * shotExecutionMultiplier;
     var c = Math.cos(error), s = Math.sin(error), vx = (dir.x * c - dir.y * s), vy = (dir.x * s + dir.y * c);
@@ -564,7 +568,9 @@
       var diveReach = (attr(p, "diving", 55) * 0.012 + attr(p, "reach", 55) * 0.004 + calibratedReach) * diveProgress;
        // Phase 6 experiment: extend committed diving reach by 40%.
        // Standing collision radius and keeper challenges remain unchanged.
-       if (['phase6-keeper-reach40','phase7-keeper-precision','phase7-combo-balanced','phase7-combo-possession','phase7-combo-scorer'].includes(TF.CALIBRATION_VARIANT)) diveReach *= 1.4;
+       if (['phase6-keeper-reach40','phase7-keeper-precision','phase7-combo-balanced','phase7-combo-possession','phase7-combo-scorer','phase9-dual-balanced'].includes(TF.CALIBRATION_VARIANT)) diveReach *= 1.4;
+       if (TF.CALIBRATION_VARIANT === 'phase9-dual-fortified') diveReach *= 1.65;
+       if (TF.CALIBRATION_VARIANT === 'phase9-dual-stabilized') diveReach *= 1.55;
        var saveReach = 1.25 + (isCommittedSave ? diveReach : 0);
       if (d > saveReach || b.position.z > (isCommittedSave ? 2.65 : 2.35)) continue;
       // Handling is legal only when the ball itself is inside the keeper's
@@ -706,7 +712,8 @@
       var passInterceptionReachScale =
         TF.CALIBRATION_VARIANT === 'phase8-reach15' ? 0.85 :
         TF.CALIBRATION_VARIANT === 'phase8-reach25' ? 0.75 :
-        TF.CALIBRATION_VARIANT === 'phase8-reach40' ? 0.60 : 1;
+        (TF.CALIBRATION_VARIANT === 'phase8-reach40' ||
+         ['phase9-dual-balanced','phase9-dual-fortified','phase9-dual-stabilized'].includes(TF.CALIBRATION_VARIANT)) ? 0.60 : 1;
       var incomingDeliberatePass = b.lastTouchKind === 'deliberate'
         && (b.lastTouchAction === 'pass' || b.lastTouchAction === 'throughBall')
         && !!b.lastTouchTeamId;
@@ -732,7 +739,7 @@
         var speed = hypot(b.velocity.x, b.velocity.y), face = p.facing || { x: 1, y: 0 };
         var incoming = speed > 0.25 ? norm(-b.velocity.x, -b.velocity.y) : norm(face.x, face.y);
         var facingQuality = clamp((face.x * incoming.x + face.y * incoming.y + 1) * 0.5, 0, 1), pressureValue = localPressure(m, p, 3);
-        var calibrationControlBonus = (TF.CALIBRATION_VARIANT === 'passing' || TF.CALIBRATION_VARIANT === 'combined' || String(TF.CALIBRATION_VARIANT || '').startsWith('phase4-') || String(TF.CALIBRATION_VARIANT || '').startsWith('phase6-') || String(TF.CALIBRATION_VARIANT || '').startsWith('phase7-') || String(TF.CALIBRATION_VARIANT || '').startsWith('phase8-') || ['keeper-reach','keeper-handling','shot-execution'].includes(TF.CALIBRATION_VARIANT)) ? 0.07 : 0;
+        var calibrationControlBonus = (TF.CALIBRATION_VARIANT === 'passing' || TF.CALIBRATION_VARIANT === 'combined' || String(TF.CALIBRATION_VARIANT || '').startsWith('phase4-') || String(TF.CALIBRATION_VARIANT || '').startsWith('phase6-') || String(TF.CALIBRATION_VARIANT || '').startsWith('phase7-') || String(TF.CALIBRATION_VARIANT || '').startsWith('phase8-') || String(TF.CALIBRATION_VARIANT || '').startsWith('phase9-') || ['keeper-reach','keeper-handling','shot-execution'].includes(TF.CALIBRATION_VARIANT)) ? 0.07 : 0;
         // Isolated Phase 6 possession experiment: substantially improve first-touch
         // reliability while preserving pressure, speed, fatigue and skill effects.
         if (TF.CALIBRATION_VARIANT === 'phase6-possession') calibrationControlBonus += 0.22;
