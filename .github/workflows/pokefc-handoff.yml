@@ -1,0 +1,23 @@
+name: PokéFC handoff boundary smoke
+on:
+  push:
+    branches: [main]
+    paths: ['.github/workflows/pokefc-handoff.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Verify checkpoint and handoff boundaries
+        run: |
+          node --check scripts/match-handoff.cjs
+          node --check scripts/handoff-smoke.cjs
+          node scripts/checkpoint-smoke.cjs
+          node scripts/handoff-smoke.cjs
