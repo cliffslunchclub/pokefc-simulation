@@ -701,7 +701,8 @@
         var speed = hypot(b.velocity.x, b.velocity.y), face = p.facing || { x: 1, y: 0 };
         var incoming = speed > 0.25 ? norm(-b.velocity.x, -b.velocity.y) : norm(face.x, face.y);
         var facingQuality = clamp((face.x * incoming.x + face.y * incoming.y + 1) * 0.5, 0, 1), pressureValue = localPressure(m, p, 3);
-        var control = clamp(0.96 + (attr(p, "firstTouch", 57) - 55) * 0.001 + (attr(p, "balance", 55) - 55) * 0.0006
+        var calibrationControlBonus = (TF.CALIBRATION_VARIANT === 'passing' || TF.CALIBRATION_VARIANT === 'combined') ? 0.07 : 0;
+        var control = clamp(0.96 + calibrationControlBonus + (attr(p, "firstTouch", 57) - 55) * 0.001 + (attr(p, "balance", 55) - 55) * 0.0006
           - Math.max(0, speed - 2) * 0.016 - (1 - facingQuality) * 0.22 - Math.max(0, b.position.z - 0.2) * 0.12
           - Math.min(0.32, pressureValue * 0.11) - (1 - clamp(Number(p.stamina) || 1, 0, 1)) * 0.1, 0.12, 0.995);
         var random = p.rng && p.rng.next ? p.rng.next() : 0.5;
