@@ -699,6 +699,17 @@
     keeperHandling(m);
     if (!b.ownerId && !b._touchCooldown && Math.min(b.previousPosition.z, b.position.z) < 1.35) {
       var winner = null, closest = 0.67;
+      // Phase 8: goalkeeper-style reach calibration in reverse. Shrink only
+      // opposing outfield contacts against a live deliberate ground/low pass;
+      // same-team receptions, tackles, loose-ball claims, shots, and keepers
+      // keep exactly the original 0.67m contact radius.
+      var passInterceptionReachScale =
+        TF.CALIBRATION_VARIANT === 'phase8-reach15' ? 0.85 :
+        TF.CALIBRATION_VARIANT === 'phase8-reach25' ? 0.75 :
+        TF.CALIBRATION_VARIANT === 'phase8-reach40' ? 0.60 : 1;
+      var incomingDeliberatePass = b.lastTouchKind === 'deliberate'
+        && (b.lastTouchAction === 'pass' || b.lastTouchAction === 'throughBall')
+        && !!b.lastTouchTeamId;
       var followPlayer = b._kickFollowThroughPlayerId && m.playersById[b._kickFollowThroughPlayerId];
       if (b._kickFollowThroughPlayerId && (!followPlayer || m.tick > b._kickFollowThroughUntil || hypot(b.position.x - followPlayer.position.x, b.position.y - followPlayer.position.y) >= 1.05)) {
         b._kickFollowThroughPlayerId = null; b._kickFollowThroughUntil = 0;
@@ -706,16 +717,22 @@
       for (var k = 0; k < m.players.length; k++) {
         var p = m.players[k]; if (!p.active || (p.id === b.lastTouchPlayerId && m.clock.elapsedSeconds - (b._lastTouchTime || 0) < 0.13)) continue;
         var d = sweptDistance(p, b);
+        var opposingPassContact = incomingDeliberatePass && !p.isGoalkeeper && p.teamId !== b.lastTouchTeamId;
+        var contactReach = opposingPassContact ? 0.67 * passInterceptionReachScale : 0.67;
+        if (d > contactReach) continue;
         if (p.id === b._kickFollowThroughPlayerId && m.tick <= b._kickFollowThroughUntil && d < 1.05) continue;
         if (d > closest || d === closest && winner && String(p.id).localeCompare(String(winner.id)) >= 0) continue;
         closest = d; winner = p;
       }
       if (winner) {
         var p = winner;
+        // Capture pass provenance before addTouch resets lastTouchAction.
+        var wasOpposingPassInterception = incomingDeliberatePass && !p.isGoalkeeper
+          && p.teamId !== b.lastTouchTeamId;
         var speed = hypot(b.velocity.x, b.velocity.y), face = p.facing || { x: 1, y: 0 };
         var incoming = speed > 0.25 ? norm(-b.velocity.x, -b.velocity.y) : norm(face.x, face.y);
         var facingQuality = clamp((face.x * incoming.x + face.y * incoming.y + 1) * 0.5, 0, 1), pressureValue = localPressure(m, p, 3);
-        var calibrationControlBonus = (TF.CALIBRATION_VARIANT === 'passing' || TF.CALIBRATION_VARIANT === 'combined' || String(TF.CALIBRATION_VARIANT || '').startsWith('phase4-') || String(TF.CALIBRATION_VARIANT || '').startsWith('phase6-') || String(TF.CALIBRATION_VARIANT || '').startsWith('phase7-') || ['keeper-reach','keeper-handling','shot-execution'].includes(TF.CALIBRATION_VARIANT)) ? 0.07 : 0;
+        var calibrationControlBonus = (TF.CALIBRATION_VARIANT === 'passing' || TF.CALIBRATION_VARIANT === 'combined' || String(TF.CALIBRATION_VARIANT || '').startsWith('phase4-') || String(TF.CALIBRATION_VARIANT || '').startsWith('phase6-') || String(TF.CALIBRATION_VARIANT || '').startsWith('phase7-') || String(TF.CALIBRATION_VARIANT || '').startsWith('phase8-') || ['keeper-reach','keeper-handling','shot-execution'].includes(TF.CALIBRATION_VARIANT)) ? 0.07 : 0;
         // Isolated Phase 6 possession experiment: substantially improve first-touch
         // reliability while preserving pressure, speed, fatigue and skill effects.
         if (TF.CALIBRATION_VARIANT === 'phase6-possession') calibrationControlBonus += 0.22;
@@ -727,7 +744,7 @@
           - Math.max(0, speed - 2) * 0.016 - (1 - facingQuality) * 0.22 - Math.max(0, b.position.z - 0.2) * 0.12
           - Math.min(0.32, pressureValue * 0.11) - (1 - clamp(Number(p.stamina) || 1, 0, 1)) * 0.1, 0.12, 0.995);
         var random = p.rng && p.rng.next ? p.rng.next() : 0.5;
-        if (random < control) { b.ownerId = p.id; b.controlState = "controlled"; b.velocity.x *= 0.22; b.velocity.y *= 0.22; b.velocity.z = 0; b._lastControlTouch = m.clock.elapsedSeconds; b._lastControlTouchTick = m.tick; addTouch(m, p, "control"); event(m, "ball-control", { playerId: p.id, teamId: p.teamId, origin: { x: p.position.x, y: p.position.y }, contactPoint: { x: b.position.x, y: b.position.y, z: b.position.z }, quality: control }); }
+        if (random < control) { b.ownerId = p.id; b.controlState = "controlled"; b.velocity.x *= 0.22; b.velocity.y *= 0.22; b.velocity.z = 0; b._lastControlTouch = m.clock.elapsedSeconds; b._lastControlTouchTick = m.tick; addTouch(m, p, "control"); event(m, "ball-control", { playerId: p.id, teamId: p.teamId, origin: { x: p.position.x, y: p.position.y }, contactPoint: { x: b.position.x, y: b.position.y, z: b.position.z }, quality: control, opposingPassInterception: wasOpposingPassInterception }); }
         else {
           // Resolve a failed trap as a dissipative collision against the
           // player's moving body; the ball cannot gain energy in its incoming
@@ -741,7 +758,7 @@
           b.velocity.x = (p.velocity.x || 0) + tx * 0.38 + normal.x * rebound;
           b.velocity.y = (p.velocity.y || 0) + ty * 0.38 + normal.y * rebound;
           b.velocity.z *= 0.35; b._touchCooldown = 0.12; addTouch(m, p, "deflection");
-          event(m, "ball-deflection", { playerId: p.id, teamId: p.teamId, restitution: restitution, relativeNormalSpeed: normalSpeed });
+          event(m, "ball-deflection", { playerId: p.id, teamId: p.teamId, restitution: restitution, relativeNormalSpeed: normalSpeed, opposingPassInterception: wasOpposingPassInterception });
         }
       }
     }
