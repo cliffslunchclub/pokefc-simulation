@@ -1,0 +1,284 @@
+name: PokéFC Phase 7 — 13-hour overnight calibration
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/pokefc-phase7-overnight.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: pokefc-overnight-main
+  cancel-in-progress: false
+jobs:
+  preflight:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Validate scripts and deterministic checkpoint continuation
+        run: |
+          node --check engines/tacticmesh/src/intelligence.js
+          node --check engines/tacticmesh/src/physics.js
+          node --check engines/tacticmesh/tools/batch.cjs
+          node --check scripts/run-overnight.cjs
+          node --check scripts/summarize-overnight.cjs
+          node scripts/checkpoint-smoke.cjs
+      - name: Smoke test every experimental variant
+        run: |
+          set -euo pipefail
+          mkdir -p results
+          for variant in phase4-control phase7-pass-light phase7-pass-medium phase7-pass-support phase7-support phase7-defense-01 phase7-defense-025 phase6-keeper-reach40 phase7-shot-precision phase7-keeper-precision phase7-combo-balanced phase7-combo-possession phase7-combo-scorer; do
+            node engines/tacticmesh/tools/batch.cjs --matches 1 --seed 949001 --half-seconds 30 --strength-profile independent --calibration-variant "$variant" --out "results/$variant.json" > /dev/null
+            node -e 'const x=require(process.argv[1]);if(x.calibrationVariant!==process.argv[2]||x.completedMatches!==1)process.exit(1)' "$(pwd)/results/$variant.json" "$variant"
+          done
+          echo "All 13 variants passed the short-match preflight."
+
+  stage1:
+    needs: preflight
+    runs-on: ubuntu-latest
+    timeout-minutes: 205
+    strategy:
+      fail-fast: false
+      max-parallel: 4
+      matrix:
+        variant: [phase4-control, phase7-pass-light, phase7-pass-medium, phase7-pass-support]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Run full regulation matches for 180 minutes
+        env:
+          STAGE: stage1
+          VARIANT: ${{ matrix.variant }}
+        run: |
+          node scripts/run-overnight.cjs --stage "$STAGE" --variant "$VARIANT" --minutes 180 --seed 950001 --out results
+      - name: Preserve all completed matches and representative full batch files
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: calib-stage1-${{ matrix.variant }}
+          path: results/stage1/
+          if-no-files-found: warn
+          retention-days: 30
+
+  report_stage1:
+    needs: stage1
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: 'calib-stage1-*'
+          path: results/input
+          merge-multiple: true
+      - name: Summarize matched seeds
+        run: |
+          node scripts/summarize-overnight.cjs results/input results/overnight-stage1.md stage1
+          cat results/overnight-stage1.md >> "$GITHUB_STEP_SUMMARY"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: report-stage1
+          path: |
+            results/overnight-stage1.md
+            results/overnight-stage1.json
+          retention-days: 90
+
+  stage2:
+    needs: stage1
+    runs-on: ubuntu-latest
+    timeout-minutes: 205
+    strategy:
+      fail-fast: false
+      max-parallel: 4
+      matrix:
+        variant: [phase4-control, phase7-support, phase7-defense-01, phase7-defense-025]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Run full regulation matches for 180 minutes
+        env:
+          STAGE: stage2
+          VARIANT: ${{ matrix.variant }}
+        run: |
+          node scripts/run-overnight.cjs --stage "$STAGE" --variant "$VARIANT" --minutes 180 --seed 960001 --out results
+      - name: Preserve all completed matches and representative full batch files
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: calib-stage2-${{ matrix.variant }}
+          path: results/stage2/
+          if-no-files-found: warn
+          retention-days: 30
+
+  report_stage2:
+    needs: stage2
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: 'calib-stage2-*'
+          path: results/input
+          merge-multiple: true
+      - name: Summarize matched seeds
+        run: |
+          node scripts/summarize-overnight.cjs results/input results/overnight-stage2.md stage2
+          cat results/overnight-stage2.md >> "$GITHUB_STEP_SUMMARY"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: report-stage2
+          path: |
+            results/overnight-stage2.md
+            results/overnight-stage2.json
+          retention-days: 90
+
+  stage3:
+    needs: stage2
+    runs-on: ubuntu-latest
+    timeout-minutes: 205
+    strategy:
+      fail-fast: false
+      max-parallel: 4
+      matrix:
+        variant: [phase4-control, phase6-keeper-reach40, phase7-shot-precision, phase7-keeper-precision]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Run full regulation matches for 180 minutes
+        env:
+          STAGE: stage3
+          VARIANT: ${{ matrix.variant }}
+        run: |
+          node scripts/run-overnight.cjs --stage "$STAGE" --variant "$VARIANT" --minutes 180 --seed 970001 --out results
+      - name: Preserve all completed matches and representative full batch files
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: calib-stage3-${{ matrix.variant }}
+          path: results/stage3/
+          if-no-files-found: warn
+          retention-days: 30
+
+  report_stage3:
+    needs: stage3
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: 'calib-stage3-*'
+          path: results/input
+          merge-multiple: true
+      - name: Summarize matched seeds
+        run: |
+          node scripts/summarize-overnight.cjs results/input results/overnight-stage3.md stage3
+          cat results/overnight-stage3.md >> "$GITHUB_STEP_SUMMARY"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: report-stage3
+          path: |
+            results/overnight-stage3.md
+            results/overnight-stage3.json
+          retention-days: 90
+
+  stage4:
+    needs: stage3
+    runs-on: ubuntu-latest
+    timeout-minutes: 270
+    strategy:
+      fail-fast: false
+      max-parallel: 4
+      matrix:
+        variant: [phase4-control, phase7-combo-balanced, phase7-combo-possession, phase7-combo-scorer]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Run full regulation matches for 240 minutes
+        env:
+          STAGE: stage4
+          VARIANT: ${{ matrix.variant }}
+        run: |
+          node scripts/run-overnight.cjs --stage "$STAGE" --variant "$VARIANT" --minutes 240 --seed 980001 --out results
+      - name: Preserve all completed matches and representative full batch files
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: calib-stage4-${{ matrix.variant }}
+          path: results/stage4/
+          if-no-files-found: warn
+          retention-days: 30
+
+  report_stage4:
+    needs: stage4
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: 'calib-stage4-*'
+          path: results/input
+          merge-multiple: true
+      - name: Summarize matched seeds
+        run: |
+          node scripts/summarize-overnight.cjs results/input results/overnight-stage4.md stage4
+          cat results/overnight-stage4.md >> "$GITHUB_STEP_SUMMARY"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: report-stage4
+          path: |
+            results/overnight-stage4.md
+            results/overnight-stage4.json
+          retention-days: 90
+
+  final_report:
+    needs: [stage1, stage2, stage3, stage4]
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: 'calib-*'
+          path: results/input
+          merge-multiple: true
+      - name: Report all 13 hours, without automatic promotion
+        run: |
+          node scripts/summarize-overnight.cjs results/input results/phase7-final-report.md all
+          cat results/phase7-final-report.md >> "$GITHUB_STEP_SUMMARY"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: pokefc-phase7-overnight-report
+          path: |
+            results/phase7-final-report.md
+            results/phase7-final-report.json
+          retention-days: 90
