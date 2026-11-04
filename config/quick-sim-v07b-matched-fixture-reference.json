@@ -51,7 +51,8 @@
         "tackleAttempts": 51263,
         "homeGoals": 595,
         "awayGoals": 452
-      }
+      },
+      "rosterFingerprint": "4983af66"
     },
     {
       "profile": "avg-avg",
@@ -65,7 +66,8 @@
         "tackleAttempts": 52337,
         "homeGoals": 537,
         "awayGoals": 491
-      }
+      },
+      "rosterFingerprint": "b08b6c5c"
     },
     {
       "profile": "avg-avg",
@@ -79,7 +81,8 @@
         "tackleAttempts": 50748,
         "homeGoals": 712,
         "awayGoals": 615
-      }
+      },
+      "rosterFingerprint": "e1140f18"
     },
     {
       "profile": "avg-avg",
@@ -93,7 +96,8 @@
         "tackleAttempts": 49658,
         "homeGoals": 721,
         "awayGoals": 694
-      }
+      },
+      "rosterFingerprint": "1a9e4bd3"
     },
     {
       "profile": "weak-weak",
@@ -107,7 +111,8 @@
         "tackleAttempts": 45147,
         "homeGoals": 539,
         "awayGoals": 418
-      }
+      },
+      "rosterFingerprint": "a93fcad2"
     },
     {
       "profile": "weak-weak",
@@ -121,7 +126,8 @@
         "tackleAttempts": 46184,
         "homeGoals": 482,
         "awayGoals": 466
-      }
+      },
+      "rosterFingerprint": "a971394c"
     },
     {
       "profile": "weak-weak",
@@ -135,7 +141,8 @@
         "tackleAttempts": 44737,
         "homeGoals": 613,
         "awayGoals": 578
-      }
+      },
+      "rosterFingerprint": "f359ae5c"
     },
     {
       "profile": "weak-weak",
@@ -149,7 +156,8 @@
         "tackleAttempts": 43679,
         "homeGoals": 687,
         "awayGoals": 640
-      }
+      },
+      "rosterFingerprint": "cc561693"
     },
     {
       "profile": "elite-elite",
@@ -163,7 +171,8 @@
         "tackleAttempts": 57365,
         "homeGoals": 635,
         "awayGoals": 504
-      }
+      },
+      "rosterFingerprint": "566610aa"
     },
     {
       "profile": "elite-elite",
@@ -177,7 +186,8 @@
         "tackleAttempts": 57959,
         "homeGoals": 552,
         "awayGoals": 581
-      }
+      },
+      "rosterFingerprint": "b64ac0b8"
     },
     {
       "profile": "elite-elite",
@@ -191,7 +201,8 @@
         "tackleAttempts": 56722,
         "homeGoals": 769,
         "awayGoals": 602
-      }
+      },
+      "rosterFingerprint": "c3ea4468"
     },
     {
       "profile": "elite-elite",
@@ -205,7 +216,8 @@
         "tackleAttempts": 55425,
         "homeGoals": 805,
         "awayGoals": 772
-      }
+      },
+      "rosterFingerprint": "498759f3"
     },
     {
       "profile": "elite-weak",
@@ -219,7 +231,8 @@
         "tackleAttempts": 51211,
         "homeGoals": 1308,
         "awayGoals": 123
-      }
+      },
+      "rosterFingerprint": "7f5f646a"
     },
     {
       "profile": "elite-weak",
@@ -233,7 +246,8 @@
         "tackleAttempts": 52183,
         "homeGoals": 1217,
         "awayGoals": 116
-      }
+      },
+      "rosterFingerprint": "1f2ef00c"
     },
     {
       "profile": "elite-weak",
@@ -247,7 +261,8 @@
         "tackleAttempts": 50785,
         "homeGoals": 1452,
         "awayGoals": 201
-      }
+      },
+      "rosterFingerprint": "3f207630"
     },
     {
       "profile": "elite-weak",
@@ -261,7 +276,8 @@
         "tackleAttempts": 49739,
         "homeGoals": 1514,
         "awayGoals": 187
-      }
+      },
+      "rosterFingerprint": "795df91b"
     }
   ]
 }
