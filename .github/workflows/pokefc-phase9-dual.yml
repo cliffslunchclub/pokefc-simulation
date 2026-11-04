@@ -37,7 +37,7 @@ jobs:
               --calibration-variant "$variant" \
               --include-quick-sim-fixtures \
               --out "results/$variant-smoke.json" > /dev/null
-            VARIANT="$variant" node -e 'const fs=require("node:fs");const f=JSON.parse(fs.readFileSync("results/"+process.env.VARIANT+"-smoke.json","utf8"));const x=f.matchesData[0].quickSimFixture;if(f.completedMatches!==1||x.home.lineup.length!==11||x.away.lineup.length!==11)process.exit(1);'
+            VARIANT="$variant" node -e 'const fs=require("node:fs");const f=JSON.parse(fs.readFileSync("results/"+process.env.VARIANT+"-smoke.json","utf8"));const x=f.matchesData[0].quickSimFixture;if(f.completedMatches!==1||x.home.lineup.length!==11||x.away.lineup.length!==11)process.exit(1);const ref=JSON.parse(fs.readFileSync("config/phase9-quick-sim-numeric-reference.json","utf8"));const expected=ref.fixtures.find(y=>y.variant===process.env.VARIANT&&y.profile==="avg-avg"&&y.seed===993001);let h=2166136261;for(const c of JSON.stringify(x))h=Math.imul(h^c.charCodeAt(0),16777619)>>>0;const actual=h.toString(16).padStart(8,"0");if(actual!==expected?.rosterFingerprint)throw Error("Matched roster fingerprint mismatch: "+process.env.VARIANT+" "+actual+" != "+expected?.rosterFingerprint);'
           done
   experiment:
     needs: preflight
