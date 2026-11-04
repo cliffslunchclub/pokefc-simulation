@@ -1,0 +1,267 @@
+{
+  "kind": "pokefc-private-quicksim-matched-fixture-reference",
+  "sourceEngine": "PokeFC/quick-sim.js (private; numerical outputs only)",
+  "reportedModelVersion": "v0.7b",
+  "calibrationStatus": "provisional",
+  "referenceMatches": 0,
+  "generation": {
+    "startingPlayersPerTeam": 11,
+    "seedPolicy": "same TacticMesh world.js seed; private Quick Sim uses seed + :quick-ref: + replicateIndex",
+    "teams": [
+      "Redbridge FC",
+      "Ashford Athletic"
+    ],
+    "formation": "4-3-3",
+    "tactic": "balanced",
+    "squadSizePerTeam": 20,
+    "offsets": [
+      {
+        "id": "avg-avg",
+        "home": 0,
+        "away": 0
+      },
+      {
+        "id": "weak-weak",
+        "home": -15,
+        "away": -15
+      },
+      {
+        "id": "elite-elite",
+        "home": 15,
+        "away": 15
+      },
+      {
+        "id": "elite-weak",
+        "home": 15,
+        "away": -15
+      }
+    ],
+    "replicatesPerFixture": 500
+  },
+  "fixtures": [
+    {
+      "profile": "avg-avg",
+      "seed": 991101,
+      "simulations": 500,
+      "stats": {
+        "goals": 1047,
+        "shots": 10451,
+        "passes": 413829,
+        "completedPasses": 281415,
+        "tackleAttempts": 51263,
+        "homeGoals": 595,
+        "awayGoals": 452
+      }
+    },
+    {
+      "profile": "avg-avg",
+      "seed": 991102,
+      "simulations": 500,
+      "stats": {
+        "goals": 1028,
+        "shots": 10481,
+        "passes": 416115,
+        "completedPasses": 283467,
+        "tackleAttempts": 52337,
+        "homeGoals": 537,
+        "awayGoals": 491
+      }
+    },
+    {
+      "profile": "avg-avg",
+      "seed": 991103,
+      "simulations": 500,
+      "stats": {
+        "goals": 1327,
+        "shots": 11305,
+        "passes": 415617,
+        "completedPasses": 282444,
+        "tackleAttempts": 50748,
+        "homeGoals": 712,
+        "awayGoals": 615
+      }
+    },
+    {
+      "profile": "avg-avg",
+      "seed": 991104,
+      "simulations": 500,
+      "stats": {
+        "goals": 1415,
+        "shots": 11552,
+        "passes": 414321,
+        "completedPasses": 282260,
+        "tackleAttempts": 49658,
+        "homeGoals": 721,
+        "awayGoals": 694
+      }
+    },
+    {
+      "profile": "weak-weak",
+      "seed": 991101,
+      "simulations": 500,
+      "stats": {
+        "goals": 957,
+        "shots": 10543,
+        "passes": 414205,
+        "completedPasses": 281823,
+        "tackleAttempts": 45147,
+        "homeGoals": 539,
+        "awayGoals": 418
+      }
+    },
+    {
+      "profile": "weak-weak",
+      "seed": 991102,
+      "simulations": 500,
+      "stats": {
+        "goals": 948,
+        "shots": 10526,
+        "passes": 416409,
+        "completedPasses": 283384,
+        "tackleAttempts": 46184,
+        "homeGoals": 482,
+        "awayGoals": 466
+      }
+    },
+    {
+      "profile": "weak-weak",
+      "seed": 991103,
+      "simulations": 500,
+      "stats": {
+        "goals": 1191,
+        "shots": 11274,
+        "passes": 415446,
+        "completedPasses": 282267,
+        "tackleAttempts": 44737,
+        "homeGoals": 613,
+        "awayGoals": 578
+      }
+    },
+    {
+      "profile": "weak-weak",
+      "seed": 991104,
+      "simulations": 500,
+      "stats": {
+        "goals": 1327,
+        "shots": 11509,
+        "passes": 414676,
+        "completedPasses": 282303,
+        "tackleAttempts": 43679,
+        "homeGoals": 687,
+        "awayGoals": 640
+      }
+    },
+    {
+      "profile": "elite-elite",
+      "seed": 991101,
+      "simulations": 500,
+      "stats": {
+        "goals": 1139,
+        "shots": 10537,
+        "passes": 413926,
+        "completedPasses": 281287,
+        "tackleAttempts": 57365,
+        "homeGoals": 635,
+        "awayGoals": 504
+      }
+    },
+    {
+      "profile": "elite-elite",
+      "seed": 991102,
+      "simulations": 500,
+      "stats": {
+        "goals": 1133,
+        "shots": 10639,
+        "passes": 415616,
+        "completedPasses": 282870,
+        "tackleAttempts": 57959,
+        "homeGoals": 552,
+        "awayGoals": 581
+      }
+    },
+    {
+      "profile": "elite-elite",
+      "seed": 991103,
+      "simulations": 500,
+      "stats": {
+        "goals": 1371,
+        "shots": 11163,
+        "passes": 415174,
+        "completedPasses": 281920,
+        "tackleAttempts": 56722,
+        "homeGoals": 769,
+        "awayGoals": 602
+      }
+    },
+    {
+      "profile": "elite-elite",
+      "seed": 991104,
+      "simulations": 500,
+      "stats": {
+        "goals": 1577,
+        "shots": 11572,
+        "passes": 414873,
+        "completedPasses": 282213,
+        "tackleAttempts": 55425,
+        "homeGoals": 805,
+        "awayGoals": 772
+      }
+    },
+    {
+      "profile": "elite-weak",
+      "seed": 991101,
+      "simulations": 500,
+      "stats": {
+        "goals": 1431,
+        "shots": 10333,
+        "passes": 414390,
+        "completedPasses": 281682,
+        "tackleAttempts": 51211,
+        "homeGoals": 1308,
+        "awayGoals": 123
+      }
+    },
+    {
+      "profile": "elite-weak",
+      "seed": 991102,
+      "simulations": 500,
+      "stats": {
+        "goals": 1333,
+        "shots": 10529,
+        "passes": 415431,
+        "completedPasses": 282601,
+        "tackleAttempts": 52183,
+        "homeGoals": 1217,
+        "awayGoals": 116
+      }
+    },
+    {
+      "profile": "elite-weak",
+      "seed": 991103,
+      "simulations": 500,
+      "stats": {
+        "goals": 1653,
+        "shots": 11176,
+        "passes": 415571,
+        "completedPasses": 282688,
+        "tackleAttempts": 50785,
+        "homeGoals": 1452,
+        "awayGoals": 201
+      }
+    },
+    {
+      "profile": "elite-weak",
+      "seed": 991104,
+      "simulations": 500,
+      "stats": {
+        "goals": 1701,
+        "shots": 11334,
+        "passes": 414168,
+        "completedPasses": 281312,
+        "tackleAttempts": 49739,
+        "homeGoals": 1514,
+        "awayGoals": 187
+      }
+    }
+  ]
+}
