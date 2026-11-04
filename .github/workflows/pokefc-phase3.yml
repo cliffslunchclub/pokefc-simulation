@@ -1,0 +1,104 @@
+name: PokéFC Phase 3 — paired-seed calibration trials
+on:
+  push:
+    branches: [main]
+    paths: ['.github/workflows/pokefc-phase3.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  preflight:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Validate scripts and checkpoints
+        run: |
+          node --check engines/tacticmesh/tools/batch.cjs
+          node --check engines/tacticmesh/src/intelligence.js
+          node --check engines/tacticmesh/src/physics.js
+          node --check scripts/summarize-phase3.cjs
+          node scripts/checkpoint-smoke.cjs
+      - name: Verify experimental variant selection
+        run: |
+          mkdir -p results
+          for variant in baseline passing defense shot-selection combined; do
+            node engines/tacticmesh/tools/batch.cjs --matches 1 --seed 870000 --half-seconds 30 --calibration-variant "$variant" --out "results/${variant}.json" > /dev/null
+            node -e 'const r=require(process.argv[1]); if(r.calibrationVariant!==process.argv[2]||r.completedMatches!==1)process.exit(1)' "$(pwd)/results/${variant}.json" "$variant"
+          done
+  trial:
+    needs: preflight
+    runs-on: ubuntu-latest
+    timeout-minutes: 75
+    strategy:
+      fail-fast: false
+      max-parallel: 10
+      matrix:
+        include:
+          - { variant: 'baseline', seed: 870001, part: 1 }
+          - { variant: 'baseline', seed: 870005, part: 2 }
+          - { variant: 'baseline', seed: 870009, part: 3 }
+          - { variant: 'passing', seed: 870001, part: 1 }
+          - { variant: 'passing', seed: 870005, part: 2 }
+          - { variant: 'passing', seed: 870009, part: 3 }
+          - { variant: 'defense', seed: 870001, part: 1 }
+          - { variant: 'defense', seed: 870005, part: 2 }
+          - { variant: 'defense', seed: 870009, part: 3 }
+          - { variant: 'shot-selection', seed: 870001, part: 1 }
+          - { variant: 'shot-selection', seed: 870005, part: 2 }
+          - { variant: 'shot-selection', seed: 870009, part: 3 }
+          - { variant: 'combined', seed: 870001, part: 1 }
+          - { variant: 'combined', seed: 870005, part: 2 }
+          - { variant: 'combined', seed: 870009, part: 3 }
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Run four 90-minute matches
+        env:
+          VARIANT: ${{ matrix.variant }}
+          SEED: ${{ matrix.seed }}
+          PART: ${{ matrix.part }}
+        run: |
+          mkdir -p results
+          node engines/tacticmesh/tools/batch.cjs --matches 4 --seed "$SEED" --half-seconds 2700 --strength-profile independent --home-style balanced --away-style balanced --calibration-variant "$VARIANT" --out "results/phase3-${VARIANT}-${PART}.json" > /dev/null
+          node -e 'const r=require(process.argv[1]);if(r.completedMatches!==4||!r.fullRegulation||r.calibrationVariant!==process.argv[2])process.exit(1)' "$(pwd)/results/phase3-${VARIANT}-${PART}.json" "$VARIANT"
+      - name: Preserve batch output
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: trial-${{ matrix.variant }}-${{ matrix.part }}
+          path: results/phase3-*.json
+          retention-days: 90
+          if-no-files-found: warn
+  summary:
+    needs: [preflight, trial]
+    if: always()
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: trial-*
+          path: results/input
+          merge-multiple: true
+      - name: Analyze paired-seed experiments
+        run: |
+          node scripts/summarize-phase3.cjs results/input results/phase3
+          cat results/phase3/phase3-report.md >> "$GITHUB_STEP_SUMMARY"
+      - name: Preserve Phase 3 report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: pokefc-phase3-calibration-report
+          path: results/phase3/
+          if-no-files-found: warn
+          retention-days: 90
