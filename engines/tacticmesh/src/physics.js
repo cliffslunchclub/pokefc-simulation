@@ -554,7 +554,11 @@
       var saveStartTick = p._keeperDiveState ? p._keeperDiveState.startTick : Number.isFinite(Number(keeperIntent.createdTick)) ? Number(keeperIntent.createdTick) : m.tick;
       var diveProgress = isCommittedSave ? clamp((m.tick - saveStartTick + 1) / 10, 0, 1) : 0;
       var calibratedReach = ['keeper-reach','phase4-combined'].includes(TF.CALIBRATION_VARIANT) ? 0.18 : 0;
-      var saveReach = 1.25 + (isCommittedSave ? (attr(p, "diving", 55) * 0.012 + attr(p, "reach", 55) * 0.004 + calibratedReach) * diveProgress : 0);
+      var diveReach = (attr(p, "diving", 55) * 0.012 + attr(p, "reach", 55) * 0.004 + calibratedReach) * diveProgress;
+       // Phase 6 experiment: extend committed diving reach by 40%.
+       // Standing collision radius and keeper challenges remain unchanged.
+       if (TF.CALIBRATION_VARIANT === "phase6-keeper-reach40") diveReach *= 1.4;
+       var saveReach = 1.25 + (isCommittedSave ? diveReach : 0);
       if (d > saveReach || b.position.z > (isCommittedSave ? 2.65 : 2.35)) continue;
       // Handling is legal only when the ball itself is inside the keeper's
       // penalty area. Keeper proximity alone must not extend the box by 5m.
