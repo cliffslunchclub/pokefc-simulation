@@ -8,7 +8,7 @@ permissions:
   contents: read
 concurrency:
   group: pokefc-matched-quicksim-reference
-  cancel-in-progress: false
+  cancel-in-progress: true
 jobs:
   preflight:
     runs-on: ubuntu-latest
