@@ -4,7 +4,7 @@ on:
     branches: [main]
     paths: ['.github/workflows/phase6-possession.yml']
   workflow_dispatch:
-# Rerun after registering Phase 6 calibration variants in batch runner.
+# Matched-baseline retest with aggregate diagnostics.
 permissions:
   contents: read
 jobs:
@@ -37,4 +37,28 @@ jobs:
         with:
           name: possession-${{ matrix.variant }}-${{ matrix.seed }}
           path: results/*.json
+          retention-days: 90
+
+  summary:
+    needs: compare
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: 'possession-*'
+          path: results/input
+          merge-multiple: true
+      - name: Calculate matched-seed report
+        run: |
+          node scripts/summarize-phase6.cjs results/input results/phase6-summary.md
+          cat results/phase6-summary.md >> "$GITHUB_STEP_SUMMARY"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: phase6-aggregate-report
+          path: results/phase6-summary.md
           retention-days: 90
