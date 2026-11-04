@@ -130,7 +130,7 @@ lines.push('','## Exploratory ranking (lower discrepancy is better)','',
   '- Even matched teams do not share an event-by-event RNG sequence across engines.',
   '- Run separate holdout seeds plus watch-to-quick handoff tests before considering live deployment.',
   '- The stabilized experiment also alters the player rating *inputs* by compressing differences toward 60. That is a diagnostic only and must not silently rewrite Pokémon ratings.',
-  ''];
+  '');
 fs.mkdirSync(output,{recursive:true});
 fs.writeFileSync(path.join(output,'phase9-dual-report.md'),lines.join('\n'));
 fs.writeFileSync(path.join(output,'phase9-dual-report.json'),JSON.stringify(report,null,2)+'\n');
