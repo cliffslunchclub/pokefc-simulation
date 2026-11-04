@@ -13,7 +13,7 @@ if (loadedVersion !== version) throw new Error(`Source changed while batch runti
 const TF = globalThis.TF;
 TF.VERSION = version;
 const calibrationVariant = (() => { const i = process.argv.indexOf('--calibration-variant'); return i >= 0 ? process.argv[i+1] : 'baseline'; })();
-if (!['baseline', 'passing', 'defense', 'shot-selection', 'combined', 'phase4-control', 'keeper-reach', 'keeper-handling', 'shot-execution', 'phase4-combined'].includes(calibrationVariant)) throw new Error('Unknown calibration variant: ' + calibrationVariant);
+if (!['baseline', 'passing', 'defense', 'shot-selection', 'combined', 'phase4-control', 'keeper-reach', 'keeper-handling', 'shot-execution', 'phase4-combined', 'phase6-keeper-reach40', 'phase6-possession'].includes(calibrationVariant)) throw new Error('Unknown calibration variant: ' + calibrationVariant);
 TF.CALIBRATION_VARIANT = calibrationVariant;
 function arg(name, fallback) { const i = process.argv.indexOf('--' + name); return i >= 0 ? process.argv[i + 1] : fallback; }
 function has(name) { return process.argv.includes('--' + name); }
