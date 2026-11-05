@@ -100,9 +100,12 @@ jobs:
           path: |
             phase10-reports/inline-2p5d-browser.json
             phase10-reports/inline-2p5d-kickoff.png
+            phase10-reports/inline-2p5d-fullscreen.png
+            phase10-reports/inline-2p5d-mobile-fullscreen.png
             phase10-reports/inline-2p5d-fulltime.png
             phase10-reports/franchise-2p5d-browser.json
             phase10-reports/franchise-2p5d-kickoff.png
+            phase10-reports/franchise-2p5d-fullscreen.png
             phase10-reports/franchise-2p5d-fulltime.png
           retention-days: 7
           if-no-files-found: warn
