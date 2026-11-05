@@ -1,0 +1,52 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>PokeFC public Franchise 2.5D browser regression</title>
+<style>
+*{box-sizing:border-box}body{background:#071917;color:#edf7ed;font:15px system-ui;margin:20px auto;max-width:1140px;padding:0 18px}
+h1{font-size:24px}button,select{background:#234c42;color:white;padding:9px;border:1px solid #83a08f;border-radius:6px}
+button:disabled{opacity:.4}.pitch-frame{width:100%;background:#183c35;border:2px solid #46675f;border-radius:9px;overflow:hidden}
+.pitch-frame.soccerjs-franchise-active canvas{display:none!important}.pitch-frame .soccerjs-inline-frame{display:block;width:100%;aspect-ratio:1120/650;border:0}
+.controls{display:flex;flex-wrap:wrap;gap:9px;margin:12px 0}.status{border:1px solid #455f52;padding:9px}
+.viewer-stat{display:grid;grid-template-columns:1fr 2fr 1fr;text-align:center;padding:4px}
+</style><script defer src="./watch-bridge.js"></script><script defer src="./soccerjs-franchise-viewer.js"></script>
+</head><body>
+<h1>Public test — Franchise Soccer-JS 2.5D Tactical Viewer</h1>
+<p>Public exported 2–1 official fixture, no private Franchise saves or engine.</p>
+<div class="status"><strong id="liveScore">0 – 0</strong> · <span id="liveClock">00:00</span> · <span id="engineInstallStatus">Loading fixture…</span></div>
+<div class="pitch-frame"><canvas id="tacticalPitch" width="1050" height="680"></canvas></div>
+<div class="controls"><select id="viewerMode"><option value="soccerjs">2.5D Soccer-JS</option></select>
+<button id="viewerPlay">Play</button><button id="viewerReset">Replay</button>
+<label>Speed<select id="viewerSpeed"><option value="1">1×</option><option value="4" selected>4×</option></select></label>
+<label>Projection<select id="viewerProjection"><option value="isometric">2.5D</option><option value="orthographic">Broadcast</option><option value="topdown">Top-down</option></select></label>
+<label>Camera<select id="viewerCamera"><option value="wide">Wide</option><option value="follow">Follow</option></select></label>
+<label>Scrub<input id="viewerSeek" type="range" min="0" max="90" step=".1" value="0"></label></div>
+<div class="controls"><button id="viewerComplete">Sim to End</button>
+<button id="viewerSoccerRecord" hidden disabled>Record matchweek</button>
+<button id="viewerSoccerCancel" hidden>Cancel Watch</button>
+<button id="viewerTMFull" hidden>Legacy</button>
+<button id="start" disabled>Mount 2.5D Watch</button></div>
+<div id="viewerEvents"></div><div id="viewerStats"></div>
+<p>Matchweek progression callbacks: <strong id="records">0</strong></p>
+<script>
+const state={records:0,cancels:0,score:null,errors:[],lastWeek:0};
+window.__PFC_FRA_PUBLIC_TEST__=state;
+(async()=>{
+ try{
+  const res=await fetch('./fixture.json');if(!res.ok)throw Error('Fixture fetch '+res.status);
+  const fixture=await res.json();const result={origin:'quick-sim',home:fixture.home.id,away:fixture.away.id,
+   score:fixture.score,stats:fixture.stats,box:fixture.box,events:fixture.events};
+  const data={season:1,week:0,fixtureIndex:5,home:fixture.home,away:fixture.away,result};
+  window.__PFC_FRA_FIXTURE__=data;
+  const start=()=>window.FXI_SOCCERJS_FRANCHISE.mount(data,record=>{
+   if(record.result!==result)throw Error('Altered official match');
+   if(record.fixtureIndex!==5||record.week!==0)throw Error('Wrong matchweek');
+   state.records++;state.lastWeek=1;state.score=record.result.score.slice();
+   document.getElementById('records').textContent=String(state.records);
+   window.FXI_SOCCERJS_FRANCHISE.unmount();
+  });
+  document.getElementById('start').onclick=start;
+  document.getElementById('start').disabled=false;
+  document.getElementById('engineInstallStatus').textContent='Fixture ready';
+ }catch(e){state.errors.push(String(e));window.__PFC_FRA_ERROR__=String(e)}
+})();
+</script></body></html>
