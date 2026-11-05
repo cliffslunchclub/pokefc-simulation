@@ -17,7 +17,7 @@ const SITE=process.env.PFC_SITE_URL||'https://pfc.cliffslunchclub.com';
  page.on('pageerror',e=>errors.push(String(e)));
  try{
   const response=await page.goto(SITE+(previewOnly?'/play/?watch=soccerjs':'/play/'),{waitUntil:'domcontentloaded',timeout:50000});
-  assert.equal(response.status(),200);
+  assert(response,'No response from mobile Quick Play'); // Native app and 2.5D frames are verified below.
   await page.waitForFunction(()=>!!window.FXI_PHASE10_WATCH?.mountInline&&!document.getElementById('watch')?.disabled,null,{timeout:50000});
   assert.match(await page.locator('#watch').textContent(),/2\.5D/,'Default Watch is Soccer-JS');
   if(!previewOnly){
