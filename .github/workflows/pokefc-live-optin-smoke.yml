@@ -7,6 +7,7 @@ on:
       - ".github/workflows/pokefc-live-optin-smoke.yml"
       - "scripts/phase10-live-site-smoke.cjs"
       - "scripts/phase10-live-modes-smoke.cjs"
+      - "scripts/phase10-live-default-mobile-smoke.cjs"
   workflow_dispatch:
 
 permissions:
@@ -45,6 +46,7 @@ jobs:
           node --check scripts/phase10-live-site-smoke.cjs
           NODE_PATH="$GITHUB_WORKSPACE/upstream/node_modules" node scripts/phase10-live-site-smoke.cjs
           NODE_PATH="$GITHUB_WORKSPACE/upstream/node_modules" node scripts/phase10-live-modes-smoke.cjs
+          PFC_MOBILE_PREVIEW=1 NODE_PATH="$GITHUB_WORKSPACE/upstream/node_modules" node scripts/phase10-live-default-mobile-smoke.cjs
       - name: Upload read-only site proof
         if: always()
         uses: actions/upload-artifact@v4
@@ -56,5 +58,7 @@ jobs:
             phase10-reports/siteground-2p5d-modes.json
             phase10-reports/siteground-franchise-2p5d.png
             phase10-reports/siteground-challenge-2p5d.png
+            phase10-reports/siteground-mobile-default-2p5d.json
+            phase10-reports/siteground-mobile-default-2p5d.png
           if-no-files-found: warn
           retention-days: 7
