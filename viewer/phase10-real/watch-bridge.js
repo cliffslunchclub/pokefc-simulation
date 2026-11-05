@@ -159,6 +159,55 @@
  // Inline 2.5D presentation. Unlike open(), this mounts directly in Quick Play's
  // match viewport; the outer page owns Pause, Resume, Sim to End and Record.
  // No result is committed unless record() is explicitly invoked.
+ // Fullscreen belongs to the outer match viewport, not its iframe.
+ // Mobile browsers lacking element fullscreen use a viewport-sized theater.
+ let expandedPitch=null,fullscreenListenersBound=false;
+ const fullscreenActive=el=>!!el&&(expandedPitch===el||document.fullscreenElement===el);
+ function syncFullscreenButton(el,expanded){
+  const button=el?.querySelector?.('[data-pfc-fullscreen]');
+  if(button){
+   button.textContent=expanded?'✕ EXIT FULLSCREEN':'⛶ FULLSCREEN';
+   button.setAttribute('aria-pressed',expanded?'true':'false');
+  }
+ }
+ function clearFullscreen(el=expandedPitch){
+  if(!el)return;
+  el.classList?.remove('pfc-watch-theater');
+  document.body?.classList?.remove('pfc-watch-no-scroll');
+  syncFullscreenButton(el,false);
+  if(expandedPitch===el)expandedPitch=null;
+ }
+ async function leaveFullscreen(el=expandedPitch){
+  if(!el)return false;
+  if(document.fullscreenElement===el&&typeof document.exitFullscreen==='function'){
+   try{await document.exitFullscreen()}catch(_){}
+  }
+  clearFullscreen(el);return true;
+ }
+ async function toggleFullscreen(el){
+  requireValid(el?.classList&&el?.querySelector,'Match viewport required for fullscreen');
+  if(fullscreenActive(el)){
+   await leaveFullscreen(el);return false;
+  }
+  if(expandedPitch)await leaveFullscreen(expandedPitch);
+  if(!fullscreenListenersBound){
+   fullscreenListenersBound=true;
+   document.addEventListener('fullscreenchange',()=>{
+    if(expandedPitch&&!document.fullscreenElement)clearFullscreen(expandedPitch);
+   });
+   document.addEventListener('keydown',e=>{
+    if(e.key==='Escape'&&expandedPitch&&!document.fullscreenElement)clearFullscreen(expandedPitch);
+   });
+  }
+  expandedPitch=el;el.classList.add('pfc-watch-theater');
+  document.body?.classList?.add('pfc-watch-no-scroll');
+  syncFullscreenButton(el,true);
+  // Rejected/fullscreen-unsupported requests leave theater mode available.
+  if(typeof el.requestFullscreen==='function'){
+   try{await el.requestFullscreen({navigationUI:'hide'})}catch(_){}
+  }
+  return true;
+ }
  function mountInline({
   preview,result,container,onRecord,onCancel,onProgress,onReady,onStatus,
   viewerUrl='../watch/soccerjs/dist/index.html?embedded=1&inline=1'
@@ -176,6 +225,8 @@
   frame.className='soccerjs-inline-frame';
   frame.title='Broadcast Soccer-JS Pokémon match (Quick Sim-authoritative)';
   frame.setAttribute('aria-label','Soccer-JS 2.5D watched match');
+  frame.setAttribute('allowfullscreen','');
+  frame.setAttribute('allow','fullscreen');
   frame.src=url.href;
   function announce(state,extra={}){
    if(typeof onStatus==='function')onStatus({state,minute,score:scoreAt(fixture,minute),recorded,...extra});
@@ -185,6 +236,7 @@
    closed=true;
    if(watchdog!==null)root.clearTimeout(watchdog);
    root.removeEventListener('message',onMessage);
+   if(fullscreenActive(container))void leaveFullscreen(container);
    frame.remove();
    if(active===session)active=null;
   }
@@ -268,6 +320,6 @@
   return session;
  }
 
- root.FXI_PHASE10_WATCH={open,mountInline,snapshot,scoreAt,isActive:()=>!!active};
+ root.FXI_PHASE10_WATCH={open,mountInline,snapshot,scoreAt,toggleFullscreen,leaveFullscreen,fullscreenActive,isActive:()=>!!active};
  if(typeof module!=='undefined'&&module.exports)module.exports={snapshot,scoreAt,mountInline,isActive:()=>!!active};
 })(typeof window!=='undefined'?window:globalThis);
