@@ -6,3 +6,6 @@
 #projection{min-width:135px}
 #camera{min-width:104px}
 @media(max-width:680px){.controls label{margin-left:0}.motion-status{font-size:11px}}
+
+.sprite-toggle{display:flex;align-items:center;gap:6px;font-size:12px;color:#DCEBEA}
+.sprite-toggle input{width:16px;height:16px;accent-color:#EBC63C}
