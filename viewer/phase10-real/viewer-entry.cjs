@@ -9,7 +9,7 @@ const {prepare}=require('./pokemon-roster.cjs');
 const {draw}=require('./pokemon-draw.cjs');
 const $=id=>document.getElementById(id);
 const mix=(a,b,t)=>a+(b-a)*Math.max(0,Math.min(1,t));
-let match,sim,minute=0,playing=false,last=null,speed=1,lastSent=-2,stopAt=90,spriteRoster=null,ballCarrier=-1,smoothedFocus=null;
+let match,sim,minute=0,playing=false,last=null,speed=1,lastSent=-2,stopAt=90,spriteRoster=null,ballCarrier=-1,smoothedFocus=null,trackedActors=null,trackedBall=null,trackedMinute=null;
 const validViews=new Set(['isometric','orthographic','topdown']);
 const embedded=new URLSearchParams(location.search).get('embedded')==='1';
 const inlineView=embedded&&new URLSearchParams(location.search).get('inline')==='1';
@@ -49,7 +49,7 @@ function cameraFit(canvas,field,ball){
  const fit=Math.min(canvas.width*.78/w,canvas.height*.70/h);
  const camera=$('camera').value==='follow'?'follow':'wide';
  // Deliberately tighter television-style framing; camera tracks the ball.
- Settings.camera.scale=fit*(camera==='follow'?2.45:1.25);
+ Settings.camera.scale=fit*(camera==='follow'?4.8:1.35);
  const corners=[[0,0],[field.width,0],[0,field.height],[field.width,field.height]]
    .map(([x,y])=>Utils.toScreen(x,y,0));
  const xs=corners.map(v=>v.x),ys=corners.map(v=>v.y);
@@ -69,9 +69,35 @@ function cameraFit(canvas,field,ball){
   tx:canvas.width/2-center.x,ty:canvas.height/2-center.y,
   visibleWorld:[field.width,field.height]};
 }
+// Screen-frame locomotion cap: off-ball Pokémon and the ball cannot
+// instantaneously teleport when a new illustrative action is chosen.
+// All tracking is presentation-only; official score/events stay untouched.
+function smoothMotion(script,t){
+ if(trackedMinute===null||t<trackedMinute||!trackedActors||!trackedBall){
+  trackedActors=script.actors.map(p=>({x:p.x,y:p.y}));
+  trackedBall={x:script.ball.x,y:script.ball.y,z:script.ball.z};
+  trackedMinute=t;return script;
+ }
+ const seconds=Math.max(0,(t-trackedMinute)*60);
+ const follow=(prev,next,maxDistance)=>{
+  const dx=next.x-prev.x,dy=next.y-prev.y,distance=Math.hypot(dx,dy);
+  if(!distance||distance<=maxDistance)return {...next};
+  const ratio=maxDistance/distance;
+  return {...next,x:prev.x+dx*ratio,y:prev.y+dy*ratio};
+ };
+ const actors=script.actors.map((p,i)=>{
+  const prev=trackedActors[i];
+  return {...p,...follow(prev,p,seconds*6.5)};
+ });
+ const ball=follow(trackedBall,script.ball,seconds*28);
+ trackedActors=actors.map(p=>({x:p.x,y:p.y}));
+ trackedBall={x:ball.x,y:ball.y,z:ball.z};
+ trackedMinute=t;
+ return {...script,actors,ball};
+}
 function render(t){
  const field=Utils.getFieldBounds(),s=scoreAt(t);
- const script=motionFrame(match,t,field);
+ const script=smoothMotion(motionFrame(match,t,field),t);
  for(const p of script.actors){
   const actor=(p.side===0?sim.teamA:sim.teamB).players[p.index];
   actor.x=p.x;actor.y=p.y;actor.z=p.z;
@@ -113,6 +139,7 @@ function render(t){
   projection:camera.projection,camera:camera.camera,scale:camera.scale,
   animation:script.action,ball:{x:script.ball.x,y:script.ball.y,z:script.ball.z},
   cameraOffset:[camera.tx,camera.ty],ballDrawRadius:Settings.BALL_DRAW_RADIUS,
+  actorWorldPositions:script.actors.map(p=>[p.x,p.y]),
   actualSprites:!!ImageDB.get('player_Brazil_main')&&!!ImageDB.get('player_Argentina_main'),
   pokemonSpritesLoaded:spriteRoster.entries.filter(e=>e.image?.naturalWidth>0).length,
   pokemonSpritesDrawn:window.__PFC_REAL_SPRITES_DRAWN__,pokemonEntitiesDrawn:window.__PFC_DRAWN__,
@@ -121,13 +148,18 @@ function render(t){
 }
 function step(now){
  if(playing){
-  if(last!==null)minute=Math.min(stopAt,minute+Math.min(.1,(now-last)/1000)*playbackRate(minute,match.events,speed));
+  if(last!==null){
+    const elapsed=Math.max(0,(now-last)/1000);
+    // Background/suspended tabs pause instead of teleporting 30 seconds ahead.
+    if(elapsed>2){playing=false;last=null;}
+    else minute=Math.min(stopAt,minute+elapsed*playbackRate(minute,match.events,speed));
+   }
   if(minute>=stopAt)playing=false;
   last=now;render(minute);
  }
  requestAnimationFrame(step);
 }
-function seek(t){playing=false;last=null;smoothedFocus=null;minute=Math.max(0,Math.min(90,t));render(minute);}
+function seek(t){playing=false;last=null;smoothedFocus=null;trackedActors=null;trackedBall=null;trackedMinute=null;minute=Math.max(0,Math.min(90,t));render(minute);}
 async function boot(){
  try{
   window.__APP_ROOT__=new URL('./',location.href).href;
@@ -141,7 +173,7 @@ async function boot(){
   Settings.HEADLESS=false;Settings.showFPS=false;Settings.showTime=false;
   Settings.soundsMuted=true;
    // Cosmetic only: enlarge the drawn ball, never its physics radius.
-   Settings.BALL_DRAW_RADIUS=14;Settings.camera.scale=8.6;
+   Settings.BALL_DRAW_RADIUS=24;Settings.camera.scale=8.6;
   Settings.camera.type='centered';Settings.camera.offsetX=0;Settings.camera.offsetY=0;
   Settings.projectionMode='orthographic';
    $('projection').value='orthographic';$('camera').value='follow';
@@ -203,7 +235,7 @@ async function boot(){
    if(msg.action==='play'){
     if(minute>=90)return;
     speed=Math.max(.25,Math.min(16,Number(msg.speed)||1));
-    $('speed').value=String([1,2,4].includes(speed)?speed:4);
+    $('speed').value=String([1,2,4,8,16].includes(speed)?speed:1);
     playing=true;last=null;
     render(minute);
    }else if(msg.action==='pause'){
