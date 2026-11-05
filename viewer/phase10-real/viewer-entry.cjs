@@ -6,7 +6,21 @@ const {Utils}=require('./kernel/core/lib/utils.js');
 const {ImageDB}=require('./kernel/core/lib/imagedb.js');
 const $=id=>document.getElementById(id);
 const mix=(a,b,t)=>a+(b-a)*Math.max(0,Math.min(1,t));
-let match,sim,minute=0,playing=false,last=null,speed=1;
+let match,sim,minute=0,playing=false,last=null,speed=1,lastSent=-2;
+const embedded=new URLSearchParams(location.search).get('embedded')==='1';
+const send=(msg)=>{if(embedded&&window.parent!==window)window.parent.postMessage({...msg,type:'pfc-phase10-'+msg.type},location.origin)};
+function receiveFixture(){
+ return new Promise((resolve,reject)=>{
+  let done=false;
+  const onMsg=e=>{
+   if(done||e.source!==window.parent||e.origin!==location.origin||e.data?.type!=='pfc-phase10-fixture')return;
+   done=true;window.removeEventListener('message',onMsg);
+   try{verify(e.data.fixture);resolve(e.data.fixture)}catch(err){reject(err)}
+  };
+  window.addEventListener('message',onMsg);
+  window.parent.postMessage({type:'pfc-phase10-ready'},location.origin);
+ });
+}
 function verify(m){
  if(m?.origin!=='quick-sim'||m?.schema!=='pokefc-quick-sim-export/v1')throw Error('Not a Quick Sim export');
  if(m.home.lineup.length!==11||m.away.lineup.length!==11)throw Error('Missing lineup');
@@ -64,6 +78,9 @@ function render(t){
  $('toast').textContent=label;$('toast').hidden=!label;
  $('status').textContent=t>=90?'FULL TIME':playing?'WATCHING':'READY / PAUSED';
  if(sim.scoreA!==s[0]||sim.scoreB!==s[1])throw Error('Score changed during render');
+ if(embedded&&(t===90||t===0||Math.abs(t-lastSent)>=.1)){
+  lastSent=t;send({type:'progress',minute:t,score:s});
+ }
  window.__PFC_SNAPSHOT__={minute:t,score:s,players:22,actualSprites:
   !!ImageDB.get('player_Brazil_main')&&!!ImageDB.get('player_Argentina_main')};
 }
@@ -79,8 +96,12 @@ function seek(t){playing=false;last=null;minute=Math.max(0,Math.min(90,t));rende
 async function boot(){
  try{
   window.__APP_ROOT__=new URL('./',location.href).href;
-  const response=await fetch('./fixture.json');if(!response.ok)throw Error('Missing match fixture');
-  match=await response.json();verify(match);
+  if(embedded){match=await receiveFixture()}
+  else{
+   const response=await fetch('./fixture.json');if(!response.ok)throw Error('Missing match fixture');
+   match=await response.json();
+  }
+  verify(match);
   Settings.app={canvas:$('pitch'),camX:0,camY:0};
   Settings.HEADLESS=false;Settings.showFPS=false;Settings.showTime=false;
   Settings.soundsMuted=true;Settings.camera.scale=8.6;
@@ -114,10 +135,16 @@ async function boot(){
   };
   $('speed').onchange=e=>{speed=Number(e.target.value)||1;};
   for(const id of ['play','pause','restart','skip','nextGoal','scrub'])$(id).disabled=false;
+  window.addEventListener('message',e=>{
+   if(!embedded||e.source!==window.parent||e.origin!==location.origin||e.data?.type!=='pfc-phase10-seek')return;
+   const requested=Number(e.data.minute);
+   if(Number.isFinite(requested))seek(requested);
+  });
   seek(0);window.__PFC_VIEWER_READY__=true;requestAnimationFrame(step);
  }catch(e){
   console.error(e);window.__PFC_VIEWER_ERROR__=String(e.stack||e);
   $('status').textContent='VIEWER ERROR';$('notice').textContent=e.message||String(e);
+  send({type:'error',message:String(e.message||e)});
  }
 }
 document.addEventListener('DOMContentLoaded',boot);
