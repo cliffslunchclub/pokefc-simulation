@@ -1,0 +1,49 @@
+name: PokeFC — deployed opt-in 2.5D Quick Play smoke
+
+on:
+  push:
+    branches: ["test/phase10-inline-2p5d"]
+    paths:
+      - ".github/workflows/pokefc-live-optin-smoke.yml"
+      - "scripts/phase10-live-site-smoke.cjs"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: pfc-live-optin-browser-smoke
+  cancel-in-progress: true
+
+jobs:
+  hosted-browser-smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Install Playwright only in temporary test runner
+        run: |
+          mkdir -p /tmp/pfc-playwright
+          printf '{"private":true,"name":"pfc-external-smoke"}\n' > /tmp/pfc-playwright/package.json
+          npm --prefix /tmp/pfc-playwright install --no-audit --no-fund playwright
+          /tmp/pfc-playwright/node_modules/.bin/playwright install --with-deps chromium
+      - name: Verify live SiteGround opt-in Watch via normal public browser
+        env:
+          NODE_PATH: /tmp/pfc-playwright/node_modules
+          PFC_SITE_URL: https://pfc.cliffslunchclub.com
+        run: |
+          node --check scripts/phase10-live-site-smoke.cjs
+          node scripts/phase10-live-site-smoke.cjs
+      - name: Upload read-only site proof
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: pfc-siteground-2p5d-live-smoke
+          path: |
+            phase10-reports/siteground-optin-smoke.json
+            phase10-reports/siteground-optin-kickoff.png
+          if-no-files-found: warn
+          retention-days: 7
