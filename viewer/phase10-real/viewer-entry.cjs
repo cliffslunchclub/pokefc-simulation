@@ -83,8 +83,8 @@ async function boot(){
   match=await response.json();verify(match);
   Settings.app={canvas:$('pitch'),camX:0,camY:0};
   Settings.HEADLESS=false;Settings.showFPS=false;Settings.showTime=false;
-  Settings.soundsMuted=true;Settings.camera.scale=9.5;
-  Settings.camera.offsetX=55;Settings.camera.offsetY=140;
+  Settings.soundsMuted=true;Settings.camera.scale=8.6;
+  Settings.camera.offsetX=55;Settings.camera.offsetY=145;
   Settings.projectionMode='orthographic';
   $('status').textContent='GENERATING REAL SOCCER-JS SPRITES…';
   sim=new Simulator({seed:12345});await sim.start();sim.active=true;
