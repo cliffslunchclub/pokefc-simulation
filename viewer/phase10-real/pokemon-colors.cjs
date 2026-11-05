@@ -1,4 +1,8 @@
 'use strict';
-function colors(home,away){const a=home?.primaryColor||'#EBC63C',b=away?.primaryColor||'#287FCB';return [a,a.toLowerCase()===b.toLowerCase()?(away?.secondaryColor||'#B44EEB'):b]}
-function number(player,index){return player?.jerseyNumber||index+1}
-module.exports={colors,number};
+const HOME='#E53935',AWAY='#FFFFFF';
+function colors(){return [HOME,AWAY]}
+function number(p,i){
+ const n=Number(p?.jerseyNumber??p?.shirtNumber??p?.number);
+ return Number.isInteger(n)&&n>=1&&n<=99?n:i+1;
+}
+module.exports={colors,number,HOME,AWAY};
