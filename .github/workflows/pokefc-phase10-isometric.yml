@@ -17,7 +17,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
 
 concurrency:
   group: pokefc-phase10-isometric
@@ -104,3 +104,13 @@ jobs:
             phase10-reports/isometric-goal-buildup.png
           retention-days: 7
           if-no-files-found: warn
+
+      - name: Publish validated 2.5D preview files to public gh-pages branch
+        if: success()
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./dist
+          publish_branch: gh-pages
+          force_orphan: true
+          commit_message: "Phase 10: validated Soccer-JS isometric watched-match preview"
