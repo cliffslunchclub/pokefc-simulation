@@ -11,6 +11,11 @@ p{color:#b5cddd;line-height:1.4}
 button,select{font:inherit;color:#0a2330;background:#e7ec87;border:0;border-radius:7px;padding:9px 13px;cursor:pointer}
 button:disabled{opacity:.5;cursor:not-allowed}
 .field-shell{position:relative;border:2px solid #54746c;border-radius:12px;background:#13382b;overflow:hidden}
+.field-shell .pfc-fullscreen-btn{position:absolute;z-index:30;right:8px;top:8px;background:#102020;color:white;border:2px solid white}
+.field-shell .pfc-fullscreen-btn[hidden]{display:none!important}
+body.pfc-watch-no-scroll{overflow:hidden}
+.field-shell.pfc-watch-theater,.field-shell:fullscreen{position:fixed!important;inset:0!important;width:100vw!important;height:100dvh!important;z-index:99990!important;margin:0!important;border:0!important;border-radius:0!important;background:#081917!important;display:flex!important;align-items:center;justify-content:center}
+.field-shell.pfc-watch-theater iframe,.field-shell:fullscreen iframe{width:100%!important;height:100%!important;aspect-ratio:auto!important}
 .soccerjs-inline-frame{display:block;width:100%;aspect-ratio:1120 / 650;border:0;background:#163b36}
 .status{border:1px solid #436273;padding:12px;margin-top:9px;border-radius:8px}
 #score{font-weight:900;font-size:25px}#status{font-weight:650}
@@ -29,7 +34,7 @@ button:disabled{opacity:.5;cursor:not-allowed}
 <label>Camera <select id="camera"><option value="follow" selected>Follow ball</option><option value="wide">Wide</option></select></label>
 </div>
 <div class="status">Pewter City FC <span id="score">0 – 0</span> Cerulean City FC | <span id="clock">0'</span> | <span id="status">Loading test fixture</span></div>
-<div class="field-shell" id="field"></div>
+<div class="field-shell" id="field"><button class="pfc-fullscreen-btn" type="button" id="fullscreen" data-pfc-fullscreen aria-pressed="false" hidden>⛶ FULLSCREEN</button></div>
 <div class="status">Recorded outcomes: <strong id="records">0</strong> | Last recorded score: <strong id="saved">none</strong></div>
 </main>
 <script>
@@ -55,10 +60,10 @@ function setReady(v){
 el('start').onclick=()=>{
  try{
   if(session)session.destroy();
-  el('field').replaceChildren();
+  el('field').querySelectorAll('iframe').forEach(frame=>frame.remove());
   session=window.FXI_PHASE10_WATCH.mountInline({
    preview,result,container:el('field'),viewerUrl:'./index.html?embedded=1&inline=1',
-   onReady:s=>{state.boots++;setReady(true);label('2.5D Broadcast follow-ball ready');s.play(1)},
+   onReady:s=>{state.boots++;setReady(true);el('fullscreen').hidden=false;label('2.5D Broadcast follow-ball ready');s.play(1)},
    onProgress:p=>{state.atMinute=p.minute;el('score').textContent=p.score.join(' – ');
     el('clock').textContent=p.minute.toFixed(1)+"'";
     if(p.finished){el('record').disabled=false;el('handoff').disabled=true;label('Full time · official result ready')}},
@@ -69,7 +74,7 @@ el('start').onclick=()=>{
     el('saved').textContent=state.recordedScore.join(' – ');
     setReady(false);label('Official result recorded exactly once')
    },
-   onCancel:()=>{state.cancels++;session=null;setReady(false);el('field').replaceChildren();label('Canceled without recording')},
+   onCancel:()=>{state.cancels++;session=null;setReady(false);el('fullscreen').hidden=true;el('field').querySelectorAll('iframe').forEach(frame=>frame.remove());label('Canceled without recording')},
    onStatus:({state:s,message})=>{if(s==='error'){state.errors.push(message);label('ERROR: '+message)}}
   });
   el('cancel').disabled=false;el('start').disabled=false;
@@ -82,4 +87,5 @@ el('record').onclick=()=>session?.record();
 el('cancel').onclick=()=>session?.cancel();
 el('view').onchange=e=>session?.setProjection(e.target.value);
 el('camera').onchange=e=>session?.setCamera(e.target.value);
+el('fullscreen').onclick=()=>window.FXI_PHASE10_WATCH.toggleFullscreen(el('field'));
 </script></body></html>
