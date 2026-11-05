@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>PokéFC — Inline 2.5D Native Browser Regression</title>
+<style>
+:root{font-family:system-ui;color:#e9f6fb;background:#0b1827}
+*{box-sizing:border-box}body{margin:0;padding:18px}
+main{max-width:1220px;margin:auto}
+h1{font-size:clamp(22px,3vw,34px);margin:8px 0}
+p{color:#b5cddd;line-height:1.4}
+.toolbar{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin:16px 0}
+button,select{font:inherit;color:#0a2330;background:#e7ec87;border:0;border-radius:7px;padding:9px 13px;cursor:pointer}
+button:disabled{opacity:.5;cursor:not-allowed}
+.field-shell{position:relative;border:2px solid #54746c;border-radius:12px;background:#13382b;overflow:hidden}
+.soccerjs-inline-frame{display:block;width:100%;aspect-ratio:1120 / 650;border:0;background:#163b36}
+.status{border:1px solid #436273;padding:12px;margin-top:9px;border-radius:8px}
+#score{font-weight:900;font-size:25px}#status{font-weight:650}
+</style>
+<script defer src="./watch-bridge.js"></script>
+</head><body><main>
+<div>PUBLIC BROWSER REGRESSION · DO NOT USE AS A PRODUCT PAGE</div>
+<h1>Quick Play — embedded Soccer-JS 2.5D</h1>
+<p>The result is fixed by an already exported Quick Sim fixture. This checks actual native Soccer-JS rendering and controls in the match panel.</p>
+<div class="toolbar">
+<button id="start" disabled>▶ Watch Match · 2.5D</button>
+<button id="pause" disabled>Pause</button><button id="resume" disabled>Resume</button>
+<button id="handoff" disabled>Sim to End</button><button id="record" disabled>Record Result</button>
+<button id="cancel" disabled>Cancel Watch</button>
+<label>View <select id="view"><option value="isometric">2.5D Isometric</option><option value="orthographic">Broadcast</option><option value="topdown">Top-down</option></select></label>
+<label>Camera <select id="camera"><option value="wide">Wide</option><option value="follow">Follow ball</option></select></label>
+</div>
+<div class="status">Pewter City FC <span id="score">0 – 0</span> Cerulean City FC | <span id="clock">0'</span> | <span id="status">Loading test fixture</span></div>
+<div class="field-shell" id="field"></div>
+<div class="status">Recorded outcomes: <strong id="records">0</strong> | Last recorded score: <strong id="saved">none</strong></div>
+</main>
+<script>
+let fixture,result,preview,session;
+const state={records:0,recordedScore:null,cancels:0,boots:0,errors:[],lastStatus:null,atMinute:0};
+window.__PFC_INLINE_TEST__=state;
+const el=id=>document.getElementById(id);
+const label=(s)=>{el('status').textContent=s;state.lastStatus=s};
+(async()=>{
+ try{
+  fixture=await (await fetch('./fixture.json')).json();
+  preview={home:fixture.home,away:fixture.away};
+  result={origin:'quick-sim',home:fixture.home.id,away:fixture.away.id,
+   score:fixture.score,stats:fixture.stats,events:fixture.events,box:fixture.box};
+  window.__PFC_INLINE_FIXTURE__={preview,result};
+  el('start').disabled=false;label('Ready: official Quick Sim result locked');
+ }catch(err){state.errors.push(String(err));window.__PFC_INLINE_ERROR__=String(err);label(String(err))}
+})();
+function setReady(v){
+ for(const id of ['pause','resume','handoff','cancel'])el(id).disabled=!v;
+ el('record').disabled=true;
+}
+el('start').onclick=()=>{
+ try{
+  if(session)session.destroy();
+  el('field').replaceChildren();
+  session=window.FXI_PHASE10_WATCH.mountInline({
+   preview,result,container:el('field'),viewerUrl:'./index.html?embedded=1&inline=1',
+   onReady:s=>{state.boots++;setReady(true);label('2.5D isometric ready');s.play(1)},
+   onProgress:p=>{state.atMinute=p.minute;el('score').textContent=p.score.join(' – ');
+    el('clock').textContent=p.minute.toFixed(1)+"'";
+    if(p.finished){el('record').disabled=false;el('handoff').disabled=true;label('Full time · official result ready')}},
+   onRecord:({result:r})=>{
+    if(r!==result)throw Error('Recorded result object differed from locked official result');
+    state.records++;state.recordedScore=r.score.slice();
+    el('records').textContent=String(state.records);
+    el('saved').textContent=state.recordedScore.join(' – ');
+    setReady(false);label('Official result recorded exactly once')
+   },
+   onCancel:()=>{state.cancels++;session=null;setReady(false);el('field').replaceChildren();label('Canceled without recording')},
+   onStatus:({state:s,message})=>{if(s==='error'){state.errors.push(message);label('ERROR: '+message)}}
+  });
+  el('cancel').disabled=false;el('start').disabled=false;
+ }catch(err){state.errors.push(String(err));label(String(err))}
+};
+el('pause').onclick=()=>session?.pause();
+el('resume').onclick=()=>session?.play(1);
+el('handoff').onclick=()=>session?.simToEnd();
+el('record').onclick=()=>session?.record();
+el('cancel').onclick=()=>session?.cancel();
+el('view').onchange=e=>session?.setProjection(e.target.value);
+el('camera').onchange=e=>session?.setCamera(e.target.value);
+</script></body></html>
