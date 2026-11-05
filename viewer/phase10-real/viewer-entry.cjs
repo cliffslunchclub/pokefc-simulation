@@ -104,7 +104,11 @@ function render(t){
   projection:camera.projection,camera:camera.camera,scale:camera.scale,
   animation:script.action,ball:{x:script.ball.x,y:script.ball.y,z:script.ball.z},
   cameraOffset:[camera.tx,camera.ty],
-  actualSprites:!!ImageDB.get('player_Brazil_main')&&!!ImageDB.get('player_Argentina_main')};
+  actualSprites:!!ImageDB.get('player_Brazil_main')&&!!ImageDB.get('player_Argentina_main'),
+  pokemonSpritesLoaded:spriteRoster.entries.filter(e=>e.image?.naturalWidth>0).length,
+  pokemonSpritesDrawn:window.__PFC_REAL_SPRITES_DRAWN__,pokemonEntitiesDrawn:window.__PFC_DRAWN__,
+  numbersVisible:$('showNumbers').checked,teamColors:spriteRoster.colors,
+  pokemonIds:spriteRoster.entries.map(e=>e.dexId),humanPlayerSprites:false};
 }
 function step(now){
  if(playing){
