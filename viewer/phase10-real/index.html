@@ -7,15 +7,16 @@
 <main><section class="intro">
 <div class="eyebrow">QUICK SIM × SOCCER-JS</div>
 <h1>A real match. <em>One official result.</em></h1>
-<p>This is a real PokéFC Quick Sim v0.7b result replayed by Soccer-JS's original pitch, sprites and ball drawing systems. Controls never run Soccer-JS's competing match simulation.</p>
-<div class="caution" id="notice"><b>Early technical preview.</b> Only scoring events have official timestamps. The animated passes, challenges, shot paths, player movement and goalkeeper reactions are illustrative—not official Quick Sim events. This is not yet a complete Match Director, nor a 120-minute or shootout engine.</div>
+<p>This is a real PokéFC Quick Sim v0.7b result replayed by Soccer-JS's original pitch and ball drawing systems, with Pokémon sprite billboards. Controls never run Soccer-JS's competing match simulation.</p>
+<div class="caution" id="notice"><b>Early technical preview.</b> Only scoring events have official timestamps. The Pokémon sprite art is original game artwork. Animated passes, challenges, shot paths and goalkeeper reactions are illustrative—not official Quick Sim events. This is not yet a complete Match Director, nor a 120-minute or shootout engine.</div>
 </section>
 <section class="scoreline"><div class="team"><span>PEWTER CITY</span><small>HOME</small></div><div class="result"><strong id="score">0 – 0</strong><div id="clock">0'</div><small id="status" role="status" aria-live="polite">LOADING…</small></div><div class="team visitor"><span>CERULEAN CITY</span><small>AWAY</small></div></section>
-<div class="layout"><section class="viewer"><div class="cap"><h2>SOCCER-JS ORIGINAL VISUAL ENGINE</h2><small>Authentic player sprite sheets • official Quick Sim score</small></div>
+<div class="layout"><section class="viewer"><div class="cap"><h2>SOCCER-JS ORIGINAL VISUAL ENGINE</h2><small>Original Pokémon game sprites • club-colored jersey numbers • official Quick Sim score</small></div>
 <div class="pitchwrap"><canvas id="pitch" width="1120" height="650" aria-label="Soccer-JS pitch animated with Quick Sim match events"></canvas><span id="toast" hidden></span></div>
 <div class="controls"><button id="play" disabled class="primary">▶ Play</button><button id="playFive" disabled>▶ Next 5′</button><button id="pause" disabled>Ⅱ Pause</button><button id="restart" disabled>↺ Replay</button><button id="nextGoal" disabled>⚽ Next goal</button><button id="skip" disabled>⏭ Full time</button>
 <label>Speed <select id="speed"><option value="1">1×</option><option value="2">2×</option><option value="4">4×</option></select></label>
 <label>View <select id="projection" aria-label="Soccer-JS projection"><option value="isometric" selected>2.5D Isometric</option><option value="orthographic">Broadcast</option><option value="topdown">Top-down</option></select></label>
+<label class="sprite-toggle"><input id="showNumbers" type="checkbox" checked> Jersey numbers</label>
 <label>Camera <select id="camera" aria-label="Camera framing"><option value="wide" selected>Wide pitch</option><option value="follow">Follow ball</option></select></label></div>
 <div id="motionStatus" class="motion-status" role="status">Loading illustrated match sequence…</div>
 <div class="seek"><span>0'</span><input id="scrub" type="range" min="0" max="90" step=".05" value="0" disabled aria-label="Scrub match minute"><span>90'</span><b id="played">0/90'</b></div>
