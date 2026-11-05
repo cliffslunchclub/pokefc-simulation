@@ -1,0 +1,65 @@
+name: PokéFC Phase 10B — knockout baseline (public)
+
+on:
+  push:
+    branches:
+      - experiment/phase10-knockout-baseline
+    paths:
+      - ".github/workflows/pokefc-phase10-knockout-baseline.yml"
+      - "scripts/phase10-knockout-baseline.cjs"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: pfc-public-phase10-knockout-baseline
+  cancel-in-progress: true
+
+jobs:
+  baseline:
+    name: Knockout baseline, pinned Soccer-JS, public runner
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Check out public simulation repo
+        uses: actions/checkout@v4
+
+      - name: Check out pinned Soccer-JS
+        uses: actions/checkout@v4
+        with:
+          repository: haeretici/soccer-js
+          ref: 38970e0dade0865078c9e84bc1ecfd72aaa02fde
+          path: upstream
+          persist-credentials: false
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Existing penalty, match-flow and replay regressions
+        working-directory: upstream
+        shell: bash
+        run: |
+          set -euo pipefail
+          node tests/match_fsm_gate.js
+          node tests/match_rules_events.js
+          node tests/replay_scrubber_test.js
+          node tests/substitutions.js
+          node tests/goal_entity.js
+
+      - name: Record pre-extra-time baseline in public report
+        run: |
+          set -euo pipefail
+          node --check scripts/phase10-knockout-baseline.cjs
+          node scripts/phase10-knockout-baseline.cjs upstream
+
+      - name: Upload compact baseline report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: phase10-knockout-baseline
+          path: phase10-reports/knockout-baseline.*
+          if-no-files-found: warn
+          retention-days: 7
