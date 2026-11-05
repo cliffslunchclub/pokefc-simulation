@@ -25,8 +25,8 @@ button:disabled{opacity:.5;cursor:not-allowed}
 <button id="pause" disabled>Pause</button><button id="resume" disabled>Resume</button>
 <button id="handoff" disabled>Sim to End</button><button id="record" disabled>Record Result</button>
 <button id="cancel" disabled>Cancel Watch</button>
-<label>View <select id="view"><option value="isometric">2.5D Isometric</option><option value="orthographic">Broadcast</option><option value="topdown">Top-down</option></select></label>
-<label>Camera <select id="camera"><option value="wide">Wide</option><option value="follow">Follow ball</option></select></label>
+<label>View <select id="view"><option value="orthographic" selected>Broadcast</option><option value="isometric">2.5D Isometric</option><option value="topdown">Top-down</option></select></label>
+<label>Camera <select id="camera"><option value="follow" selected>Follow ball</option><option value="wide">Wide</option></select></label>
 </div>
 <div class="status">Pewter City FC <span id="score">0 – 0</span> Cerulean City FC | <span id="clock">0'</span> | <span id="status">Loading test fixture</span></div>
 <div class="field-shell" id="field"></div>
@@ -58,7 +58,7 @@ el('start').onclick=()=>{
   el('field').replaceChildren();
   session=window.FXI_PHASE10_WATCH.mountInline({
    preview,result,container:el('field'),viewerUrl:'./index.html?embedded=1&inline=1',
-   onReady:s=>{state.boots++;setReady(true);label('2.5D isometric ready');s.play(1)},
+   onReady:s=>{state.boots++;setReady(true);label('2.5D Broadcast follow-ball ready');s.play(1)},
    onProgress:p=>{state.atMinute=p.minute;el('score').textContent=p.score.join(' – ');
     el('clock').textContent=p.minute.toFixed(1)+"'";
     if(p.finished){el('record').disabled=false;el('handoff').disabled=true;label('Full time · official result ready')}},
