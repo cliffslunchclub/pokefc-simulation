@@ -75,6 +75,8 @@ function render(t){
  const canvas=$('pitch'),ctx=canvas.getContext('2d');
  const camera=cameraFit(canvas,field,script.ball);
  window.__PFC_DRAWN__=0;window.__PFC_REAL_SPRITES_DRAWN__=0;
+ const distances=script.actors.map(p=>Math.hypot(p.x-script.ball.x,p.y-script.ball.y));
+ const nearest=Math.min(...distances);ballCarrier=nearest<12?distances.indexOf(nearest):-1;
  ctx.clearRect(0,0,canvas.width,canvas.height);
  ctx.save();
  ctx.translate(camera.tx,camera.ty);
