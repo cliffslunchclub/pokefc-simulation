@@ -43,6 +43,6 @@ for(const m of [120,0,105,32,87,90,113,120]){
 assert.equal(JSON.stringify(knockoutExtra),a,'Original match changed');
 assert.throws(()=>p.validate({...draws,events:[goal(91,0)]}),/League match has extra-time goal|Goal ledger/);
 assert.throws(()=>p.validate({competition:'knockout',events:[goal(5,1)],score:[0,0]}),/Goal ledger/);
-assert.throws(()=>p.validate({competition:'knockout',events:[goal(91,0)],score:[1,0]}),/Extra-time goal in regulation-only/);
+assert.throws(()=>p.validate({competition:'knockout',events:[goal(20,0),goal(91,0)],score:[2,0]}),/Extra-time goal in regulation-only/);
 assert.throws(()=>p.stateAt(knockoutExtra,-1),/Invalid playback minute/);
 console.log('PASS Phase 10B: league draw, regulation knockout win, 90-to-105-to-120, ET winner, PK handoff, replay/skip parity');
