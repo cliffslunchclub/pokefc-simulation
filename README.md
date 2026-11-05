@@ -1,71 +1,46 @@
-# PokéFC — Unattended simulation benchmark starter
+# PokéFC Simulation Lab
 
-This repo is a **working TacticMesh reference benchmark** and a staging area for cross-engine calibration. TacticMesh was taken from the user-supplied `tacticmesh-main(1).zip` (archive commit comment `603312dcf037bed0b0c817f8ba8a194eaebce8da`). Original TacticMesh source files are intentionally kept unchanged, with its MIT license and third-party notices.
+**Public, non-production research and testing repository** for the private game [`cliffslunchclub/PokeFC`](https://github.com/cliffslunchclub/PokeFC). The playable public alpha is [pfc.cliffslunchclub.com](https://pfc.cliffslunchclub.com/), **not** GitHub Pages.
 
-## What is real today
+Updated 2026-11-05. See [RESEARCH_TODO.md](RESEARCH_TODO.md) for current experiments and unimplemented items.
 
-- Six independent, **complete 90-minute TacticMesh reference matches** (45-minute halves), executed as six concurrent GitHub Actions jobs.
-- Matrix includes balanced, pressing, possession, direct and native generated-default tactical profiles.
-- Native seed replay and checkpoint restore parity smoke checks.
-- TacticMesh JSON outputs, aggregated JSON, CSV and a Markdown report, saved as GitHub Actions artifacts.
-- A fast `smoke` option to avoid a multi-hour run when checking basic wiring.
+## Purpose and boundaries
 
-## What is not implemented yet
+This repository runs/reproduces isolated soccer simulation, calibration, viewer feasibility and public browser tests. It contains research helpers, verified test inputs where available, and an original MIT-licensed TacticMesh reference tree. It is **not** the app, a second official game engine, a Pokémon account backend, or an alternative public Soccer-JS game page.
 
-- **20,000 real Quick Sim matches**: the prior custom FUTBOL XI / Quick Sim code was not included in the supplied archive. These are **not** simulated or fabricated.
-- Pokémon stats/typing and 25+10 roster are game-level integration work and are **not** applied to the vanilla TacticMesh reference matches here.
-- Watch → Sim to End at 15/45/75 minutes: not runnable until both engines share a defined match-state handoff. Native same-engine checkpoint parity is tested independently.
-- The aggregate of six matches is an exploratory baseline, not enough to claim reliable goal/outcome calibration.
+Do not publish private PokeFC Quick Sim source, SiteGround credentials, private user fixtures or browser local-save data here. Native research outputs are never assumed to be authoritative PokeFC gameplay outcomes.
 
-## Start in GitHub (cloud, so your computer can be off)
+## Implemented research capabilities
 
-1. Create a **new, private, empty** repository such as `cliffslunchclub/pokefc-simulation`. Do not put this in the existing school or homepage repos.
-2. Extract the accompanying kit ZIP and upload its files, **including the hidden `.github/workflows/pokefc-calibration.yml` path**, into the repository. Easiest from a local terminal once the empty GitHub repo exists:
+| Area | What exists | Important limit |
+| --- | --- | --- |
+| TacticMesh reference | Baseline engine integration, native full-match/checkpoint helpers, calibration scripts and GitHub Actions workflows | Tests characterize **TacticMesh**, not the final Quick Sim model; baseline is exploratory |
+| Comparisons | Scripts and workflow paths for matched Quick Sim/TacticMesh reference comparisons and report summarization | Source fixtures and valid statistical ground truth must be audited before calibration claims |
+| Match continuation | Reference checkpoint/handoff smoke checks | Not proof of production cross-engine mid-match tactical resumption |
+| Soccer-JS feasibility | Public experimental branches for isometric rendering, knockout-periods, Pokémon sprite loading and 90-minute replay/Watch → Sim handoff | These are prototypes. **No verified native visual engine has been promoted from a public branch to PokeFC `main`** |
+| Browser artifacts | Public workflow runs and screenshots demonstrating earlier native Soccer-JS rendering and an immutable Quick Sim result replay | Older screenshots do **not** validate the newest inline viewer integration |
 
-```bash
-cd /path/to/extracted/pokefc-calibration-repo
+The earlier public proof was in [this native Soccer-JS run](https://github.com/cliffslunchclub/pokefc-simulation/actions/runs/41965539911) and [this Watch → Sim handoff run](https://github.com/cliffslunchclub/pokefc-simulation/actions/runs/41968855684), both from experimental branches. Artifact retention is limited by GitHub; preserve reports and test sources before pruning branches.
 
-git init -b main
-git add .
-git commit -m "Set up reproducible TacticMesh calibration CI"
-git remote add origin https://github.com/cliffslunchclub/pokefc-simulation.git
-git push -u origin main
-```
+## Current project architecture
 
-3. On GitHub: open **Actions → PokéFC TacticMesh calibration baseline → Run workflow → aggressive**.
-4. After completion, open the workflow run → **Artifacts** → `pokefc-reference-report` to download the CSV, JSON and written baseline. Individual reference jobs also retain their detailed JSON files.
+- Product `PokeFC/main`: Quick Play, Challenges and Gen I–IV 32-Gym Franchise with Quick Sim and legacy TacticMesh Watch.
+- Product draft [PR #21](https://github.com/cliffslunchclub/PokeFC/pull/21): **Soccer-JS 2.5D** is being connected to the real Quick Play match screen, with Quick Sim-authoritative results. **Unmerged; not live.**
+- Planned: full natural Match Director, complete player/ball sequences, in-game tactical changes via resumable Quick Sim, Challenge/Franchise Soccer-JS parity, and eventual TacticMesh removal.
 
-The `aggressive` option uses six parallel hosted jobs; it may consume GitHub Actions minutes and is subject to the account's quotas/concurrency. A shut-down PC does not stop an already-started GitHub Actions run.
+**Soccer-JS GitHub Pages demo is retired.** Its separate `gh-pages` hosting was a development proof, not a fourth game route. The necessary embedded Soccer-JS `index.html` is in the private draft and must be preserved until replaced.
 
-### One-command Mac alternative
+## How to use this repo
 
-If GitHub CLI (`gh`) is installed and authenticated (`gh auth login`), the included `SETUP_MAC.sh` creates a new private `cliffslunchclub/pokefc-simulation` repository if absent, publishes the source, and **dispatches aggressive workflow**:
+- Select a relevant existing workflow in **Actions** and use `workflow_dispatch` only for a defined test. Some full-match jobs are resource intensive.
+- For local reproduction, inspect `scripts/`, `engines/`, `config/` and the corresponding workflow YAMLs. Use a local Node/Python environment where required.
+- Keep heavy browser/renderer tests **public**, but share only non-sensitive fixtures and test harnesses. Don't automatically trigger expensive private GitHub Actions.
+- Preserve upstream MIT licenses and third-party notices; Pokémon artwork and sprite rights require separate review.
 
-```bash
-cd /path/to/extracted/pokefc-calibration-repo
-bash SETUP_MAC.sh
-```
+The repository previously included step-by-step instructions to create a new repo. Those are obsolete because both repositories already exist.
 
-The script never targets the school or homepage repositories. If GitHub Actions cannot be dispatched automatically, it prints the Actions page for a manual start. An active GH CLI session is needed for authentication.
+## Maintenance
 
-## Run locally
+[Research TODO](RESEARCH_TODO.md) · [Cleanup policy](docs/REPOSITORY_CLEANUP.md) · [Watched-match controls notes](docs/watched-match-controls.md)
 
-Node.js 22 is sufficient for the included headless simulation and smoke tests. No npm installation is required.
-
-```bash
-node scripts/checkpoint-smoke.cjs
-mkdir -p results
-node engines/tacticmesh/tools/batch.cjs --matches 1 --seed 847291 --half-seconds 90 --out results/smoke.json > /dev/null
-# Optional: a full 90-minute match (computationally more expensive)
-node engines/tacticmesh/tools/batch.cjs --matches 1 --seed 847291 --half-seconds 2700 --out results/reference-01-balanced.json > /dev/null
-node scripts/verify-reference.cjs results/reference-01-balanced.json 847291
-node scripts/summarize.cjs results results/summary
-```
-
-## Next integration step
-
-Add the real custom FUTBOL XI / Quick Sim source under `engines/quicksim/`. It should accept a fixed integer seed, initial teams/tactics, length, and (for handoffs) a snapshot plus remaining match time. It should export **completed** match metrics using documented semantics for passes, tackles, shots, score, and possession. Only then should CI add a 20,000-match Quick Sim matrix and numeric calibration check. Avoid claiming a win-rate or goal-rate calibration from six slow-engine matches.
-
-## Security and authorship
-
-TacticMesh is authored by Energen Games and distributed under the MIT License; see `engines/tacticmesh/LICENSE` and `engines/tacticmesh/THIRD_PARTY_NOTICES.md`. This starter is not an upstream release. Its extracted `src` and native `tools` content were kept unchanged.
+This repository has no official affiliation with The Pokémon Company, Nintendo, FIFA/EA or the Soccer-JS authors.
