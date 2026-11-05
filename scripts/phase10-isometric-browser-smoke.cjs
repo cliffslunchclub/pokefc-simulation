@@ -88,6 +88,30 @@ async function seek(page,minute){
 
   await page.locator('#restart').click();
   assert.deepEqual((await page.evaluate(()=>window.__PFC_SNAPSHOT__)).score,[0,0]);
+  // Sample 181 frames across the entire 90-minute match, verifying that
+  // graphics never create extra goals and every official scorer stays intact.
+  const ninety=await page.evaluate(async()=>{
+   const official=await (await fetch('./fixture.json')).json();
+   const slider=document.getElementById('scrub'),samples=[];
+   for(let i=0;i<=180;i++){
+    const t=i/2,start=performance.now();
+    slider.value=String(t);slider.dispatchEvent(new Event('input',{bubbles:true}));
+    samples.push(performance.now()-start);
+    const expected=[0,0];
+    for(const goal of official.events)if(goal.minute<=t)
+      expected[goal.team===official.home.id?0:1]++;
+    const actual=window.__PFC_SNAPSHOT__;
+    if(actual.score[0]!==expected[0]||actual.score[1]!==expected[1])
+     throw Error('Score drift during 90-min sweep at '+t);
+    if(actual.projection!=='isometric'||actual.players!==22)
+     throw Error('Missing 2.5D sprite scene at '+t);
+   }
+   samples.sort((a,b)=>a-b);
+   return {sampledFrames:samples.length,medianMs:samples[90],p95Ms:samples[171],fullTimeScore:window.__PFC_SNAPSHOT__.score};
+  });
+  assert.deepEqual(ninety.fullTimeScore,[2,1]);
+  report.ninetyMinuteSweep=ninety;
+  await page.locator('#restart').click();
   const bench=await page.evaluate(()=>{
    const slider=document.getElementById('scrub');
    const samples=[];
