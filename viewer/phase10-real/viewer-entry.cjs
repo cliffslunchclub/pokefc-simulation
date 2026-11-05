@@ -5,6 +5,8 @@ const {Simulator}=require('./kernel/providers/simulator/simulator.js');
 const {Utils}=require('./kernel/core/lib/utils.js');
 const {ImageDB}=require('./kernel/core/lib/imagedb.js');
 const {motionFrame}=require('./phase10-motion.cjs');
+const {prepare}=require('./pokemon-roster.cjs');
+const {draw}=require('./pokemon-draw.cjs');
 const $=id=>document.getElementById(id);
 const mix=(a,b,t)=>a+(b-a)*Math.max(0,Math.min(1,t));
 let match,sim,minute=0,playing=false,last=null,speed=1,lastSent=-2,stopAt=90;
