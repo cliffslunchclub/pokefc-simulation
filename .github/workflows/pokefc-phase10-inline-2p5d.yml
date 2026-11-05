@@ -7,6 +7,7 @@ on:
       - ".github/workflows/pokefc-phase10-inline-2p5d.yml"
       - "viewer/phase10-real/**"
       - "scripts/phase10-inline-browser-smoke.cjs"
+      - "scripts/phase10-franchise-browser-smoke.cjs"
       - "fixtures/phase10-real-quicksim-v07b.json"
   workflow_dispatch:
 
@@ -43,6 +44,8 @@ jobs:
           node tests/phase10-real-quicksim-fixture.cjs
           node --check viewer/phase10-real/viewer-entry.cjs
           node --check viewer/phase10-real/watch-bridge.js
+          node --check viewer/phase10-real/soccerjs-franchise-viewer.js
+          node --check scripts/phase10-franchise-browser-smoke.cjs
           node --check scripts/phase10-inline-browser-smoke.cjs
           node viewer/phase10-real/test-inline-bridge.cjs
 
@@ -50,7 +53,7 @@ jobs:
         working-directory: upstream
         run: |
           npm install --no-audit --no-fund
-          npm install --no-save --no-audit --no-fund playwright
+          npm install --no-save --no-audit --no-fund playwright@1.64.1
           npx playwright install --with-deps chromium
 
       - name: Build actual isometric Soccer-JS pitch with Pokémon helpers
@@ -65,7 +68,8 @@ jobs:
             --bundle --platform=browser --format=iife --target=es2020 \
             --minify --outfile=dist/viewer.bundle.js
           cp viewer/phase10-real/index.html viewer/phase10-real/viewer.css \
-            viewer/phase10-real/watch-bridge.js viewer/phase10-real/host-inline.html dist/
+            viewer/phase10-real/watch-bridge.js viewer/phase10-real/host-inline.html \
+            viewer/phase10-real/soccerjs-franchise-viewer.js viewer/phase10-real/host-franchise.html dist/
           cp fixtures/phase10-real-quicksim-v07b.json dist/fixture.json
           cp -R upstream/presets upstream/assets dist/
           cp upstream/LICENSE dist/SOCCER-JS-LICENSE.txt
@@ -86,6 +90,7 @@ jobs:
           python3 -m http.server 8765 --directory dist >/tmp/phase10-inline-http.log 2>&1 &
           sleep 2
           NODE_PATH="$GITHUB_WORKSPACE/upstream/node_modules" node scripts/phase10-inline-browser-smoke.cjs
+          NODE_PATH="$GITHUB_WORKSPACE/upstream/node_modules" node scripts/phase10-franchise-browser-smoke.cjs
 
       - name: Upload visual proof and browser results (no private game files)
         if: always()
@@ -96,5 +101,8 @@ jobs:
             phase10-reports/inline-2p5d-browser.json
             phase10-reports/inline-2p5d-kickoff.png
             phase10-reports/inline-2p5d-fulltime.png
+            phase10-reports/franchise-2p5d-browser.json
+            phase10-reports/franchise-2p5d-kickoff.png
+            phase10-reports/franchise-2p5d-fulltime.png
           retention-days: 7
           if-no-files-found: warn
