@@ -4,7 +4,7 @@ function draw(g,player,entry,screen,showNumbers,selected){
  const q=screen(player.x,player.y,0),x=q.x,y=q.y,size=72;
  g.save();
  g.beginPath();g.ellipse(x,y-2,22,9,0,0,Math.PI*2);
- g.fillStyle=entry.color+'55';g.strokeStyle=entry.color;
+ g.fillStyle=entry.color+'55';g.strokeStyle=entry.side===1?'#E53935':entry.color;
  g.lineWidth=selected?4:2.5;g.fill();g.stroke();
  const loaded=entry.image?.naturalWidth>0;
  if(loaded){g.imageSmoothingEnabled=false;g.drawImage(entry.image,x-size/2,y-size-4,size,size)}
