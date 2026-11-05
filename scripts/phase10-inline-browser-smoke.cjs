@@ -62,6 +62,28 @@ const fs=require('node:fs');
   assert.equal((await page.locator('#field iframe').count()),0,'Canceled iframe still mounted');
   assert.equal(state.errors.length,0,'Inline application errors: '+JSON.stringify(state.errors));
   assert.equal(errors.length,0,'JavaScript errors: '+JSON.stringify(errors));
+  // Mobile visual parity on the same compiled native 2.5D renderer.
+  // Isolated public fixture: no SiteGround bot-blocking false negatives.
+  const mobile=await browser.newPage({viewport:{width:390,height:844},deviceScaleFactor:1,isMobile:true,hasTouch:true});
+  await mobile.goto(server+'host-inline.html',{waitUntil:'domcontentloaded'});
+  await mobile.waitForFunction(()=>!!window.__PFC_INLINE_FIXTURE__||!!window.__PFC_INLINE_ERROR__,null,{timeout:15000});
+  assert.equal(await mobile.evaluate(()=>window.__PFC_INLINE_ERROR__||null),null);
+  await mobile.locator('#start').click();
+  await mobile.waitForFunction(()=>window.__PFC_INLINE_TEST__?.boots===1||window.__PFC_INLINE_TEST__?.errors?.length>0,null,{timeout:90000});
+  const mobileInfo=await mobile.locator('#field iframe').evaluate(el=>{
+   const r=el.getBoundingClientRect();
+   return {width:r.width,right:r.right,viewport:innerWidth,snapshot:el.contentWindow.__PFC_SNAPSHOT__};
+  });
+  assert.equal(mobileInfo.snapshot?.projection,'isometric','Mobile must default to angled 2.5D');
+  assert.equal(mobileInfo.snapshot?.players,22);
+  assert(mobileInfo.snapshot?.pokemonSpritesDrawn>=20,'Mobile original Pokémon sprites missing');
+  assert(mobileInfo.width<=mobileInfo.viewport+1,'2.5D field overflows mobile viewport');
+  await mobile.screenshot({path:'phase10-reports/inline-2p5d-mobile.png',fullPage:true});
+  await mobile.locator('#handoff').click();
+  await mobile.waitForFunction(()=>!document.getElementById('record')?.disabled,null,{timeout:12000});
+  await mobile.locator('#record').click();
+  assert.equal(await mobile.evaluate(()=>window.__PFC_INLINE_TEST__.records),1);
+  await mobile.close();
   fs.mkdirSync('phase10-reports',{recursive:true});
   fs.writeFileSync('phase10-reports/inline-2p5d-browser.json',JSON.stringify({
    result:'PASS',nativeSoccerJS:true,embedded:true,defaultProjection:'isometric',
@@ -70,7 +92,8 @@ const fs=require('node:fs');
    cameraControls:true,firstGoal:halfway.score,
    officialFulltimeScore:shot.score,watchToSim:true,
    recordedExactlyOnce:state.records===1,cancelWithoutSave:true,
-   screenCaptures:['inline-2p5d-kickoff.png','inline-2p5d-fulltime.png'],
+   mobile390px:{fieldWidth:mobileInfo.width,viewportWidth:mobileInfo.viewport,pokemonDrawn:mobileInfo.snapshot.pokemonSpritesDrawn,recordedExactlyOnce:true},
+   screenCaptures:['inline-2p5d-kickoff.png','inline-2p5d-fulltime.png','inline-2p5d-mobile.png'],
    errors
   },null,2));
   console.log('PASS native 2.5D inline browser: 22 Pokémon, real sprites, isometric camera, 1–0 → 2–1, record once, cancel');
