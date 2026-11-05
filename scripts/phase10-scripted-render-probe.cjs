@@ -92,6 +92,9 @@ function mockContext(){
  // FULL native Soccer-JS pitch/stadium renderer. Supply a method-complete
  // spy context to BOTH the main canvas and dynamically created cache canvas.
  const createElement=global.document.createElement;
+ const getElementById=global.document.getElementById;
+ global.document.getElementById=(id)=>
+   id==='minimap'?{width:200,height:128,getContext:()=>mockContext().ctx}:getElementById(id);
  global.document.createElement=(tag)=>
    tag==='canvas'?{width:960,height:600,getContext:()=>mockContext().ctx}:createElement(tag);
  Settings.HEADLESS=false;
@@ -103,6 +106,7 @@ function mockContext(){
  }catch(e){renderError=e.stack||String(e);}
  Settings.HEADLESS=true;
  global.document.createElement=createElement;
+ global.document.getElementById=getElementById;
  assert.equal(renderOk,true,'Native frame rendering failed: '+renderError);
  assert(trace.images>=22,'Native sprite drawing did not render all 22 player entities: '+trace.images);
  assert(trace.arcs>0,'Native soccer ball did not render');
