@@ -19,7 +19,7 @@
    lineup:t.lineup.map(p=>{
     const id=String(p.id);
     requireValid(id&&!ids.has(id),'Player IDs must be unique');ids.add(id);
-    return {id,name:String(p.name||p.species||id),pos:String(p.pos||'MID')};
+    return {id,name:String(p.name||p.species||id),pos:String(p.pos||'MID'),speciesId:p.speciesId??p.pokemonId??p.dexId??null,jerseyNumber:p.jerseyNumber??p.shirtNumber??null};
    })
   });
   const safeTeams=teams.map(clean),events=result.events.filter(e=>e.type==='goal').map(e=>{
@@ -57,7 +57,7 @@
   }
   return s;
  }
- function open({preview,result,onRecord,onClose,source='PokéFC',viewerUrl='../experiments/phase10-soccerjs/dist/index.html?embedded=1'}){
+ function open({preview,result,onRecord,onClose,source='PokéFC',viewerUrl='../watch/soccerjs/dist/index.html?embedded=1'}){
   if(active)throw Error('Another Phase 10 Watch session is already open');
   requireValid(typeof onRecord==='function','Result callback required');
   const fixture=snapshot(preview,result);
@@ -137,6 +137,117 @@
   active={close:cleanup,fixture};
   return active;
  }
- root.FXI_PHASE10_WATCH={open,snapshot,scoreAt,isActive:()=>!!active};
- if(typeof module!=='undefined'&&module.exports)module.exports={snapshot,scoreAt};
+
+ // Inline 2.5D presentation. Unlike open(), this mounts directly in Quick Play's
+ // match viewport; the outer page owns Pause, Resume, Sim to End and Record.
+ // No result is committed unless record() is explicitly invoked.
+ function mountInline({
+  preview,result,container,onRecord,onCancel,onProgress,onReady,onStatus,
+  viewerUrl='../watch/soccerjs/dist/index.html?embedded=1&inline=1'
+ }){
+  requireValid(!active,'Another Watch session is already active');
+  requireValid(container&&typeof container.appendChild==='function','A match viewport is required');
+  requireValid(typeof onRecord==='function','Record callback required');
+  const fixture=snapshot(preview,result);
+  const expectedFinal=result.score.slice();
+  const url=new URL(viewerUrl,root.location.href);
+  const origin=root.location.origin;
+  requireValid(url.origin===origin,'Inline viewer must be same-origin');
+  let closed=false,ready=false,booted=false,finished=false,handedOff=false,recorded=false,error=null,minute=0,watchdog=null;
+  const frame=document.createElement('iframe');
+  frame.className='soccerjs-inline-frame';
+  frame.title='Isometric Soccer-JS Pokémon match (Quick Sim-authoritative)';
+  frame.setAttribute('aria-label','Soccer-JS 2.5D watched match');
+  frame.src=url.href;
+  function announce(state,extra={}){
+   if(typeof onStatus==='function')onStatus({state,minute,score:scoreAt(fixture,minute),recorded,...extra});
+  }
+  function cleanup(){
+   if(closed)return;
+   closed=true;
+   if(watchdog!==null)root.clearTimeout(watchdog);
+   root.removeEventListener('message',onMessage);
+   frame.remove();
+   if(active===session)active=null;
+  }
+  function fail(message){
+   if(error||closed)return;
+   error=String(message);
+   announce('error',{message:error});
+  }
+  function send(action,details={}){
+   if(!booted||closed||error)return false;
+   frame.contentWindow?.postMessage({type:TYPE+'-control',action,...details},origin);
+   return true;
+  }
+  function onMessage(e){
+   if(closed||e.origin!==origin||e.source!==frame.contentWindow||!e.data||typeof e.data!=='object')return;
+   if(e.data.type===TYPE+'-ready'){
+    if(ready)return;ready=true;
+    frame.contentWindow.postMessage({type:TYPE+'-fixture',fixture},origin);
+    announce('loading',{message:'Official Quick Sim fixture accepted; preparing isometric Soccer-JS'});
+   }else if(e.data.type===TYPE+'-booted'){
+    if(booted||!ready||error)return;
+    if(e.data.projection!=='isometric'){
+     fail('Expected an isometric 2.5D Soccer-JS camera at startup');return;
+    }
+    booted=true;
+    if(watchdog!==null){root.clearTimeout(watchdog);watchdog=null;}
+    announce('ready',{projection:'isometric'});
+    if(typeof onReady==='function')onReady(session);
+   }else if(e.data.type===TYPE+'-progress'){
+    const next=Number(e.data.minute);
+    if(error||!ready||!Number.isFinite(next)||next<0||next>90)return;
+    const official=scoreAt(fixture,next);
+    if(!Array.isArray(e.data.score)||!official.every((n,i)=>n===e.data.score[i])){
+     fail('Viewer score differs from authoritative Quick Sim ledger');return;
+    }
+    if(handedOff&&next<90)return;
+    minute=next;finished=next>=90;
+    if(typeof onProgress==='function')onProgress({minute,score:official,finished,handedOff,recorded});
+    if(finished)announce('full-time');
+   }else if(e.data.type===TYPE+'-error'){
+    fail('Soccer-JS renderer: '+String(e.data.message||'Unknown rendering error'));
+   }
+  }
+  const session={
+   fixture,frame,
+   getState:()=>({ready:booted,minute,score:scoreAt(fixture,minute),finished,handedOff,recorded,error,closed}),
+   play:(speed=1)=>!finished&&send('play',{speed:Number(speed)||1}),
+   pause:()=>send('pause'),
+   setSpeed:(speed)=>Number.isFinite(Number(speed))&&Number(speed)>0&&Number(speed)<=16&&send('speed',{speed:Number(speed)}),
+   setProjection:(projection)=>['isometric','orthographic','topdown'].includes(projection)&&send('projection',{projection}),
+   setCamera:(camera)=>['wide','follow'].includes(camera)&&send('camera',{camera}),
+   setNumbers:(visible)=>send('numbers',{visible:!!visible}),
+   simToEnd:()=>{
+    if(!booted||finished||closed||error)return false;
+    handedOff=true;announce('simulating-to-end',{fromMinute:minute});
+    return send('seek',{minute:90});
+   },
+   record:()=>{
+    if(closed||recorded||!finished||error||minute<90)return false;
+    requireValid(scoreAt(fixture,90).every((n,i)=>n===expectedFinal[i]),'Official final score drift');
+    recorded=true;
+    onRecord({result,minute:90,origin:'quick-sim',handoff:handedOff?'watch-to-quick-sim':'watched-replay'});
+    announce('recorded');
+    return true;
+   },
+   cancel:()=>{
+    if(closed||recorded)return false;
+    cleanup();
+    if(typeof onCancel==='function')onCancel();
+    return true;
+   },
+   destroy:()=>{cleanup();}
+  };
+  active=session;
+  root.addEventListener('message',onMessage);
+  container.appendChild(frame);
+  watchdog=root.setTimeout(()=>{if(!booted)fail('Soccer-JS viewer bundle did not initialize. Build watch/soccerjs/dist locally.');},15000);
+  announce('loading',{message:'Loading the 2.5D Soccer-JS field'});
+  return session;
+ }
+
+ root.FXI_PHASE10_WATCH={open,mountInline,snapshot,scoreAt,isActive:()=>!!active};
+ if(typeof module!=='undefined'&&module.exports)module.exports={snapshot,scoreAt,mountInline,isActive:()=>!!active};
 })(typeof window!=='undefined'?window:globalThis);
