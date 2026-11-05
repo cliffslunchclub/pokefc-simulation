@@ -25,13 +25,13 @@ function motionFrame(fixture,t,field){
  const teams=[fixture.home,fixture.away],actors=[];
  for(let side=0;side<2;side++)for(let i=0;i<11;i++){
   const p=base(side,i,field);
-  actors.push({side,index:i,x:p.x+Math.sin(t*2.1+i*1.8+side)*.7,
-   y:p.y+Math.cos(t*2.4+i*1.2+side)*.7,z:0,
-   frame:Math.floor(t*7+i)%3===0?1:0,orientation:side===0?2:6});
+  actors.push({side,index:i,x:p.x+Math.sin(t*.9+i*1.8+side)*.48,
+   y:p.y+Math.cos(t*1.05+i*1.2+side)*.48,z:0,
+   frame:Math.floor(t*3.5+i)%3===0?1:0,orientation:side===0?2:6});
  }
  let ball={x:field.width*.5,y:field.height*.5,z:.22};
  const goals=fixture.events.filter(e=>e.type==='goal');
- const event=goals.find(g=>t>=g.minute-.42&&t<=g.minute+.16);
+ const event=goals.find(g=>t>=g.minute-.7&&t<=g.minute+.22);
  if(event){
   const side=event.team===teams[0].id?0:1,roster=teams[side];
   const scorer=roster.lineup.findIndex(p=>String(p.id)===String(event.player));
@@ -42,8 +42,8 @@ function motionFrame(fixture,t,field){
   const setup={x:origin(side,.63,field),y:field.height*.43};
   const finish={x:origin(side,.84,field),y:field.height*.51};
   const net={x:origin(side,.985,field),y:field.height*.5};
-  const initial=event.minute-.42;
-  const u=limit((t-initial)/.42,0,1);
+  const initial=event.minute-.7;
+  const u=limit((t-initial)/.7,0,1);
   actors[first].x=kickoff.x;actors[first].y=kickoff.y;
   actors[second].x=setup.x;actors[second].y=setup.y;
   actors[last].x=finish.x;actors[last].y=finish.y;
@@ -69,7 +69,8 @@ function motionFrame(fixture,t,field){
  }
  // Continuous deterministic build-up. Each new cycle is a fresh illustrative
  // passage, NOT a recorded or statistically authoritative possession sequence.
- const cycleLen=.62,cycle=Math.floor(t/cycleLen);
+ // Longer illustrative passages reduce exaggerated sprinting and camera whiplash.
+  const cycleLen=1.55,cycle=Math.floor(t/cycleLen);
  const u=(t-cycle*cycleLen)/cycleLen,roll=hash(String(fixture.seed||'pfc')+':'+cycle);
  const side=roll%2,teamOffset=side*11;
  const passer=teamOffset+5+((roll>>>2)%3);
