@@ -18,8 +18,8 @@ const fs=require('node:fs');
   assert.equal(await iframe.count(),1,'2.5D viewer must be embedded inside the field panel');
   let shot=await iframe.evaluate(el=>el.contentWindow.__PFC_SNAPSHOT__);
   if(!shot)throw Error('No 2.5D browser snapshot: '+JSON.stringify(await page.evaluate(()=>window.__PFC_INLINE_TEST__)));
-  assert.equal(shot.projection,'isometric','Expected angled 2.5D as default');
-  assert.equal(shot.camera,'wide');
+  assert.equal(shot.projection,'orthographic','Expected Broadcast 2.5D as default');
+  assert.equal(shot.camera,'follow');
   assert.equal(shot.players,22);
   assert.equal(shot.actualSprites,true,'Original Soccer-JS native renderer did not initialize');
   assert(shot.pokemonSpritesLoaded>=20,'Pokémon sprites did not load: '+shot.pokemonSpritesLoaded);
@@ -27,16 +27,22 @@ const fs=require('node:fs');
   assert.deepEqual(shot.teamColors,['#E53935','#FFFFFF']);
   assert.deepEqual(shot.score,[0,0]);
   assert(shot.scale>0);
+  assert(shot.ballDrawRadius>=14,'The displayed ball must be visibly enlarged');
   await page.screenshot({path:'phase10-reports/inline-2p5d-kickoff.png',fullPage:true});
   await page.locator('#pause').click();
   await page.locator('#view').selectOption('topdown');
   await page.waitForFunction(()=>document.querySelector('#field iframe')?.contentWindow?.__PFC_SNAPSHOT__?.projection==='topdown');
   await page.locator('#view').selectOption('isometric');
   await page.waitForFunction(()=>document.querySelector('#field iframe')?.contentWindow?.__PFC_SNAPSHOT__?.projection==='isometric');
-  await page.locator('#camera').selectOption('follow');
-  await page.waitForFunction(()=>document.querySelector('#field iframe')?.contentWindow?.__PFC_SNAPSHOT__?.camera==='follow');
+  await page.locator('#view').selectOption('orthographic');
+  await page.waitForFunction(()=>document.querySelector('#field iframe')?.contentWindow?.__PFC_SNAPSHOT__?.projection==='orthographic');
   await page.locator('#camera').selectOption('wide');
   await page.waitForFunction(()=>document.querySelector('#field iframe')?.contentWindow?.__PFC_SNAPSHOT__?.camera==='wide');
+  const wideScale=await iframe.evaluate(el=>el.contentWindow.__PFC_SNAPSHOT__.scale);
+  await page.locator('#camera').selectOption('follow');
+  await page.waitForFunction(()=>document.querySelector('#field iframe')?.contentWindow?.__PFC_SNAPSHOT__?.camera==='follow');
+  const followScale=await iframe.evaluate(el=>el.contentWindow.__PFC_SNAPSHOT__.scale);
+  assert(followScale>wideScale*1.5,'Follow Ball must be materially closer than wide view');
   await page.evaluate(()=>{
    const frame=document.querySelector('#field iframe');
    frame.contentWindow.postMessage({type:'pfc-phase10-control',action:'seek',minute:54},location.origin);
@@ -48,7 +54,7 @@ const fs=require('node:fs');
   await page.waitForFunction(()=>!document.querySelector('#record')?.disabled);
   shot=await iframe.evaluate(el=>el.contentWindow.__PFC_SNAPSHOT__);
   assert.deepEqual(shot.score,[2,1],'Watch→Sim score drift');
-  assert.equal(shot.projection,'isometric');
+  assert.equal(shot.projection,'orthographic');
   await page.screenshot({path:'phase10-reports/inline-2p5d-fulltime.png',fullPage:true});
   await page.locator('#record').click();
   assert.equal(await page.evaluate(()=>window.__PFC_INLINE_TEST__.records),1);
@@ -74,7 +80,7 @@ const fs=require('node:fs');
    const r=el.getBoundingClientRect();
    return {width:r.width,right:r.right,viewport:innerWidth,snapshot:el.contentWindow.__PFC_SNAPSHOT__};
   });
-  assert.equal(mobileInfo.snapshot?.projection,'isometric','Mobile must default to angled 2.5D');
+  assert.equal(mobileInfo.snapshot?.projection,'orthographic','Mobile must default to Broadcast 2.5D');
   assert.equal(mobileInfo.snapshot?.players,22);
   assert(mobileInfo.snapshot?.pokemonSpritesDrawn>=20,'Mobile original Pokémon sprites missing');
   assert(mobileInfo.width<=mobileInfo.viewport+1,'2.5D field overflows mobile viewport');
@@ -86,7 +92,7 @@ const fs=require('node:fs');
   await mobile.close();
   fs.mkdirSync('phase10-reports',{recursive:true});
   fs.writeFileSync('phase10-reports/inline-2p5d-browser.json',JSON.stringify({
-   result:'PASS',nativeSoccerJS:true,embedded:true,defaultProjection:'isometric',
+   result:'PASS',nativeSoccerJS:true,embedded:true,defaultProjection:'orthographic',defaultCamera:'follow',ballDrawRadius:shot.ballDrawRadius,zoomRatio:followScale/wideScale,
    originalSpriteEngine:true,pokemonSpritesLoaded:shot.pokemonSpritesLoaded,
    pokemonSpritesDrawn:shot.pokemonSpritesDrawn,teamColors:shot.teamColors,
    cameraControls:true,firstGoal:halfway.score,
@@ -96,7 +102,7 @@ const fs=require('node:fs');
    screenCaptures:['inline-2p5d-kickoff.png','inline-2p5d-fulltime.png','inline-2p5d-mobile.png'],
    errors
   },null,2));
-  console.log('PASS native 2.5D inline browser: 22 Pokémon, real sprites, isometric camera, 1–0 → 2–1, record once, cancel');
+  console.log('PASS native 2.5D inline browser: 22 Pokémon, real sprites, Broadcast Follow Ball camera, 1–0 → 2–1, record once, cancel');
  }finally{
   await browser.close();
  }
