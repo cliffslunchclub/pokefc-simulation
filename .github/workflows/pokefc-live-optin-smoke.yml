@@ -28,7 +28,7 @@ jobs:
         run: |
           mkdir -p /tmp/pfc-playwright
           printf '{"private":true,"name":"pfc-external-smoke"}\n' > /tmp/pfc-playwright/package.json
-          npm --prefix /tmp/pfc-playwright install --no-audit --no-fund playwright
+          npm --prefix /tmp/pfc-playwright install --no-audit --no-fund playwright@1.56.1
           /tmp/pfc-playwright/node_modules/.bin/playwright install --with-deps chromium
       - name: Verify live SiteGround opt-in Watch via normal public browser
         env:
