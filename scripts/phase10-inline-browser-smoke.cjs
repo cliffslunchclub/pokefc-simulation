@@ -27,10 +27,34 @@ const fs=require('node:fs');
   assert.deepEqual(shot.teamColors,['#E53935','#FFFFFF']);
   assert.deepEqual(shot.score,[0,0]);
   assert(shot.scale>0);
-  assert(shot.ballDrawRadius>=14,'The displayed ball must be visibly enlarged');
+  assert(shot.ballDrawRadius>=24,'The soccer ball must be substantially larger than the previous version');
+  assert(shot.ballDrawRadius*shot.scale/20>=30,'Ball must have a legible on-canvas radius');
   const officialStats=await iframe.evaluate(el=>el.contentWindow.document.getElementById('stats')?.textContent||'');
   assert.match(officialStats,/FULL-TIME TOTALS \(not live\)/,'Final shot totals should not masquerade as live shots');
   assert.match(officialStats,/Keeper saves \d+–\d+/,'Include authoritative goalkeeper saves');
+  const beginning=await iframe.evaluate(el=>({minute:el.contentWindow.__PFC_SNAPSHOT__.minute,at:performance.now()}));
+  await page.waitForTimeout(2100);
+  const afterTwoSeconds=await iframe.evaluate(el=>({minute:el.contentWindow.__PFC_SNAPSHOT__.minute,at:performance.now(),world:el.contentWindow.__PFC_SNAPSHOT__.actorWorldPositions}));
+  const elapsed=(afterTwoSeconds.at-beginning.at)/1000;
+  const matchSeconds=(afterTwoSeconds.minute-beginning.minute)*60;
+  assert(matchSeconds>elapsed*.5&&matchSeconds<elapsed*1.5,
+   '1x clock is not real time: '+matchSeconds+' match seconds in '+elapsed+' real seconds');
+  assert.equal(afterTwoSeconds.world.length,22,'Expose all 22 animated Pokémon positions');
+  const positionsBefore=await iframe.evaluate(el=>el.contentWindow.__PFC_SNAPSHOT__);
+  await page.waitForTimeout(330);
+  const positionsAfter=await iframe.evaluate(el=>el.contentWindow.__PFC_SNAPSHOT__);
+  const dt=(positionsAfter.minute-positionsBefore.minute)*60;
+  const maxMove=Math.max(...positionsAfter.actorWorldPositions.map((p,i)=>
+    Math.hypot(p[0]-positionsBefore.actorWorldPositions[i][0],p[1]-positionsBefore.actorWorldPositions[i][1])));
+  assert(maxMove<=6.5*dt+.2,'Pokémon teleport instead of running: '+maxMove+'m in '+dt+' seconds');
+  await page.locator('#fullscreen').click();
+  await page.waitForFunction(()=>document.getElementById('field').classList.contains('pfc-watch-theater'));
+  assert.equal(await page.locator('#fullscreen').getAttribute('aria-pressed'),'true');
+  assert((await page.locator('#field').boundingBox()).width>900,'Fullscreen field did not expand');
+  await page.screenshot({path:'phase10-reports/inline-2p5d-fullscreen.png',fullPage:true});
+  await page.locator('#fullscreen').click();
+  await page.waitForFunction(()=>!document.getElementById('field').classList.contains('pfc-watch-theater'));
+  assert.equal(await page.locator('#fullscreen').getAttribute('aria-pressed'),'false');
   await page.screenshot({path:'phase10-reports/inline-2p5d-kickoff.png',fullPage:true});
   await page.locator('#pause').click();
   await page.locator('#view').selectOption('topdown');
@@ -45,7 +69,7 @@ const fs=require('node:fs');
   await page.locator('#camera').selectOption('follow');
   await page.waitForFunction(()=>document.querySelector('#field iframe')?.contentWindow?.__PFC_SNAPSHOT__?.camera==='follow');
   const followScale=await iframe.evaluate(el=>el.contentWindow.__PFC_SNAPSHOT__.scale);
-  assert(followScale>wideScale*1.5,'Follow Ball must be materially closer than wide view');
+  assert(followScale>wideScale*3,'Follow Ball must be FIFA-style close framing (3x wide or tighter)');
   await page.evaluate(()=>{
    const frame=document.querySelector('#field iframe');
    frame.contentWindow.postMessage({type:'pfc-phase10-control',action:'seek',minute:54},location.origin);
@@ -87,6 +111,14 @@ const fs=require('node:fs');
   assert.equal(mobileInfo.snapshot?.players,22);
   assert(mobileInfo.snapshot?.pokemonSpritesDrawn>=20,'Mobile original Pokémon sprites missing');
   assert(mobileInfo.width<=mobileInfo.viewport+1,'2.5D field overflows mobile viewport');
+  assert(mobileInfo.snapshot.ballDrawRadius>=24,'Mobile ball size must be increased');
+  await mobile.locator('#fullscreen').tap();
+  await mobile.waitForFunction(()=>document.getElementById('field').classList.contains('pfc-watch-theater'));
+  const theaterHeight=await mobile.locator('#field').evaluate(el=>el.getBoundingClientRect().height);
+  assert(theaterHeight>=700,'Mobile theater mode should fill phone height: '+theaterHeight);
+  await mobile.screenshot({path:'phase10-reports/inline-2p5d-mobile-fullscreen.png',fullPage:true});
+  await mobile.locator('#fullscreen').tap();
+  await mobile.waitForFunction(()=>!document.getElementById('field').classList.contains('pfc-watch-theater'));
   await mobile.screenshot({path:'phase10-reports/inline-2p5d-mobile.png',fullPage:true});
   await mobile.locator('#handoff').click();
   await mobile.waitForFunction(()=>!document.getElementById('record')?.disabled,null,{timeout:12000});
@@ -102,7 +134,7 @@ const fs=require('node:fs');
    officialFulltimeScore:shot.score,watchToSim:true,
    recordedExactlyOnce:state.records===1,cancelWithoutSave:true,
    mobile390px:{fieldWidth:mobileInfo.width,viewportWidth:mobileInfo.viewport,pokemonDrawn:mobileInfo.snapshot.pokemonSpritesDrawn,recordedExactlyOnce:true},
-   screenCaptures:['inline-2p5d-kickoff.png','inline-2p5d-fulltime.png','inline-2p5d-mobile.png'],
+   screenCaptures:['inline-2p5d-kickoff.png','inline-2p5d-fullscreen.png','inline-2p5d-fulltime.png','inline-2p5d-mobile.png','inline-2p5d-mobile-fullscreen.png'],
    errors
   },null,2));
   console.log('PASS native 2.5D inline browser: 22 Pokémon, real sprites, Broadcast Follow Ball camera, 1–0 → 2–1, record once, cancel');
