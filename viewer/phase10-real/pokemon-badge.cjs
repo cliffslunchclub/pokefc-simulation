@@ -6,7 +6,7 @@ function badge(g,x,y,text,fill,keeper){
  else g.arc(x,y,13,0,Math.PI*2);
  g.fill();g.stroke();
  g.font='900 13px system-ui';g.textAlign='center';g.textBaseline='middle';
- g.fillStyle=fill.toUpperCase()==='#EBC63C'?'#142235':'#FFFFFF';
+ g.fillStyle=fill.toUpperCase()==='#FFFFFF'?'#E53935':'#FFFFFF';
  g.fillText(String(text).padStart(2,'0'),x,y+1);
  g.restore();
 }
