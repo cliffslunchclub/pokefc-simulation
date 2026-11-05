@@ -1,0 +1,100 @@
+name: PokeFC — 2.5D inline Watch browser regression (public fixture)
+
+on:
+  push:
+    branches: ["test/phase10-inline-2p5d"]
+    paths:
+      - ".github/workflows/pokefc-phase10-inline-2p5d.yml"
+      - "viewer/phase10-real/**"
+      - "scripts/phase10-inline-browser-smoke.cjs"
+      - "fixtures/phase10-real-quicksim-v07b.json"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: pfc-public-inline-2p5d
+  cancel-in-progress: true
+
+jobs:
+  browser:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - name: Checkout public test harness (no private engine source)
+        uses: actions/checkout@v4
+
+      - name: Checkout pinned Soccer-JS MIT source
+        uses: actions/checkout@v4
+        with:
+          repository: haeretici/soccer-js
+          ref: 38970e0dade0865078c9e84bc1ecfd72aaa02fde
+          path: upstream
+          persist-credentials: false
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Verify public exported Quick Sim fixture and bridge
+        run: |
+          set -euo pipefail
+          node tests/phase10-real-quicksim-fixture.cjs
+          node --check viewer/phase10-real/viewer-entry.cjs
+          node --check viewer/phase10-real/watch-bridge.js
+          node --check scripts/phase10-inline-browser-smoke.cjs
+          node viewer/phase10-real/test-inline-bridge.cjs
+
+      - name: Install upstream toolchain and Chromium test dependencies
+        working-directory: upstream
+        run: |
+          npm install --no-audit --no-fund
+          npm install --no-save --no-audit --no-fund playwright
+          npx playwright install --with-deps chromium
+
+      - name: Build actual isometric Soccer-JS pitch with Pokémon helpers
+        shell: bash
+        run: |
+          set -euo pipefail
+          cp viewer/phase10-real/viewer-entry.cjs upstream/phase10-viewer-entry.cjs
+          cp viewer/phase10-real/phase10-motion.cjs upstream/phase10-motion.cjs
+          cp viewer/phase10-real/pokemon-*.cjs upstream/
+          mkdir -p dist/pokemon/bw phase10-reports
+          ./upstream/node_modules/.bin/esbuild upstream/phase10-viewer-entry.cjs \
+            --bundle --platform=browser --format=iife --target=es2020 \
+            --minify --outfile=dist/viewer.bundle.js
+          cp viewer/phase10-real/index.html viewer/phase10-real/viewer.css \
+            viewer/phase10-real/watch-bridge.js viewer/phase10-real/host-inline.html dist/
+          cp fixtures/phase10-real-quicksim-v07b.json dist/fixture.json
+          cp -R upstream/presets upstream/assets dist/
+          cp upstream/LICENSE dist/SOCCER-JS-LICENSE.txt
+          test -s dist/viewer.bundle.js
+          test -s dist/assets/animation_rigs/1.json
+          for dex in 9 95 76 143 68 65 26 94 6 59 25 3 31 112 131 149 64 45 97 38 125 135; do
+            curl -fLsS --retry 3 --max-time 35 \
+              "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-v/black-white/${dex}.png" \
+              -o "dist/pokemon/bw/${dex}.png"
+            test -s "dist/pokemon/bw/${dex}.png"
+          done
+          echo "Soccer-JS runtime, 22 Pokémon sprites and MIT notice packaged for public browser test."
+
+      - name: Test actual 2.5D native graphics and Watch to Sim
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m http.server 8765 --directory dist >/tmp/phase10-inline-http.log 2>&1 &
+          sleep 2
+          NODE_PATH="$GITHUB_WORKSPACE/upstream/node_modules" node scripts/phase10-inline-browser-smoke.cjs
+
+      - name: Upload visual proof and browser results (no private game files)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: pfc-inline-2p5d-visual-browser-proof
+          path: |
+            phase10-reports/inline-2p5d-browser.json
+            phase10-reports/inline-2p5d-kickoff.png
+            phase10-reports/inline-2p5d-fulltime.png
+          retention-days: 7
+          if-no-files-found: warn
