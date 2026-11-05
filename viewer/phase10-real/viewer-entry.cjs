@@ -4,10 +4,16 @@ const {Settings}=require('./kernel/settings.js');
 const {Simulator}=require('./kernel/providers/simulator/simulator.js');
 const {Utils}=require('./kernel/core/lib/utils.js');
 const {ImageDB}=require('./kernel/core/lib/imagedb.js');
+const {motionFrame}=require('./phase10-motion.cjs');
+const {prepare}=require('./pokemon-roster.cjs');
+const {draw}=require('./pokemon-draw.cjs');
 const $=id=>document.getElementById(id);
 const mix=(a,b,t)=>a+(b-a)*Math.max(0,Math.min(1,t));
-let match,sim,minute=0,playing=false,last=null,speed=1,lastSent=-2;
+let match,sim,minute=0,playing=false,last=null,speed=1,lastSent=-2,stopAt=90,spriteRoster=null,ballCarrier=-1;
+const validViews=new Set(['isometric','orthographic','topdown']);
 const embedded=new URLSearchParams(location.search).get('embedded')==='1';
+const inlineView=embedded&&new URLSearchParams(location.search).get('inline')==='1';
+if(inlineView)document.documentElement.classList.add('pfc-inline');
 const send=(msg)=>{if(embedded&&window.parent!==window)window.parent.postMessage({...msg,type:'pfc-phase10-'+msg.type},location.origin)};
 function receiveFixture(){
  return new Promise((resolve,reject)=>{
@@ -33,61 +39,83 @@ function scoreAt(t){
  const s=[0,0];for(const g of match.events)if(g.minute<=t)s[g.team===match.home.id?0:1]++;
  return s;
 }
-function spot(side,index,f){
- const x=side===0?p=>p:p=>f.width-p;
- if(index===0)return {x:x(f.width*.07),y:f.height*.5};
- if(index<5)return {x:x(f.width*.23),y:f.height*(.12+(index-1)*.25)};
- if(index<8)return {x:x(f.width*.45),y:f.height*(.2+(index-5)*.30)};
- return {x:x(f.width*.70),y:f.height*(.20+(index-8)*.27)};
+function cameraFit(canvas,field,ball){
+ const p=Settings.projectionMode;
+ // Screen extents per one world unit, from the unchanged original Soccer-JS
+ // projection transforms (Utils.toScreen). Do not substitute our own art.
+ const w=p==='isometric'?(field.width+field.height)*.6:
+   p==='orthographic'?field.width+field.height*.3:field.width;
+ const h=p==='isometric'?(field.width+field.height)*.3:field.height*.8;
+ const fit=Math.min(canvas.width*.78/w,canvas.height*.70/h);
+ const camera=$('camera').value==='follow'?'follow':'wide';
+ Settings.camera.scale=fit*(camera==='follow'?1.43:1);
+ const corners=[[0,0],[field.width,0],[0,field.height],[field.width,field.height]]
+   .map(([x,y])=>Utils.toScreen(x,y,0));
+ const xs=corners.map(v=>v.x),ys=corners.map(v=>v.y);
+ const center={x:(Math.min(...xs)+Math.max(...xs))/2,y:(Math.min(...ys)+Math.max(...ys))/2};
+ const focus=Utils.toScreen(ball.x,ball.y,0);
+ if(camera==='follow'){
+  center.x=mix(center.x,focus.x,.82);
+  center.y=mix(center.y,focus.y,.82);
+ }
+ return {projection:p,camera,scale:Settings.camera.scale,
+  tx:canvas.width/2-center.x,ty:canvas.height/2-center.y,
+  visibleWorld:[field.width,field.height]};
 }
 function render(t){
- const f=Utils.getFieldBounds(),s=scoreAt(t),players=[];
- for(let team=0;team<2;team++)for(let i=0;i<11;i++){
-  const p=spot(team,i,f);players.push({team,i,x:p.x+Math.sin(t*.65+i)*.7,
-   y:p.y+Math.cos(t*.85+i)*.55,frame:1,orientation:team===0?2:6,z:0});
- }
- let ball={x:f.width*(.5+.29*Math.sin(t*.8)),y:f.height*(.5+.2*Math.cos(t*.9)),z:.2};
- let label='';
- const g=match.events.find(e=>t>=e.minute-.18&&t<e.minute+.14);
- if(g){
-  const side=g.team===match.home.id?0:1,roster=side===0?match.home:match.away;
-  const shooter=roster.lineup.findIndex(p=>p.id===g.player);
-  const p=players[side*11+shooter],gk=players[(1-side)*11];
-  const start=g.minute-.18,kick=g.minute-.045;
-  p.x=f.width*(side===0?.82:.18);p.y=f.height*.5;
-  gk.x=f.width*(side===0?.98:.02);gk.y=f.height*.5;
-  p.frame=t>=kick?3:1;gk.frame=t>=kick?8:0;
-  ball.x=t<kick?mix(f.width*.5,p.x,(t-start)/(kick-start)):
-    mix(p.x,gk.x,(t-kick)/(g.minute-kick));
-  ball.y=f.height*.5;
-  label=(t>=g.minute?'GOAL! ':'Attack: ')+roster.lineup[shooter].name;
- }
- for(const p of players){
-  const actor=(p.team===0?sim.teamA:sim.teamB).players[p.i];
-  actor.x=p.x;actor.y=p.y;actor.z=0;actor.frame=p.frame;actor.orientation=p.orientation;
+ const field=Utils.getFieldBounds(),s=scoreAt(t);
+ const script=motionFrame(match,t,field);
+ for(const p of script.actors){
+  const actor=(p.side===0?sim.teamA:sim.teamB).players[p.index];
+  actor.x=p.x;actor.y=p.y;actor.z=p.z;
+  actor.frame=p.frame;actor.orientation=p.orientation;
   actor.vx=actor.vy=actor.vz=0;
  }
- sim.ball.owner=null;sim.ball.x=ball.x;sim.ball.y=ball.y;sim.ball.z=ball.z;
+ sim.ball.owner=null;sim.ball.x=script.ball.x;sim.ball.y=script.ball.y;sim.ball.z=script.ball.z;
  sim.ball.vx=sim.ball.vy=sim.ball.vz=0;
  sim.scoreA=s[0];sim.scoreB=s[1];sim.matchTimer=t*60;
  const canvas=$('pitch'),ctx=canvas.getContext('2d');
- ctx.clearRect(0,0,canvas.width,canvas.height);sim.renderAll(ctx);
+ const camera=cameraFit(canvas,field,script.ball);
+ window.__PFC_DRAWN__=0;window.__PFC_REAL_SPRITES_DRAWN__=0;
+ const distances=script.actors.map(p=>Math.hypot(p.x-script.ball.x,p.y-script.ball.y));
+ const nearest=Math.min(...distances);ballCarrier=nearest<12?distances.indexOf(nearest):-1;
+ ctx.clearRect(0,0,canvas.width,canvas.height);
+ ctx.save();
+ ctx.translate(camera.tx,camera.ty);
+ // Original Soccer-JS pitch/players/ball renderer, no native sim ticks.
+ sim.renderAll(ctx);
+ ctx.restore();
  $('score').textContent=s.join(' – ');
  $('clock').textContent=Math.floor(t)+"'";
  $('scrub').value=t;$('played').textContent=t.toFixed(1)+"/90'";
- $('toast').textContent=label;$('toast').hidden=!label;
+ $('toast').textContent=script.label;$('toast').hidden=!script.label;
  $('status').textContent=t>=90?'FULL TIME':playing?'WATCHING':'READY / PAUSED';
+ const actionText={
+  'illustrative-carry':'Ball carry','illustrative-pass':'Passing sequence',
+  'illustrative-dribble':'Attacking dribble','illustrative-challenge':'Defensive challenge',
+  'illustrative-goal-buildup':'Goal buildup','illustrative-shot':'Shooting animation',
+  'official-goal':'OFFICIAL QUICK SIM GOAL'
+ };
+ $('motionStatus').textContent=(actionText[script.action]||'Animated sequence')+
+  (script.action==='official-goal'?' · official result':' · illustrative movement');
  if(sim.scoreA!==s[0]||sim.scoreB!==s[1])throw Error('Score changed during render');
  if(embedded&&(t===90||t===0||Math.abs(t-lastSent)>=.1)){
   lastSent=t;send({type:'progress',minute:t,score:s});
  }
- window.__PFC_SNAPSHOT__={minute:t,score:s,players:22,actualSprites:
-  !!ImageDB.get('player_Brazil_main')&&!!ImageDB.get('player_Argentina_main')};
+ window.__PFC_SNAPSHOT__={minute:t,score:s,players:22,
+  projection:camera.projection,camera:camera.camera,scale:camera.scale,
+  animation:script.action,ball:{x:script.ball.x,y:script.ball.y,z:script.ball.z},
+  cameraOffset:[camera.tx,camera.ty],
+  actualSprites:!!ImageDB.get('player_Brazil_main')&&!!ImageDB.get('player_Argentina_main'),
+  pokemonSpritesLoaded:spriteRoster.entries.filter(e=>e.image?.naturalWidth>0).length,
+  pokemonSpritesDrawn:window.__PFC_REAL_SPRITES_DRAWN__,pokemonEntitiesDrawn:window.__PFC_DRAWN__,
+  numbersVisible:$('showNumbers').checked,teamColors:spriteRoster.colors,
+  pokemonIds:spriteRoster.entries.map(e=>e.dexId),humanPlayerSprites:false};
 }
 function step(now){
  if(playing){
-  if(last!==null)minute=Math.min(90,minute+Math.min(.1,(now-last)/1000)*2.5*speed);
-  if(minute>=90)playing=false;
+  if(last!==null)minute=Math.min(stopAt,minute+Math.min(.1,(now-last)/1000)*.5*speed);
+  if(minute>=stopAt)playing=false;
   last=now;render(minute);
  }
  requestAnimationFrame(step);
@@ -105,12 +133,21 @@ async function boot(){
   Settings.app={canvas:$('pitch'),camX:0,camY:0};
   Settings.HEADLESS=false;Settings.showFPS=false;Settings.showTime=false;
   Settings.soundsMuted=true;Settings.camera.scale=8.6;
-  Settings.camera.offsetX=55;Settings.camera.offsetY=145;
-  Settings.projectionMode='orthographic';
+  Settings.camera.type='centered';Settings.camera.offsetX=0;Settings.camera.offsetY=0;
+  Settings.projectionMode='isometric';
   $('status').textContent='GENERATING REAL SOCCER-JS SPRITES…';
   sim=new Simulator({seed:12345});await sim.start();sim.active=true;
   // Keep native sprite/pitch/ball rendering; suppress upstream kickoff/score overlays.
   sim.render=()=>{};
+  spriteRoster=prepare(match);await spriteRoster.load();
+  for(let side=0;side<2;side++)for(let i=0;i<11;i++){
+   const actor=(side===0?sim.teamA:sim.teamB).players[i],index=side*11+i;
+   actor.preRender=()=>{};
+   actor.render=g=>{
+    window.__PFC_DRAWN__++;
+    if(draw(g,actor,spriteRoster.entries[index],Utils.toScreen,$('showNumbers').checked,ballCarrier===index))window.__PFC_REAL_SPRITES_DRAWN__++;
+   };
+  }
   if(!ImageDB.get('player_Brazil_main')||!ImageDB.get('player_Argentina_main'))
    throw Error('Original Soccer-JS sprite generation failed');
   const list=$('goals');list.replaceChildren();
@@ -124,7 +161,8 @@ async function boot(){
   }
   $('stats').textContent='Shots '+match.stats[0].shots+'–'+match.stats[1].shots+
    ' · On target '+match.stats[0].shotsOnTarget+'–'+match.stats[1].shotsOnTarget;
-  $('play').onclick=()=>{if(minute>=90)minute=0;last=null;playing=true;};
+  $('play').onclick=()=>{if(minute>=90)minute=0;stopAt=90;last=null;playing=true;};
+  $('playFive').onclick=()=>{if(minute>=90)minute=0;stopAt=Math.min(90,(Math.floor(minute/5)+1)*5);last=null;playing=true;};
   $('pause').onclick=()=>seek(minute);
   $('restart').onclick=()=>seek(0);
   $('skip').onclick=()=>seek(90);
@@ -134,13 +172,51 @@ async function boot(){
    seek(g?g.minute+.01:90);
   };
   $('speed').onchange=e=>{speed=Number(e.target.value)||1;};
-  for(const id of ['play','pause','restart','skip','nextGoal','scrub'])$(id).disabled=false;
+  $('projection').onchange=e=>{
+   if(!validViews.has(e.target.value))return;
+   Settings.projectionMode=e.target.value;
+   sim.pitch?.invalidateRenderCache?.();
+   render(minute);
+  };
+  $('camera').onchange=()=>{sim.pitch?.invalidateRenderCache?.();render(minute);};
+  $('showNumbers').onchange=()=>render(minute);
+  for(const id of ['play','playFive','pause','restart','skip','nextGoal','scrub'])$(id).disabled=false;
   window.addEventListener('message',e=>{
-   if(!embedded||e.source!==window.parent||e.origin!==location.origin||e.data?.type!=='pfc-phase10-seek')return;
-   const requested=Number(e.data.minute);
-   if(Number.isFinite(requested))seek(requested);
+   if(!embedded||e.source!==window.parent||e.origin!==location.origin)return;
+   const msg=e.data;
+   if(!msg||typeof msg!=='object')return;
+   if(msg.type==='pfc-phase10-seek'){
+    const requested=Number(msg.minute);
+    if(Number.isFinite(requested))seek(requested);
+    return;
+   }
+   if(msg.type!=='pfc-phase10-control')return;
+   if(msg.action==='play'){
+    if(minute>=90)return;
+    speed=Math.max(.25,Math.min(16,Number(msg.speed)||1));
+    $('speed').value=String([1,2,4].includes(speed)?speed:4);
+    playing=true;last=null;
+    render(minute);
+   }else if(msg.action==='pause'){
+    playing=false;last=null;render(minute);
+   }else if(msg.action==='speed'){
+    const v=Number(msg.speed);
+    if(Number.isFinite(v)&&v>0&&v<=16){speed=v;last=null;render(minute);}
+   }else if(msg.action==='seek'){
+    const m=Number(msg.minute);
+    if(Number.isFinite(m)&&m>=0&&m<=90)seek(m);
+   }else if(msg.action==='projection'&&validViews.has(msg.projection)){
+    $('projection').value=msg.projection;Settings.projectionMode=msg.projection;
+    sim.pitch?.invalidateRenderCache?.();render(minute);
+   }else if(msg.action==='camera'&&['wide','follow'].includes(msg.camera)){
+    $('camera').value=msg.camera;sim.pitch?.invalidateRenderCache?.();render(minute);
+   }else if(msg.action==='numbers'){
+    $('showNumbers').checked=!!msg.visible;render(minute);
+   }
   });
-  seek(0);window.__PFC_VIEWER_READY__=true;requestAnimationFrame(step);
+  seek(0);window.__PFC_VIEWER_READY__=true;
+  send({type:'booted',projection:Settings.projectionMode,pokemonSpritesLoaded:spriteRoster.entries.filter(e=>e.image?.naturalWidth>0).length});
+  requestAnimationFrame(step);
  }catch(e){
   console.error(e);window.__PFC_VIEWER_ERROR__=String(e.stack||e);
   $('status').textContent='VIEWER ERROR';$('notice').textContent=e.message||String(e);
