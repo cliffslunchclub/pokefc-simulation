@@ -12,7 +12,11 @@ const base=process.env.PHASE10_URL||'http://127.0.0.1:8765/';
   await page.locator('#start').click();
   const iframe=page.locator('.pitch-frame iframe.soccerjs-inline-frame');
   await iframe.waitFor({state:'visible'});
-  await page.waitForFunction(()=>document.querySelector('.pitch-frame iframe')?.contentWindow?.__PFC_VIEWER_READY__,null,{timeout:150000});
+  await page.waitForFunction(()=>{
+   const w=document.querySelector('.pitch-frame iframe')?.contentWindow;
+   return !!w?.__PFC_VIEWER_READY__||!!w?.__PFC_VIEWER_ERROR__;
+  },null,{timeout:45000});
+  assert.equal(await iframe.evaluate(el=>el.contentWindow.__PFC_VIEWER_ERROR__||null),null,'Franchise iframe boot error 1');
   const info=await iframe.evaluate(el=>el.contentWindow.__PFC_SNAPSHOT__);
   assert.equal(info.projection,'isometric');assert.equal(info.players,22);
   assert.equal(info.actualSprites,true);
@@ -41,7 +45,11 @@ const base=process.env.PHASE10_URL||'http://127.0.0.1:8765/';
   assert.equal(await iframe.count(),0);
   await page.locator('#start').click();
   await iframe.waitFor({state:'visible'});
-  await page.waitForFunction(()=>document.querySelector('.pitch-frame iframe')?.contentWindow?.__PFC_VIEWER_READY__,null,{timeout:150000});
+  await page.waitForFunction(()=>{
+   const w=document.querySelector('.pitch-frame iframe')?.contentWindow;
+   return !!w?.__PFC_VIEWER_READY__||!!w?.__PFC_VIEWER_ERROR__;
+  },null,{timeout:45000});
+  assert.equal(await iframe.evaluate(el=>el.contentWindow.__PFC_VIEWER_ERROR__||null),null,'Franchise iframe boot error 2');
   await page.locator('#viewerSoccerCancel').click();
   assert.equal(await iframe.count(),0);
   assert.equal(await page.evaluate(()=>window.__PFC_FRA_PUBLIC_TEST__.records),1);
