@@ -21,22 +21,28 @@ jobs:
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
+      - name: Checkout pinned public Soccer-JS test toolchain
+        uses: actions/checkout@v4
+        with:
+          repository: haeretici/soccer-js
+          ref: 38970e0dade0865078c9e84bc1ecfd72aaa02fde
+          path: upstream
+          persist-credentials: false
       - uses: actions/setup-node@v4
         with:
           node-version: "22"
-      - name: Install Playwright only in temporary test runner
+      - name: Install the same Playwright and Chromium toolchain as the passing 2.5D run
+        working-directory: upstream
         run: |
-          mkdir -p /tmp/pfc-playwright
-          printf '{"private":true,"name":"pfc-external-smoke"}\n' > /tmp/pfc-playwright/package.json
-          npm --prefix /tmp/pfc-playwright install --no-audit --no-fund playwright@1.56.1
-          /tmp/pfc-playwright/node_modules/.bin/playwright install --with-deps chromium
+          npm install --no-audit --no-fund
+          npm install --no-save --no-audit --no-fund playwright
+          npx playwright install --with-deps chromium
       - name: Verify live SiteGround opt-in Watch via normal public browser
         env:
-          NODE_PATH: /tmp/pfc-playwright/node_modules
           PFC_SITE_URL: https://pfc.cliffslunchclub.com
         run: |
           node --check scripts/phase10-live-site-smoke.cjs
-          node scripts/phase10-live-site-smoke.cjs
+          NODE_PATH="$GITHUB_WORKSPACE/upstream/node_modules" node scripts/phase10-live-site-smoke.cjs
       - name: Upload read-only site proof
         if: always()
         uses: actions/upload-artifact@v4
