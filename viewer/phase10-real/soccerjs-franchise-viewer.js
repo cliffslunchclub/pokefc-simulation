@@ -22,8 +22,17 @@
  function stats(m){
   const a=m.data.result.stats||[];
   const fields=[['Goals','goals'],['Shots','shots'],['Shots on target','shotsOnTarget'],['Passes','passes'],['Possession','possession'],['Tackles','tackles'],['Saves','saves']];
+  const perPlayer=[m.data.home,m.data.away].flatMap((team,side)=>
+   team.lineup.map(p=>({side,name:p.species||p.name||String(p.id),
+    count:Number(m.data.result.box?.[p.id]?.shotsOnTarget??0)})))
+   .filter(p=>Number.isInteger(p.count)&&p.count>0)
+   .sort((x,y)=>x.side-y.side||y.count-x.count||x.name.localeCompare(y.name));
   $('viewerStats').innerHTML='<p class="tiny muted">Official full-time Quick Sim statistics</p>'+
-   fields.map(([label,key])=>'<div class="viewer-stat"><span>'+escape(a[0]?.[key]??'—')+'</span><small>'+escape(label)+'</small><span>'+escape(a[1]?.[key]??'—')+'</span></div>').join('');
+   fields.map(([label,key])=>'<div class="viewer-stat"><span>'+escape(a[0]?.[key]??'—')+'</span><small>'+escape(label)+'</small><span>'+escape(a[1]?.[key]??'—')+'</span></div>').join('')+
+   '<h4>Pokémon shots on target</h4>'+
+   (perPlayer.length?perPlayer.map(p=>'<div class="viewer-stat"><span>'+escape(p.side?'AWAY':'HOME')+
+    '</span><small>'+escape(p.name)+'</small><span>'+p.count+' SOT</span></div>').join(''):
+    '<p class="tiny muted">No individual shots on target were recorded.</p>');
  }
  function update(m,score){
   if(current!==m)return;
@@ -61,14 +70,14 @@
   $('viewerSoccerRecord').hidden=false;$('viewerSoccerRecord').disabled=true;
   $('viewerSoccerCancel').hidden=false;$('viewerSoccerCancel').disabled=false;
   $('viewerTMFull').hidden=true;
-  $('viewerProjection').value='isometric';$('viewerCamera').value='wide';
+  $('viewerProjection').value='orthographic';$('viewerCamera').value='follow';
   $('viewerComplete').textContent='⚡ SIM TO END';
   $('viewerComplete').disabled=true;$('viewerPlay').disabled=true;$('viewerReset').disabled=true;
   const lookup=()=>current===m;
   $('viewerPlay').onclick=()=>{
    if(!lookup()||!m.ready||m.finished||m.handedOff)return;
    m.playing=!m.playing;
-   if(m.playing)m.session.play(Number($('viewerSpeed').value)||4);else m.session.pause();
+   if(m.playing)m.session.play(Number($('viewerSpeed').value)||1);else m.session.pause();
    update(m,bridge.scoreAt(m.session.fixture,m.minute));
   };
   $('viewerComplete').onclick=()=>{
@@ -86,7 +95,7 @@
   $('viewerSoccerCancel').onclick=()=>{if(lookup()&&!m.recorded)m.session.cancel()};
   $('viewerReset').onclick=()=>{if(!lookup()||m.handedOff||m.recorded)return;m.session.seek(0);m.session.pause();m.playing=false};
   $('viewerSeek').oninput=e=>{if(lookup()&&!m.handedOff&&!m.recorded)m.session.seek(Number(e.target.value))};
-  $('viewerSpeed').onchange=e=>{if(lookup()&&m.ready)m.session.setSpeed(Number(e.target.value)||4)};
+  $('viewerSpeed').onchange=e=>{if(lookup()&&m.ready)m.session.setSpeed(Number(e.target.value)||1)};
   $('viewerProjection').onchange=e=>{if(lookup()&&m.ready)m.session.setProjection(e.target.value)};
   $('viewerCamera').onchange=e=>{if(lookup()&&m.ready)m.session.setCamera(e.target.value)};
   if(note)note.textContent='Loading native Soccer-JS 2.5D Pokémon match…';
@@ -96,7 +105,7 @@
     viewerUrl:options.viewerUrl||'../watch/soccerjs/dist/index.html?embedded=1&inline=1',
     onReady:session=>{
      if(!lookup())return;
-     m.ready=true;session.setProjection('isometric');session.setCamera('wide');
+     m.ready=true;session.setProjection('orthographic');session.setCamera('follow');
      if(note)note.textContent='2.5D ready. Score, goals and statistics are locked by Quick Sim; Play to watch.';
      update(m,[0,0]);
     },
