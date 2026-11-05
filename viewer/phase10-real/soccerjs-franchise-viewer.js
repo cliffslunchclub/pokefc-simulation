@@ -32,7 +32,8 @@
    '<h4>Pokémon shots on target</h4>'+
    (perPlayer.length?perPlayer.map(p=>'<div class="viewer-stat"><span>'+escape(p.side?'AWAY':'HOME')+
     '</span><small>'+escape(p.name)+'</small><span>'+p.count+' SOT</span></div>').join(''):
-    '<p class="tiny muted">No individual shots on target were recorded.</p>');
+    '<p class="tiny muted">No individual shots on target were recorded.</p>')+
+   '<p class="tiny muted">Quick Sim does not yet track corners, free kicks or in-match penalty-kick incidents.</p>';
  }
  function update(m,score){
   if(current!==m)return;
@@ -53,8 +54,10 @@
  function unmount(){
   const m=current;if(!m)return;
   current=null;
+  if(root.FXI_PHASE10_WATCH?.fullscreenActive?.(m.pitch))void root.FXI_PHASE10_WATCH.leaveFullscreen(m.pitch);
   m.session?.destroy();
   m.canvas.hidden=false;
+  if($('viewerFullscreen'))$('viewerFullscreen').hidden=true;
   m.pitch.classList.remove('soccerjs-franchise-active');
   if($('viewerSoccerRecord')){$('viewerSoccerRecord').hidden=true;$('viewerSoccerRecord').disabled=true}
   if($('viewerSoccerCancel'))$('viewerSoccerCancel').hidden=true;
@@ -68,6 +71,7 @@
   const m={data,finish,canvas,pitch,session:null,ready:false,failed:false,minute:0,finished:false,handedOff:false,recorded:false,playing:false};
   current=m;canvas.hidden=true;pitch.classList.add('soccerjs-franchise-active');
   $('viewerSoccerRecord').hidden=false;$('viewerSoccerRecord').disabled=true;
+  $('viewerFullscreen').hidden=true;
   $('viewerSoccerCancel').hidden=false;$('viewerSoccerCancel').disabled=false;
   $('viewerTMFull').hidden=true;
   $('viewerProjection').value='orthographic';$('viewerCamera').value='follow';
@@ -98,6 +102,12 @@
   $('viewerSpeed').onchange=e=>{if(lookup()&&m.ready)m.session.setSpeed(Number(e.target.value)||1)};
   $('viewerProjection').onchange=e=>{if(lookup()&&m.ready)m.session.setProjection(e.target.value)};
   $('viewerCamera').onchange=e=>{if(lookup()&&m.ready)m.session.setCamera(e.target.value)};
+  $('viewerFullscreen').onclick=()=>{
+   if(!lookup()||!m.ready||!bridge.toggleFullscreen)return;
+   void bridge.toggleFullscreen(pitch).catch(error=>{
+    if(note)note.textContent='Fullscreen unavailable: '+String(error?.message||error);
+   });
+  };
   if(note)note.textContent='Loading native Soccer-JS 2.5D Pokémon match…';
   try{
    m.session=bridge.mountInline({
@@ -106,6 +116,7 @@
     onReady:session=>{
      if(!lookup())return;
      m.ready=true;session.setProjection('orthographic');session.setCamera('follow');
+      $('viewerFullscreen').hidden=false;
      if(note)note.textContent='2.5D ready. Score, goals and statistics are locked by Quick Sim; Play to watch.';
      update(m,[0,0]);
     },
