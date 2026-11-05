@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>PokéFC — Watch → Quick Sim browser integration test</title>
+<style>
+:root{font-family:system-ui;background:#091525;color:#edf5fb}body{max-width:900px;margin:36px auto;padding:16px}
+h1{font-size:32px}p{line-height:1.55;color:#b5c8db}.field{border:1px solid #354c6a;background:#14263c;padding:20px;border-radius:12px;margin:18px 0}
+button{padding:12px 17px;background:#e3e97b;color:#16253a;border:0;border-radius:7px;font-weight:850;cursor:pointer}
+button:disabled{opacity:.4}strong{color:#e2e971}.status{padding:16px;border:1px solid #3b596a;border-radius:8px}
+</style><script defer src="./watch-bridge.js"></script></head>
+<body><h1>PokéFC Phase 10 — Live handoff experiment</h1>
+<p>This public test uses <strong>a genuine, exported Quick Sim match</strong> and original Soccer-JS visuals. The outcome is fixed before kickoff. Click Watch, move the playhead, then use Sim to End to record the result once.</p>
+<div class="field"><b>Pewter City FC vs Cerulean City FC</b><h1>Official full-time score: 2–1</h1>
+<button id="launch" disabled>▶ Start watched match</button></div>
+<div class="status"><p id="status">Loading official fixture…</p><p>Recorded results: <strong id="recordCount">0</strong></p><p>Saved result: <strong id="savedScore">None</strong></p><p>Last close: <span id="closed">Not yet</span></p></div>
+<p>This tests the viewer ↔ application communication boundary. It does not run Franchise or Challenges save systems, change Pokémon tactics, or simulate unrecorded possessions.</p>
+<script>
+const state={records:0,recordedScore:null,lastClose:null};
+window.__PFC_HOST__=state;
+(async()=>{
+ try{
+  const response=await fetch('./fixture.json');if(!response.ok)throw Error('Fixture is missing');
+  const fixture=await response.json();
+  const preview={home:fixture.home,away:fixture.away};
+  const result={origin:'quick-sim',home:fixture.home.id,away:fixture.away.id,
+   score:fixture.score,stats:fixture.stats,events:fixture.events,box:fixture.box};
+  window.PFC_TEST_DATA={preview,result};
+  document.getElementById('launch').disabled=false;
+  document.getElementById('status').textContent='Ready. Start the watched match.';
+  document.getElementById('launch').addEventListener('click',()=>{
+   window.FXI_PHASE10_WATCH.open({preview,result,viewerUrl:'./index.html?embedded=1',
+    source:'Public integration test',
+    onRecord:({result:locked,minute,handoff})=>{
+     if(locked!==result||minute!==90)throw Error('Official result was changed');
+     state.records++;state.recordedScore=locked.score.slice();
+     state.lastHandoff=handoff;
+     document.getElementById('recordCount').textContent=String(state.records);
+     document.getElementById('savedScore').textContent=locked.score.join(' – ');
+     document.getElementById('status').textContent='Recorded exactly one official Quick Sim result';
+    },
+    onClose:({recorded})=>{
+     state.lastClose=recorded?'recorded':'canceled';
+     document.getElementById('closed').textContent=state.lastClose;
+     if(!recorded)document.getElementById('status').textContent='Closed without changing saved results';
+    }
+   });
+  });
+ }catch(e){document.getElementById('status').textContent='Load error: '+e.message;window.__PFC_HOST_ERROR__=String(e.stack||e)}
+})();
+</script></body></html>
