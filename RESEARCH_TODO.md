@@ -17,7 +17,8 @@ Updated 2026-11-05. This is **not** the game product roadmap; see private `PokeF
 - [ ] Test actual Pokémon sprite visibility/normalization (including Gen V–IX fallback) and touch/small-screen performance.
 - [ ] Cross-check goal/event clock, periods, extra time, shootouts and provenance for 90/120-minute fixtures.
 - [ ] Audit performance, determinism and calibration representativeness; don't describe illustrative motion as observed match events.
-- [ ] Retire obsolete standalone GitHub Pages viewer assets and disable GitHub Pages in repository Settings once no external links need it.
+- [x] Retired the obsolete standalone Soccer-JS `gh-pages` content: only `.nojekyll` remains in the branch tree.
+- [ ] Disable GitHub Pages in repository Settings when no links need it; branch still exists even though content was pruned.
 - [ ] Consolidate/review experimental branches, then delete their refs using a GitHub branch-deletion client or GitHub UI. Don't rewrite `main` or destroy unique unmerged source.
 - [ ] Reduce obsolete research workflow duplication only after checking their scripts/results are no longer needed.
 
