@@ -87,6 +87,13 @@ function mockContext(){
  const spriteStub={width:1024,height:1024};
  for(const p of sim.players)p.getSpriteSheet=()=>spriteStub;
  const {ctx,trace}=mockContext();
+ // The upstream tests/mock_env.js uses a deliberately tiny pixel Canvas.
+ // Its offscreen cache context lacks fillText/measureText required by the
+ // FULL native Soccer-JS pitch/stadium renderer. Supply a method-complete
+ // spy context to BOTH the main canvas and dynamically created cache canvas.
+ const createElement=global.document.createElement;
+ global.document.createElement=(tag)=>
+   tag==='canvas'?{width:960,height:600,getContext:()=>mockContext().ctx}:createElement(tag);
  Settings.HEADLESS=false;
  let renderOk=false,renderError=null;
  try{
@@ -95,6 +102,7 @@ function mockContext(){
   renderOk=true;
  }catch(e){renderError=e.stack||String(e);}
  Settings.HEADLESS=true;
+ global.document.createElement=createElement;
  assert.equal(renderOk,true,'Native frame rendering failed: '+renderError);
  assert(trace.images>=22,'Native sprite drawing did not render all 22 player entities: '+trace.images);
  assert(trace.arcs>0,'Native soccer ball did not render');
