@@ -43,7 +43,7 @@ window.__PFC_FRA_PUBLIC_TEST__=state;
    state.records++;state.lastWeek=1;state.score=record.result.score.slice();
    document.getElementById('records').textContent=String(state.records);
    window.FXI_SOCCERJS_FRANCHISE.unmount();
-  });
+  },{viewerUrl:'./index.html?embedded=1&inline=1'});
   document.getElementById('start').onclick=start;
   document.getElementById('start').disabled=false;
   document.getElementById('engineInstallStatus').textContent='Fixture ready';
