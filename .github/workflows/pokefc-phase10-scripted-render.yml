@@ -1,0 +1,48 @@
+name: PokéFC Phase 10B — external Quick Sim-style render proof (public)
+
+on:
+  push:
+    branches:
+      - experiment/phase10-knockout-baseline
+    paths:
+      - ".github/workflows/pokefc-phase10-scripted-render.yml"
+      - "scripts/phase10-scripted-renderer.cjs"
+      - "scripts/phase10-scripted-render-probe.cjs"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  visual-feasibility:
+    name: Confirm Soccer-JS renderer can obey an external result timeline
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Check out PUBLIC PokéFC simulation research branch
+        uses: actions/checkout@v4
+      - name: Check out pinned MIT Soccer-JS upstream
+        uses: actions/checkout@v4
+        with:
+          repository: haeretici/soccer-js
+          ref: 38970e0dade0865078c9e84bc1ecfd72aaa02fde
+          path: upstream
+          persist-credentials: false
+      - name: Node 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Verify external animation adapter and native rendering
+        run: |
+          set -euo pipefail
+          node --check scripts/phase10-scripted-renderer.cjs
+          node --check scripts/phase10-scripted-render-probe.cjs
+          node scripts/phase10-scripted-render-probe.cjs upstream
+      - name: Save proof artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: phase10-soccerjs-scripted-render-proof
+          path: phase10-reports/soccerjs-scripted-render.*
+          if-no-files-found: warn
+          retention-days: 7
