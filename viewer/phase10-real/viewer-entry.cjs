@@ -173,6 +173,7 @@ async function boot(){
    render(minute);
   };
   $('camera').onchange=()=>{sim.pitch?.invalidateRenderCache?.();render(minute);};
+  $('showNumbers').onchange=()=>render(minute);
   for(const id of ['play','playFive','pause','restart','skip','nextGoal','scrub'])$(id).disabled=false;
   window.addEventListener('message',e=>{
    if(!embedded||e.source!==window.parent||e.origin!==location.origin||e.data?.type!=='pfc-phase10-seek')return;
