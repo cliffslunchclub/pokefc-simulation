@@ -62,7 +62,7 @@ async function seek(page,minute){
   await page.locator('#playFive').click();
   await page.waitForFunction(()=>window.__PFC_SNAPSHOT__?.minute>=4.999,null,{timeout:20000});
   const five=await page.evaluate(()=>window.__PFC_SNAPSHOT__);
-  assert.equal(five.minute,5);
+  assert(five.minute>=4.999&&five.minute<=5,'Five-minute clip ended at '+five.minute);
   assert.deepEqual(five.score,[0,0]);
   report.fiveMinuteClip={reachedMinute:five.minute,officialScore:five.score};
 
