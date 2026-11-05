@@ -36,7 +36,7 @@ const callbacks={
  preview:{home:fixture.home,away:fixture.away},result,container:viewport,
  onRecord:({result:official})=>{records++;assert.equal(official,result)},
  onCancel:()=>{cancels++},
- onReady:session=>{ready++;assert(session.play(4));assert(session.setProjection('isometric'))},
+ onReady:session=>{ready++;assert(session.play(4));assert(session.setProjection('orthographic'))},
  onProgress:x=>{latestProgress=x},
  onStatus:x=>{lastStatus=x}
 };
@@ -55,8 +55,8 @@ send('ready');
 assert.equal(frame.messages.at(-1).message.type,'pfc-phase10-fixture');
 assert.deepEqual(frame.messages.at(-1).message.fixture.score,[2,1]);
 assert.equal(frame.messages.at(-1).target,origin);
-send('booted',{projection:'topdown'});
-assert.match(session.getState().error,/isometric/,'Reject a non-2.5D viewer');
+send('booted',{projection:'isometric'});
+assert.match(session.getState().error,/Broadcast/,'Reject a non-default camera at boot');
 assert.equal(session.play(),false);
 assert(session.cancel());
 assert.equal(cancels,1);
@@ -69,7 +69,7 @@ assert.equal(second.getState().ready,false,'Ignore foreign-origin messages');
 send('ready',{},{source:{}});
 assert.equal(second.getState().ready,false,'Ignore other iframe messages');
 send('ready');
-send('booted',{projection:'isometric'});
+send('booted',{projection:'orthographic'});
 assert.equal(ready,1);
 assert.equal(second.getState().ready,true);
 assert(frame.messages.some(x=>x.message.type==='pfc-phase10-control'&&x.message.action==='play'));
@@ -96,4 +96,4 @@ assert.equal(cancels,1);
 assert.equal(listeners.has('message'),false,'No leaked message listener');
 assert.equal(timers.size,0,'No leaked timeout');
 assert.equal(lastStatus.state,'recorded');
-console.log('PASS inline 2.5D Watch: isometric boot, source isolation, immutable result, Watch→Sim, one-time record, cancel and cleanup');
+console.log('PASS inline 2.5D Watch: Broadcast boot, source isolation, immutable result, Watch→Sim, one-time record, cancel and cleanup');
