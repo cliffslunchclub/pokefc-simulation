@@ -4,7 +4,7 @@ const {Settings}=require('./kernel/settings.js');
 const {Simulator}=require('./kernel/providers/simulator/simulator.js');
 const {Utils}=require('./kernel/core/lib/utils.js');
 const {ImageDB}=require('./kernel/core/lib/imagedb.js');
-const {motionFrame}=require('./phase10-motion.cjs');
+const {motionFrame,shotSummary,playbackRate}=require('./phase10-motion.cjs');
 const {prepare}=require('./pokemon-roster.cjs');
 const {draw}=require('./pokemon-draw.cjs');
 const $=id=>document.getElementById(id);
@@ -121,7 +121,7 @@ function render(t){
 }
 function step(now){
  if(playing){
-  if(last!==null)minute=Math.min(stopAt,minute+Math.min(.1,(now-last)/1000)*.32*speed);
+  if(last!==null)minute=Math.min(stopAt,minute+Math.min(.1,(now-last)/1000)*playbackRate(minute,match.events,speed));
   if(minute>=stopAt)playing=false;
   last=now;render(minute);
  }
@@ -169,8 +169,7 @@ async function boot(){
      (helper?' (assist '+helper.name+')':'');
    list.append(row);
   }
-  $('stats').textContent='Shots '+match.stats[0].shots+'–'+match.stats[1].shots+
-   ' · On target '+match.stats[0].shotsOnTarget+'–'+match.stats[1].shotsOnTarget;
+  $('stats').textContent=shotSummary(match.stats);
   $('play').onclick=()=>{if(minute>=90)minute=0;stopAt=90;last=null;playing=true;};
   $('playFive').onclick=()=>{if(minute>=90)minute=0;stopAt=Math.min(90,(Math.floor(minute/5)+1)*5);last=null;playing=true;};
   $('pause').onclick=()=>seek(minute);
