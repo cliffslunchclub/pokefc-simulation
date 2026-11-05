@@ -83,14 +83,16 @@ async function boot(){
   match=await response.json();verify(match);
   Settings.app={canvas:$('pitch'),camX:0,camY:0};
   Settings.HEADLESS=false;Settings.showFPS=false;Settings.showTime=false;
-  Settings.soundsMuted=true;Settings.camera.scale=8;
-  Settings.camera.offsetX=85;Settings.camera.offsetY=65;
+  Settings.soundsMuted=true;Settings.camera.scale=9.5;
+  Settings.camera.offsetX=55;Settings.camera.offsetY=140;
   Settings.projectionMode='orthographic';
   $('status').textContent='GENERATING REAL SOCCER-JS SPRITES…';
   sim=new Simulator({seed:12345});await sim.start();sim.active=true;
+  // Keep native sprite/pitch/ball rendering; suppress upstream kickoff/score overlays.
+  sim.render=()=>{};
   if(!ImageDB.get('player_Brazil_main')||!ImageDB.get('player_Argentina_main'))
    throw Error('Original Soccer-JS sprite generation failed');
-  const list=$('goals');
+  const list=$('goals');list.replaceChildren();
   for(const e of match.events){
    const side=e.team===match.home.id?match.home:match.away;
    const row=document.createElement('div'),scorer=side.lineup.find(p=>p.id===e.player);
