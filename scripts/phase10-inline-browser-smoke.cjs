@@ -65,7 +65,7 @@ const fs=require('node:fs');
   // Mobile visual parity on the same compiled native 2.5D renderer.
   // Isolated public fixture: no SiteGround bot-blocking false negatives.
   const mobile=await browser.newPage({viewport:{width:390,height:844},deviceScaleFactor:1,isMobile:true,hasTouch:true});
-  await mobile.goto(server+'host-inline.html',{waitUntil:'domcontentloaded'});
+  await mobile.goto(url+'host-inline.html',{waitUntil:'domcontentloaded'});
   await mobile.waitForFunction(()=>!!window.__PFC_INLINE_FIXTURE__||!!window.__PFC_INLINE_ERROR__,null,{timeout:15000});
   assert.equal(await mobile.evaluate(()=>window.__PFC_INLINE_ERROR__||null),null);
   await mobile.locator('#start').click();
