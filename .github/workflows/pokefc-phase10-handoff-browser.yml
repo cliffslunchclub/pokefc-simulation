@@ -1,0 +1,95 @@
+name: PokéFC Phase 10 — Watch to Quick Sim browser handoff (public)
+
+on:
+  push:
+    branches:
+      - experiment/phase10-watch-handoff-browser
+    paths:
+      - "viewer/phase10-real/**"
+      - "fixtures/phase10-real-quicksim-v07b.json"
+      - "tests/phase10-real-quicksim-fixture.cjs"
+      - "scripts/phase10-real-browser-smoke.cjs"
+      - ".github/workflows/pokefc-phase10-handoff-browser.yml"
+      - "scripts/phase10-handoff-browser-smoke.cjs"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: pokefc-phase10-watch-handoff
+  cancel-in-progress: true
+
+jobs:
+  public-browser-proof:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - name: Checkout PUBLIC simulation repository
+        uses: actions/checkout@v4
+
+      - name: Checkout pinned MIT Soccer-JS source
+        uses: actions/checkout@v4
+        with:
+          repository: haeretici/soccer-js
+          ref: 38970e0dade0865078c9e84bc1ecfd72aaa02fde
+          path: upstream
+          persist-credentials: false
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Validate the authentic exported match
+        run: |
+          set -euo pipefail
+          node tests/phase10-real-quicksim-fixture.cjs
+          node --check viewer/phase10-real/viewer-entry.cjs
+          node --check scripts/phase10-real-browser-smoke.cjs
+
+      - name: Install the upstream build tools and Chromium test dependencies
+        working-directory: upstream
+        run: |
+          npm install --no-audit --no-fund
+          npm install --no-save --no-audit --no-fund playwright
+          npx playwright install --with-deps chromium
+
+      - name: Build fully static viewer using ORIGINAL Soccer-JS visuals
+        shell: bash
+        run: |
+          set -euo pipefail
+          cp viewer/phase10-real/viewer-entry.cjs upstream/phase10-viewer-entry.cjs
+          mkdir -p dist
+          ./upstream/node_modules/.bin/esbuild upstream/phase10-viewer-entry.cjs \
+            --bundle --platform=browser --format=iife --target=es2020 \
+            --minify --outfile=dist/viewer.bundle.js
+          cp viewer/phase10-real/index.html dist/index.html
+          cp viewer/phase10-real/host.html viewer/phase10-real/watch-bridge.js dist/
+          cp viewer/phase10-real/viewer.css dist/viewer.css
+          cp fixtures/phase10-real-quicksim-v07b.json dist/fixture.json
+          cp -R upstream/presets upstream/assets dist/
+          cp upstream/LICENSE dist/SOCCER-JS-LICENSE.txt
+          test -s dist/viewer.bundle.js
+          test -s dist/assets/animation_rigs/1.json
+          find dist/assets/sprites -type f -name '*.bin' | grep -q .
+          echo 'All original upstream pitch/rig/sprite assets packaged.'
+
+      - name: Smoke test the ACTUAL browser visuals and Quick Sim event playback
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m http.server 8765 --directory dist >/tmp/phase10-http.log 2>&1 &
+          sleep 2
+          NODE_PATH="$GITHUB_WORKSPACE/upstream/node_modules" node scripts/phase10-handoff-browser-smoke.cjs
+
+      - name: Save ZIP-able browser preview, report and screenshot
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: pfc-phase10-watch-handoff-browser
+          path: |
+            dist/
+            phase10-reports/watch-handoff-browser.png
+            phase10-reports/watch-handoff-browser.json
+          retention-days: 7
+          if-no-files-found: warn
