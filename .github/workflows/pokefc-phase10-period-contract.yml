@@ -1,0 +1,30 @@
+name: PokéFC Phase 10B — public knockout-period contract
+
+on:
+  push:
+    branches:
+      - experiment/phase10-knockout-baseline
+    paths:
+      - ".github/workflows/pokefc-phase10-period-contract.yml"
+      - "scripts/phase10-competition-periods.cjs"
+      - "tests/phase10-periods.cjs"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  periods:
+    name: Pure Quick Sim-derived period decisions 90/105/120
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Validate exact period and overtime invariants
+        run: |
+          set -euo pipefail
+          node --check scripts/phase10-competition-periods.cjs
+          node tests/phase10-periods.cjs
