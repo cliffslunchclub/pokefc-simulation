@@ -19,7 +19,7 @@ const here='phase10-reports';
    await page.waitForFunction(()=>!!window.FXI_TEST&&!!window.FXI_SOCCERJS_FRANCHISE?.mount,null,{timeout:30000});
    await page.evaluate(()=>window.FXI_TEST.create('classic',16,'PFC-BROWSER-SOCCERJS-VERIFY','off'));
    assert.equal(await page.evaluate(()=>window.FXI_TEST.state().week),0);
-   await page.locator('[data-view="tactical"]').click();
+   await page.locator('.nav button[data-view="tactical"]').click();
    await page.waitForFunction(()=>document.getElementById('viewerMode')?.value==='soccerjs',null,{timeout:12000});
    const viewer=page.locator('.pitch-frame iframe.soccerjs-inline-frame');
    await viewer.waitFor({state:'visible',timeout:25000});
@@ -44,7 +44,7 @@ const here='phase10-reports';
    const saved=await page.evaluate(()=>({week:window.FXI_TEST.state().week,
      fixtures:window.FXI_TEST.state().results[0].length,score:window.FXI_TEST.state().results[0].find(r=>r.home===16||r.away===16)?.score}));
    assert.equal(saved.fixtures,16);assert.equal(saved.week,1);
-   await page.locator('[data-view="tactical"]').click();
+   await page.locator('.nav button[data-view="tactical"]').click();
    const again=page.locator('.pitch-frame iframe.soccerjs-inline-frame');
    await again.waitFor({state:'visible',timeout:25000});
    await page.waitForFunction(()=>{
