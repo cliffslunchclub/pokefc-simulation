@@ -74,6 +74,7 @@ function render(t){
  sim.scoreA=s[0];sim.scoreB=s[1];sim.matchTimer=t*60;
  const canvas=$('pitch'),ctx=canvas.getContext('2d');
  const camera=cameraFit(canvas,field,script.ball);
+ window.__PFC_DRAWN__=0;window.__PFC_REAL_SPRITES_DRAWN__=0;
  ctx.clearRect(0,0,canvas.width,canvas.height);
  ctx.save();
  ctx.translate(camera.tx,camera.ty);
