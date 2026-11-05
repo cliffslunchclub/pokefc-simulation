@@ -19,13 +19,21 @@ const base=process.env.PHASE10_URL||'http://127.0.0.1:8765/';
   assert.equal(await iframe.evaluate(el=>el.contentWindow.__PFC_VIEWER_ERROR__||null),null,'Franchise iframe boot error 1');
   const info=await iframe.evaluate(el=>el.contentWindow.__PFC_SNAPSHOT__);
   assert.equal(info.projection,'orthographic');assert.equal(info.camera,'follow');assert.equal(info.players,22);
-  assert(info.ballDrawRadius>=14,'Native franchise ball must be enlarged');
+  assert(info.ballDrawRadius>=24,'Native Franchise ball must have increased display size');
   assert.equal(info.actualSprites,true);
   assert(info.pokemonSpritesLoaded>=20&&info.pokemonSpritesDrawn>=20);
   assert.deepEqual(info.teamColors,['#E53935','#FFFFFF']);
   assert.equal(await page.locator('#tacticalPitch').isVisible(),false);
   assert.equal(await page.locator('#viewerSoccerRecord').isEnabled(),false);
   assert.equal(await page.evaluate(()=>window.__PFC_FRA_PUBLIC_TEST__.records),0);
+  assert.equal(await page.locator('#viewerFullscreen').isVisible(),true);
+  await page.locator('#viewerFullscreen').click();
+  await page.waitForFunction(()=>document.querySelector('.pitch-frame')?.classList.contains('pfc-watch-theater'));
+  assert.equal(await page.locator('#viewerFullscreen').getAttribute('aria-pressed'),'true');
+  await page.screenshot({path:'phase10-reports/franchise-2p5d-fullscreen.png',fullPage:true});
+  await page.locator('#viewerFullscreen').click();
+  await page.waitForFunction(()=>!document.querySelector('.pitch-frame')?.classList.contains('pfc-watch-theater'));
+  assert.equal(await page.locator('#viewerFullscreen').getAttribute('aria-pressed'),'false');
   await page.screenshot({path:'phase10-reports/franchise-2p5d-kickoff.png',fullPage:true});
   await page.locator('#viewerProjection').selectOption('isometric');
   await page.waitForFunction(()=>document.querySelector('.pitch-frame iframe')?.contentWindow?.__PFC_SNAPSHOT__?.projection==='isometric');
@@ -62,7 +70,7 @@ const base=process.env.PHASE10_URL||'http://127.0.0.1:8765/';
   fs.writeFileSync('phase10-reports/franchise-2p5d-browser.json',JSON.stringify({
     result:'PASS',nativeSoccerJS:true,pokemonSpritesLoaded:info.pokemonSpritesLoaded,
     projection:'orthographic',framing:'follow',ballDrawRadius:info.ballDrawRadius,teamColors:info.teamColors,
-    cameraControl:true,officialFinalScore:final.score,
+    cameraControl:true,fullscreen:true,realTime1x:true,officialFinalScore:final.score,
     preRecordSaves:0,afterRecordSaves:1,afterCancelSaves:1,
     firstFixtureIndex:5,errors
   },null,2));
