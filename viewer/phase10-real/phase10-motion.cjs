@@ -17,6 +17,36 @@ function base(side,index,field){
  if(index<8)return {x:x(.45),y:y*(.19+(index-5)*.29)};
  return {x:x(.69),y:y*(.17+(index-8)*.31)};
 }
+// Official Quick Sim full-time totals. This is not an in-progress counter.
+// A missed shot is not on target; keeper saves belong to the opposite side.
+// Validation is presentation-only and never repairs or mutates result data.
+function shotSummary(stats){
+ if(!Array.isArray(stats)||stats.length!==2)throw Error('Missing official shot totals');
+ for(let side=0;side<2;side++){
+  const a=stats[side],other=stats[1-side];
+  for(const key of ['shots','shotsOnTarget','goals','saves'])
+   if(!Number.isInteger(a?.[key])||a[key]<0)throw Error('Invalid official '+key);
+  if(a.shotsOnTarget>a.shots||a.goals>a.shotsOnTarget||
+     a.shotsOnTarget-a.goals!==other.saves)
+   throw Error('Quick Sim shots, goals and goalkeeper saves do not reconcile');
+ }
+ return 'FULL-TIME TOTALS (not live) · Shots '+stats[0].shots+'–'+stats[1].shots+
+  ' · On target '+stats[0].shotsOnTarget+'–'+stats[1].shotsOnTarget+
+  ' · Keeper saves '+stats[0].saves+'–'+stats[1].saves;
+}
+// Slow clock advancement only near official goal timestamps; keep the
+// currently deployed, slower 1x base rate (0.32 match min / real second).
+function playbackRate(t,events,speed){
+ const normal=.32*limit(Number(speed)||1,.25,16);
+ let factor=1;
+ for(const e of events||[]){
+  if(e.type!=='goal'||!Number.isFinite(e.minute))continue;
+  const distance=e.minute-t;
+  if(distance>=-.22&&distance<=.60)factor=Math.min(factor,.4);
+  else if(distance>=-.40&&distance<=.90)factor=Math.min(factor,.7);
+ }
+ return normal*factor;
+}
 function motionFrame(fixture,t,field){
  if(!fixture||!fixture.home||!fixture.away||!Array.isArray(fixture.events))
   throw Error('Motion requires official fixture');
@@ -92,4 +122,4 @@ function motionFrame(fixture,t,field){
  else {ball={x:lerp(contest.x,center.x,ease((u-.83)/.17)),y:lerp(contest.y,center.y,ease((u-.83)/.17)),z:.2};action='illustrative-challenge';actors[defender].frame=3}
  return {actors,ball,action,label:'',officialEvent:null,illustrative:true,cycle};
 }
-module.exports={motionFrame,base,hash};
+module.exports={motionFrame,base,hash,shotSummary,playbackRate};
