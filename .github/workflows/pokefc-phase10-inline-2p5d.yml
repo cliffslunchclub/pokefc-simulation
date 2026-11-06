@@ -72,6 +72,8 @@ jobs:
             viewer/phase10-real/soccerjs-franchise-viewer.js viewer/phase10-real/host-franchise.html dist/
           cp fixtures/phase10-real-quicksim-v07b.json dist/fixture.json
           cp -R upstream/presets upstream/assets dist/
+          cp viewer/phase10-real/soccer-ball.svg dist/assets/pfc-soccer-ball.svg
+          test -s dist/assets/pfc-soccer-ball.svg
           cp upstream/LICENSE dist/SOCCER-JS-LICENSE.txt
           test -s dist/viewer.bundle.js
           test -s dist/assets/animation_rigs/1.json
