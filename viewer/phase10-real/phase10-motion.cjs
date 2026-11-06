@@ -51,20 +51,90 @@ function playbackRate(t,events,speed){
  }
  return normal*factor;
 }
-function motionFrame(fixture,t,field,ignoreGoal=false){
+
+// Deterministic continuous pass-and-receive plan. It is presentation-only:
+// these are not PSE possession, tackle, pass, or interception records.
+const touchCache=new WeakMap();
+function pose(owner,field,seconds){
+ const side=Math.floor(owner/11),index=owner%11,p=base(side,index,field);
+ const amp=index===0?.6:index<5?1.65:2.6;
+ return {x:limit(p.x+Math.sin(seconds*.22+index*1.8+side)*amp,1,field.width-1),
+  y:limit(p.y+Math.cos(seconds*.27+index*1.2+side)*amp*.8,1,field.height-1)};
+}
+function foot(player,owner){
+ return {x:player.x+(owner<11?.72:-.72),y:player.y+.32,z:.23};
+}
+function touchPlan(fixture,field){
+ const cached=touchCache.get(fixture);
+ if(cached&&cached.width===field.width&&cached.height===field.height)return cached.sequence;
+ const total=Math.ceil((fixture.durationMinutes===120?120:90)*60/8)+2;
+ const sequence=[{owner:6}],seed=String(fixture.seed||'pfc');
+ for(let k=0;k<total;k++){
+  const previous=sequence[k].owner,side=Math.floor(previous/11);
+  const switchSides=k%9===8; // illustrative challenge, not official event
+  const candidateSide=switchSides?1-side:side;
+  const passTime=k*8+8*.60;
+  const from=pose(previous,field,passTime);
+  const candidates=[];
+  for(let j=1;j<11;j++){
+   const owner=candidateSide*11+j;
+   if(owner===previous)continue;
+   const to=pose(owner,field,passTime+1.2);
+   const distance=Math.hypot(from.x-to.x,from.y-to.y);
+   if(distance>32)continue;
+   const forward=side===0?to.x-from.x:from.x-to.x;
+   const jitter=hash(seed+':'+k+':'+j)%1000/1000;
+   candidates.push({owner,score:distance+6*jitter-(forward>2&&forward<17?3.3:0)});
+  }
+  candidates.sort((a,b)=>a.score-b.score||a.owner-b.owner);
+  // If no reasonable receiver is nearby, dribble rather than teleport.
+  const choice=candidates[hash(seed+':select:'+k)%Math.min(3,candidates.length)];
+  sequence.push({owner:choice?.owner??previous});
+ }
+ touchCache.set(fixture,{width:field.width,height:field.height,sequence});
+ return sequence;
+}
+function motionFrame(fixture,t,field,options=false){
+ const ignoreGoal=options===true;
+ const kickIndex=options&&typeof options==='object'&&Number.isInteger(options.kickIndex)?options.kickIndex:0;
  if(!fixture||!fixture.home||!fixture.away||!Array.isArray(fixture.events))
   throw Error('Motion requires official fixture');
- if(!Number.isFinite(t)||t<0||t>90)throw Error('Invalid replay minute');
+ const duration=fixture.durationMinutes===120?120:90;
+ if(!Number.isFinite(t)||t<0||t>duration)throw Error('Invalid replay minute');
  if(!field||!Number.isFinite(field.width)||!Number.isFinite(field.height))throw Error('Invalid soccer pitch');
  const teams=[fixture.home,fixture.away],actors=[],seconds=t*60;
  for(let side=0;side<2;side++)for(let i=0;i<11;i++){
-  const p=base(side,i,field),amplitude=i===0?.6:i<5?1.65:2.6;
+  const p=pose(side*11+i,field,seconds);
   actors.push({side,index:i,
-   x:p.x+Math.sin(seconds*.22+i*1.8+side)*amplitude,
-   y:p.y+Math.cos(seconds*.27+i*1.2+side)*amplitude*.8,z:0,
+   x:p.x,y:p.y,z:0,
    frame:Math.floor(seconds*7+i)%3===0?1:0,orientation:side===0?2:6});
  }
  let ball={x:field.width*.5,y:field.height*.5,z:.22};
+ // Separate PSE penalty shootout. Match score stays the official 120-minute
+ // score; the panel owns independent penalty conversions.
+ if(t>=duration&&fixture.shootout&&Number.isInteger(kickIndex)&&kickIndex>0){
+  const kicks=fixture.shootout.attempts,kick=kicks[kickIndex-1];
+  if(!kick)throw Error('Invalid shootout kick index');
+  const side=kick.side==='home'?0:1,roster=teams[side];
+  const takerIndex=roster.lineup.findIndex(p=>String(p.id)===String(kick.kickerId));
+  if(takerIndex<0)throw Error('Shootout taker not on starting XI');
+  const keeperIndex=teams[1-side].lineup.findIndex(p=>String(p.id)===String(kick.keeperId));
+  if(keeperIndex<0)throw Error('Shootout keeper not on starting XI');
+  const taker=actors[side*11+takerIndex],keeper=actors[(1-side)*11+keeperIndex];
+  const shooting={x:origin(side,.84,field),y:field.height*.5};
+  const net={x:origin(side,.985,field),y:field.height*.5};
+  taker.x=shooting.x;taker.y=shooting.y;taker.frame=3;
+  keeper.x=origin(side,.972,field);keeper.y=field.height*.5;
+  const finishY=kick.outcome==='off-target'?field.height*.21:
+   kick.outcome==='saved'?field.height*.48:field.height*.5;
+  keeper.frame=kick.outcome==='saved'?8:1;
+  keeper.y=kick.outcome==='saved'?field.height*.48:field.height*.58;
+  ball={x:net.x,y:finishY,z:kick.outcome==='off-target'?1.2:.3};
+  return {actors,ball,action:'official-shootout-'+kick.outcome,
+   label:'PENALTY '+kickIndex+'/'+kicks.length+' · '+
+    (roster.lineup[takerIndex].name||'Pokémon')+' · '+kick.outcome.toUpperCase(),
+   officialEvent:kick,illustrative:false};
+ }
  const goals=ignoreGoal?[]:fixture.events.filter(e=>e.type==='goal');
  const event=goals.find(g=>t>=g.minute-.7&&t<=g.minute+.22);
  if(event){
@@ -116,33 +186,49 @@ function motionFrame(fixture,t,field,ignoreGoal=false){
      'Attack: '+roster.lineup[scorer].name,
    officialEvent:t>=event.minute?event:null,illustrative:t<event.minute};
  }
- // Continuous deterministic build-up. Each new cycle is a fresh illustrative
- // passage, NOT a recorded or statistically authoritative possession sequence.
- // Longer illustrative passages reduce exaggerated sprinting and camera whiplash.
-  const cycleLen=.35,cycle=Math.floor(t/cycleLen);
- const u=(t-cycle*cycleLen)/cycleLen,roll=hash(String(fixture.seed||'pfc')+':'+cycle);
- const side=roll%2,teamOffset=side*11;
- const passer=teamOffset+5+((roll>>>2)%3);
- const receiver=teamOffset+8+((roll>>>5)%3);
- const defender=(1-side)*11+1+((roll>>>8)%4);
- const source={x:origin(side,.46,field),y:field.height*(.30+((roll>>>11)%4)*.12)};
- const target={x:origin(side,.67,field),y:field.height*(.27+((roll>>>13)%4)*.13)};
- const contest={x:origin(side,.74,field),y:lerp(target.y,field.height*.5,.3)};
- const center={x:field.width*.5,y:field.height*.5};
- // Four-second transition into/out of each attack: no teleporting players
- // between independently randomized possession passages.
- const poseWeight=ease(u/.19)*ease((1-u)/.19);
- actors[passer].x=lerp(actors[passer].x,source.x,poseWeight);
- actors[passer].y=lerp(actors[passer].y,source.y,poseWeight);
- actors[receiver].x=lerp(actors[receiver].x,lerp(target.x,contest.x,ease((u-.55)/.3)),poseWeight);
- actors[receiver].y=lerp(actors[receiver].y,lerp(target.y,contest.y,ease((u-.55)/.3)),poseWeight);
- actors[defender].x=lerp(actors[defender].x,lerp(origin(side,.80,field),contest.x,ease((u-.6)/.28)),poseWeight);
- actors[defender].y=lerp(actors[defender].y,lerp(field.height*.48,contest.y,ease((u-.6)/.28)),poseWeight);
- let action;
- if(u<.16){ball={x:lerp(center.x,source.x,ease(u/.16)),y:lerp(center.y,source.y,ease(u/.16)),z:.2};action='illustrative-carry'}
- else if(u<.55){ball={x:lerp(source.x,target.x,ease((u-.16)/.39)),y:lerp(source.y,target.y,ease((u-.16)/.39)),z:.2+.27*Math.sin(Math.PI*(u-.16)/.39)};action='illustrative-pass'}
- else if(u<.83){ball={x:lerp(target.x,contest.x,ease((u-.55)/.28)),y:lerp(target.y,contest.y,ease((u-.55)/.28)),z:.2};action='illustrative-dribble'}
- else {ball={x:lerp(contest.x,center.x,ease((u-.83)/.17)),y:lerp(contest.y,center.y,ease((u-.83)/.17)),z:.2};action='illustrative-challenge';if(poseWeight>.5)actors[defender].frame=3}
- return {actors,ball,action,label:'',officialEvent:null,illustrative:true,cycle};
+ // The same receiver who controls the ball at the end of this passage
+ // starts the next passage as its carrier. No hidden return to midfield.
+ const cycleSeconds=8,at=seconds/cycleSeconds,cycle=Math.floor(at),u=at-cycle;
+ const plan=touchPlan(fixture,field);
+ const current=plan[Math.min(cycle,plan.length-2)];
+ const next=plan[Math.min(cycle+1,plan.length-1)];
+ const sender=pose(current.owner,field,seconds),receiver=pose(next.owner,field,seconds);
+ const passStart=cycle*cycleSeconds+cycleSeconds*.44;
+ const passArrival=cycle*cycleSeconds+cycleSeconds*.75;
+ const passOrigin=foot(pose(current.owner,field,passStart),current.owner);
+ const passTarget=foot(pose(next.owner,field,passArrival),next.owner);
+ let action,ownerIndex,contact;
+ if(u<.44){
+  ball=foot(sender,current.owner);
+  ownerIndex=current.owner;contact='controlled';action='illustrative-carry';
+ }else if(u<.75){
+  // Stop at the receiving player's foot. Decelerating there is a visible
+  // first touch, not an unexplained pre-possession change of direction.
+  const progress=ease((u-.44)/.31);
+  ball={x:lerp(passOrigin.x,passTarget.x,progress),
+   y:lerp(passOrigin.y,passTarget.y,progress),
+   z:.23+.65*Math.sin(Math.PI*progress)};
+  ownerIndex=-1;
+  const contested=Math.floor(current.owner/11)!==Math.floor(next.owner/11);
+  contact=contested?'contested-flight':'in-flight';
+  action=contested&&u>.60?'illustrative-challenge':'illustrative-pass';
+ }else{
+  ball=foot(receiver,next.owner);
+  ownerIndex=next.owner;contact='received';
+  action=Math.floor(current.owner/11)!==Math.floor(next.owner/11)
+   ?'illustrative-challenge':'illustrative-dribble';
+ }
+ // Off-ball movement is continuous absolute-time motion, rather than
+ // randomly selecting a new position for the receiving Pokémon.
+ const targetPlayer=actors[next.owner];
+ const preparation=ease((u-.20)/.35)*(1-ease((u-.76)/.16));
+ const anticipated=pose(next.owner,field,passArrival);
+ targetPlayer.x=lerp(targetPlayer.x,anticipated.x,preparation*.20);
+ targetPlayer.y=lerp(targetPlayer.y,anticipated.y,preparation*.20);
+ if(u>=.40&&u<.50)actors[current.owner].frame=3;
+ if(u>.68&&u<.80)targetPlayer.frame=3;
+ return {actors,ball,action,ownerIndex,contact,label:'',officialEvent:null,
+  illustrative:true,cycle,passStart,passArrival,passOrigin,passTarget};
+
 }
 module.exports={motionFrame,base,hash,shotSummary,playbackRate};
