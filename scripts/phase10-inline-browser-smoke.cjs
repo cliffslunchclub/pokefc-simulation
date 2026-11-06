@@ -27,8 +27,9 @@ const fs=require('node:fs');
   assert.deepEqual(shot.teamColors,['#E53935','#FFFFFF']);
   assert.deepEqual(shot.score,[0,0]);
   assert(shot.scale>0);
-  assert(shot.ballDrawRadius>=24,'The soccer ball must be substantially larger than the previous version');
-  assert(shot.ballDrawRadius*shot.scale/20>=30,'Ball must have a legible on-canvas radius');
+  assert(shot.ballDrawRadius>=8&&shot.ballDrawRadius<=12,'Ball sprite should be realistically smaller than oversized 24px circle');
+  await page.waitForFunction(()=>document.querySelector('#field iframe')?.contentWindow?.__PFC_SNAPSHOT__?.soccerBallSpriteLoaded===true,null,{timeout:20000});
+  assert(shot.ballDrawRadius*shot.scale/20>=7,'Soccer-ball sprite should be readable at broadcast zoom');
   const officialStats=await iframe.evaluate(el=>el.contentWindow.document.getElementById('stats')?.textContent||'');
   assert.match(officialStats,/FULL-TIME TOTALS \(not live\)/,'Final shot totals should not masquerade as live shots');
   assert.match(officialStats,/Keeper saves \d+–\d+/,'Include authoritative goalkeeper saves');
@@ -69,7 +70,23 @@ const fs=require('node:fs');
   await page.locator('#camera').selectOption('follow');
   await page.waitForFunction(()=>document.querySelector('#field iframe')?.contentWindow?.__PFC_SNAPSHOT__?.camera==='follow');
   const followScale=await iframe.evaluate(el=>el.contentWindow.__PFC_SNAPSHOT__.scale);
-  assert(followScale>wideScale*3,'Follow Ball must be FIFA-style close framing (3x wide or tighter)');
+  assert(followScale>wideScale*1.9&&followScale<wideScale*2.7,'FIFA-style mid-close framing should be tighter than wide but not extreme');
+  // A pass remains unowned while in flight, then touches the receiver.
+  await page.evaluate(()=>document.querySelector('#field iframe').contentWindow.postMessage(
+   {type:'pfc-phase10-control',action:'seek',minute:.08},location.origin));
+  await page.waitForFunction(()=>document.querySelector('#field iframe')?.contentWindow?.__PFC_SNAPSHOT__?.minute===.08);
+  const flight=await iframe.evaluate(el=>el.contentWindow.__PFC_SNAPSHOT__);
+  assert.equal(flight.carrier,-1,'Premature possession before a pass arrives');
+  assert.equal(flight.ballContact,'in-flight');
+  await page.evaluate(()=>document.querySelector('#field iframe').contentWindow.postMessage(
+   {type:'pfc-phase10-control',action:'seek',minute:.108},location.origin));
+  await page.waitForFunction(()=>document.querySelector('#field iframe')?.contentWindow?.__PFC_SNAPSHOT__?.minute===.108);
+  const received=await iframe.evaluate(el=>el.contentWindow.__PFC_SNAPSHOT__);
+  assert(received.carrier>=0&&received.carrier<22,'Receiver not credited after first touch');
+  assert.equal(received.ballContact,'received');
+  const ownerXY=received.actorWorldPositions[received.carrier];
+  assert(Math.hypot(ownerXY[0]-received.ball.x,ownerXY[1]-received.ball.y)<1.2,
+   'Ball changes owner before reaching receiver foot');
   await page.evaluate(()=>{
    const frame=document.querySelector('#field iframe');
    frame.contentWindow.postMessage({type:'pfc-phase10-control',action:'seek',minute:54},location.origin);
@@ -111,7 +128,8 @@ const fs=require('node:fs');
   assert.equal(mobileInfo.snapshot?.players,22);
   assert(mobileInfo.snapshot?.pokemonSpritesDrawn>=20,'Mobile original Pokémon sprites missing');
   assert(mobileInfo.width<=mobileInfo.viewport+1,'2.5D field overflows mobile viewport');
-  assert(mobileInfo.snapshot.ballDrawRadius>=24,'Mobile ball size must be increased');
+  assert(mobileInfo.snapshot.ballDrawRadius>=8&&mobileInfo.snapshot.ballDrawRadius<=12,'Mobile ball sprite must match requested realistic proportions');
+  assert.equal(mobileInfo.snapshot.soccerBallSpriteLoaded,true,'Soccer-ball SVG did not load on mobile');
   await mobile.locator('#fullscreen').tap();
   await mobile.waitForFunction(()=>document.getElementById('field').classList.contains('pfc-watch-theater'));
   const theaterHeight=await mobile.locator('#field').evaluate(el=>el.getBoundingClientRect().height);
@@ -134,6 +152,7 @@ const fs=require('node:fs');
    officialFulltimeScore:shot.score,watchToSim:true,
    recordedExactlyOnce:state.records===1,cancelWithoutSave:true,
    mobile390px:{fieldWidth:mobileInfo.width,viewportWidth:mobileInfo.viewport,pokemonDrawn:mobileInfo.snapshot.pokemonSpritesDrawn,recordedExactlyOnce:true},
+   soccerBallSprite:true,receiverContactVerified:true,
    screenCaptures:['inline-2p5d-kickoff.png','inline-2p5d-fullscreen.png','inline-2p5d-fulltime.png','inline-2p5d-mobile.png','inline-2p5d-mobile-fullscreen.png'],
    errors
   },null,2));
