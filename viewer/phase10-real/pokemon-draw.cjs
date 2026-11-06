@@ -1,7 +1,7 @@
 'use strict';
 const {badge}=require('./pokemon-badge.cjs');
 function draw(g,player,entry,screen,showNumbers,selected){
- const q=screen(player.x,player.y,0),x=q.x,y=q.y,size=72;
+ const q=screen(player.x,player.y,0),x=q.x,y=q.y,size=80;
  g.save();
  g.beginPath();g.ellipse(x,y-2,22,9,0,0,Math.PI*2);
  g.fillStyle=entry.color+'38';g.strokeStyle=entry.color;
