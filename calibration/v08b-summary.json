@@ -1,0 +1,147 @@
+{
+  "format": "fxi-calibration-exploratory-summary-v1",
+  "sampleType": "real pinned TacticMesh short-window telemetry vs Monte Carlo full-duration Quick Sim, normalized to observed window",
+  "calibrated": false,
+  "profileChanged": false,
+  "fullMatchReferences": 0,
+  "totals": {
+    "regions": 4,
+    "uniqueFixtures": 4,
+    "tmMinutes": 5.0,
+    "genuineTmTicks": 18000,
+    "quickSimCompleteMatches": 5000,
+    "tacticmeshObserved": {
+      "goals": 0,
+      "shots": 0,
+      "passes": 77,
+      "completedPasses": 47,
+      "tackles": 4,
+      "assists": 0
+    },
+    "quickSimExpectedDuringSameTime": {
+      "goals": 0.121,
+      "shots": 1.157,
+      "passes": 46.11,
+      "completedPasses": 31.348,
+      "tackles": 1.272,
+      "assists": 0.087
+    }
+  },
+  "fixtures": [
+    {
+      "region": "Kanto",
+      "fixture": "Pewter City FC vs Viridian City FC",
+      "minutes": 1.0,
+      "ticks": 3600,
+      "quickSimRuns": 1000,
+      "tm": {
+        "goals": 0,
+        "shots": 0,
+        "passes": 11,
+        "completedPasses": 8,
+        "tackles": 0,
+        "assists": 0
+      },
+      "quickExpected": {
+        "goals": 0.023,
+        "shots": 0.225,
+        "passes": 9.228000000000002,
+        "completedPasses": 6.2780000000000005,
+        "tackles": 0.258,
+        "assists": 0.016
+      },
+      "tmHomePossession": 76,
+      "quickHomePossession": 44.3,
+      "tmWallSeconds": 11.367,
+      "simWallSeconds": 2.667
+    },
+    {
+      "region": "Johto",
+      "fixture": "Violet City FC vs Blackthorn City FC",
+      "minutes": 1.0,
+      "ticks": 3600,
+      "quickSimRuns": 1000,
+      "tm": {
+        "goals": 0,
+        "shots": 0,
+        "passes": 17,
+        "completedPasses": 10,
+        "tackles": 0,
+        "assists": 0
+      },
+      "quickExpected": {
+        "goals": 0.027000000000000003,
+        "shots": 0.236,
+        "passes": 9.225999999999999,
+        "completedPasses": 6.273,
+        "tackles": 0.256,
+        "assists": 0.019
+      },
+      "tmHomePossession": 29.8,
+      "quickHomePossession": 44.6,
+      "tmWallSeconds": 13.885,
+      "simWallSeconds": 2.623
+    },
+    {
+      "region": "Hoenn",
+      "fixture": "Rustboro City FC vs Sootopolis City FC",
+      "minutes": 1.0,
+      "ticks": 3600,
+      "quickSimRuns": 1000,
+      "tm": {
+        "goals": 0,
+        "shots": 0,
+        "passes": 15,
+        "completedPasses": 11,
+        "tackles": 0,
+        "assists": 0
+      },
+      "quickExpected": {
+        "goals": 0.023,
+        "shots": 0.229,
+        "passes": 9.218,
+        "completedPasses": 6.265000000000001,
+        "tackles": 0.25,
+        "assists": 0.017
+      },
+      "tmHomePossession": 50.1,
+      "quickHomePossession": 45.3,
+      "tmWallSeconds": 13.52,
+      "simWallSeconds": 2.628
+    },
+    {
+      "region": "Sinnoh",
+      "fixture": "Oreburgh City FC vs Sunyshore City FC",
+      "minutes": 2.0,
+      "ticks": 7200,
+      "quickSimRuns": 2000,
+      "tm": {
+        "goals": 0,
+        "shots": 0,
+        "passes": 34,
+        "completedPasses": 18,
+        "tackles": 4,
+        "assists": 0
+      },
+      "quickExpected": {
+        "goals": 0.048,
+        "shots": 0.46699999999999997,
+        "passes": 18.438,
+        "completedPasses": 12.532,
+        "tackles": 0.508,
+        "assists": 0.035
+      },
+      "tmHomePossession": 58.1,
+      "quickHomePossession": 43.3,
+      "tmWallSeconds": 26.175,
+      "simWallSeconds": 5.094
+    }
+  ],
+  "limitations": [
+    "No original full-time TacticMesh match reports are present to use for calibration",
+    "Only 5 aggregate in-game minutes in four separately started fixtures; short kick-off intervals are not representative of full-match distributions",
+    "TacticMesh and Quick Sim have distinct possession definitions; percentages not directly calibrated",
+    "No valid TM shots-on-target or conventional save metric to calibrate",
+    "No parameters changed, and no artificial reference substituted"
+  ]
+}

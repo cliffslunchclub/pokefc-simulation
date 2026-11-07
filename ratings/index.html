@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#0b0d10">
+<meta name="description" content="How PokéFC Free Builder S–D Pokémon position fit grades are interpreted.">
+<title>PokéFC · How Positional Grades Work</title>
+<link rel="icon" type="image/svg+xml" href="../assets/icons/favicon.svg?v=2">
+<link rel="stylesheet" href="../assets/css/site.css?v=3">
+<style>
+*{box-sizing:border-box}
+body{font:14px/1.65 system-ui,-apple-system,"Segoe UI",sans-serif;margin:0}
+.grade-wrap{max-width:1050px;margin:0 auto;padding:34px 24px 76px}
+.grade-wrap h1{font-size:clamp(35px,6vw,61px);line-height:1;letter-spacing:-.06em;margin:8px 0 18px;font-weight:950}
+.grade-wrap h2{font-size:22px;margin:0 0 14px;letter-spacing:-.025em}
+.grade-wrap p{color:#b6cad5;max-width:900px}
+.grade-intro{max-width:730px;color:#c8dce3!important;font-size:16px}
+.grade-card{padding:22px;border:1px solid #344e61;border-radius:12px;background:#102032;margin:16px 0}
+.grade-scale{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px;padding-top:8px}
+.grade-scale div{min-width:0;display:flex;flex-direction:column;align-items:center;gap:4px;border:1px solid #39566b;border-radius:8px;padding:12px 5px;background:#172b3d;text-align:center}
+.grade-scale strong{font-size:32px;font-weight:950;color:#e5efef;line-height:1}
+.grade-scale small{font-size:11px;color:#b5c8d4}
+.grade-scale div:first-child strong{color:#8cfdba}
+.grade-scale div:nth-child(2) strong{color:#aeeeb6}
+.grade-scale div:nth-child(3) strong{color:#f3da89}
+.grade-scale div:nth-child(4) strong{color:#ffcb89}
+.grade-scale div:nth-child(5) strong{color:#f3a3a3}
+
+.position-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:13px}
+.position-card{padding:18px;border:1px solid #344e61;border-radius:10px;background:#14273a}
+.position-card .positions{font-weight:900;color:#8cfdba;letter-spacing:.09em;font-size:11px}
+.position-card h3{margin:8px 0;font-size:18px}
+.position-card p{margin:0;font-size:13px}
+.back-link{display:inline-flex;border:1px solid #567461;background:#24453a;color:#e0f9e7;padding:11px 16px;border-radius:8px;text-decoration:none;font-weight:850}
+.back-link:hover{background:#315b48}
+small.note{color:#92a9b7}
+@media(max-width:720px){.grade-wrap{padding:23px 14px 48px}.grade-scale{grid-template-columns:repeat(3,minmax(0,1fr))}.position-grid{grid-template-columns:1fr}}
+</style><link rel="stylesheet" href="../assets/css/newtro.css?v=1"></head><body>
+<header class="pfc-header">
+  <div class="pfc-shell pfc-head-row">
+    <a href="../" class="pfc-logo" aria-label="PokéFC home"><span class="pfc-mark"><img src="../assets/icons/favicon.svg?v=2" alt="" width="32" height="32"></span>POKÉ<b>FC</b></a>
+    <nav class="pfc-nav" aria-label="Game modes">
+      <a href="../play/">QUICK PLAY</a>
+      <a href="../challenge/">CHALLENGES</a>
+      <a href="../franchise/">FRANCHISE</a>
+    </nav>
+    <span class="pfc-beta">OPEN ALPHA</span>
+  </div>
+</header>
+<main class="grade-wrap">
+<span class="pfc-eyebrow">FREE BUILDER · SCOUTING GUIDE</span>
+<h1>POSITIONAL GRADES,<br>EXPLAINED.</h1>
+<p class="grade-intro">The S–D grade tells you how naturally a Pokémon’s current profile fits a particular spot on the football pitch. It is a <strong>positional fit indicator</strong>, not a guarantee of match performance or a universal Pokémon strength ranking.</p>
+<section class="grade-card" aria-labelledby="scale-title">
+<h2 id="scale-title">How to read the grades</h2>
+<div class="grade-scale" aria-label="Grades S through D"><div><strong>S</strong><small>Excellent fit</small></div><div><strong>A</strong><small>Very good fit</small></div><div><strong>B</strong><small>Good fit</small></div><div><strong>C</strong><small>Average fit</small></div><div><strong>D</strong><small>Limited fit</small></div></div>
+<p>The grade is based on a blend of underlying Pokémon attributes, interpreted through the demands of the position. The Free Builder deliberately uses broad grade bands rather than publishing individual scores, exact attribute weights, or calculation thresholds.</p>
+</section>
+<section class="grade-card" aria-labelledby="positions-title">
+<h2 id="positions-title">What matters by position</h2>
+<p>PokéFC evaluates nine positional archetypes using weighted Pokémon base stats. Closely related left/right positions share formulas, but center backs, fullbacks, midfielders, wingers and strikers have distinct requirements.</p>
+<div class="position-grid">
+<article class="position-card"><span class="positions">GK</span><h3>Goalkeeper</h3><p>Durability, defensive resilience, and mobility matter most in the current model. A high grade means a strong all-around keeper profile, rather than guaranteed saves.</p></article>
+<article class="position-card"><span class="positions">CB</span><h3>Centre Back</h3><p>Resistance to pressure, physical sturdiness, challenges, and recovery pace contribute to defensive fit.</p></article>
+<article class="position-card"><span class="positions">LB · RB · LWB · RWB</span><h3>Fullbacks and wingbacks</h3><p>Fullbacks emphasize Speed and Defense; wingbacks also benefit from attacking attributes. They no longer share one defensive rating.</p></article>
+<article class="position-card"><span class="positions">CDM · CM</span><h3>Defensive and central midfield</h3><p>CDM prioritizes defensive attributes. CM uses 20% HP, 20% Speed, and 15% each of Attack, Defense, Sp. Attack and Sp. Defense.</p></article>
+<article class="position-card"><span class="positions">LM · RM · CAM</span><h3>Wide and attacking midfield</h3><p>CAM emphasizes Sp. Attack and Speed. LM/RM use the wide-support archetype; they are not identical to CM.</p></article>
+<article class="position-card"><span class="positions">LW · RW</span><h3>Wingers</h3><p>Attacking threat, quickness, and ability to contribute going forward are emphasized. Wingers have their own Speed-focused fit.</p></article>
+<article class="position-card"><span class="positions">ST</span><h3>Striker</h3><p>Attacking ability and speed are especially important, with additional emphasis on offensive contribution. Striker fit is separate from winger fit.</p></article>
+<article class="position-card"><span class="positions">TEAM XI</span><h3>Your team's grade</h3><p>Combines the position-fit evaluations of the Pokémon you've selected. It reflects only filled positions until your full eleven is chosen.</p></article>
+</div>
+</section>
+<section class="grade-card">
+<h2>What a grade and efficiency percentage mean</h2>
+<p>The letter is this Pokémon's role-fit tier. The percentage beside it is match efficiency relative to that Pokémon's own best role, from 100% at its natural best to a 70% floor when heavily misplaced. It is not a goal-scoring percentage or win probability. Grades do not show a predicted match score or how a specific opponent’s tactics will play out. Pokémon type, height and weight appear as scouting information but are not currently part of the Builder's positional-fit formula. Match outcomes also depend on the simulation engine and tactics.</p>
+<p><small class="note">These are provisional alpha grades. As positional roles and the shared match engine are calibrated, grades and efficiency may change. The exact numerical formula is not published in this guide.</small></p>
+</section>
+<a href="../#builder" class="back-link">← Back to Free Builder</a>
+</main>
+</body></html>

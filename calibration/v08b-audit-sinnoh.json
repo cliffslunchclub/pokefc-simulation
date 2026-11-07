@@ -1,0 +1,157 @@
+{
+  "format": "fxi-quick-vs-tm-diagnostic-v1",
+  "sourceCommit": "603312dcf037bed0b0c817f8ba8a194eaebce8da",
+  "engineMode": "verified-unmodified-original",
+  "provenance": {
+    "realTacticMeshTicks": 7200,
+    "realTacticMeshSeconds": 119.99999999999447,
+    "realTacticMeshStatus": "running",
+    "fullMatch": false,
+    "calibrationEligible": false,
+    "goalEventConsistent": true
+  },
+  "fixture": {
+    "home": "Oreburgh City FC",
+    "away": "Sunyshore City FC",
+    "club": 24,
+    "matchId": "fxi-3402825588",
+    "seed": 3402825588
+  },
+  "parametersStatus": "provisional",
+  "replicates": 2000,
+  "wallSeconds": {
+    "realTM": 26.175,
+    "quickSimBatch": 5.094
+  },
+  "observations": [
+    {
+      "team": "Oreburgh City FC",
+      "originalTacticMeshObserved": {
+        "team": "Oreburgh City FC",
+        "teamId": "24",
+        "goals": 0,
+        "shots": 0,
+        "passes": 18,
+        "completedPasses": 10,
+        "tackles": 1,
+        "assists": 0,
+        "possessionPercent": 58.1
+      },
+      "quickSimMonteCarlo": {
+        "goals": {
+          "per90": 0.842,
+          "perObservedMinutes": 0.019,
+          "stdDev90": 0.896
+        },
+        "shots": {
+          "per90": 10.277,
+          "perObservedMinutes": 0.228,
+          "stdDev90": 3
+        },
+        "passes": {
+          "per90": 388.043,
+          "perObservedMinutes": 8.623,
+          "stdDev90": 19.929
+        },
+        "completedPasses": {
+          "per90": 263.533,
+          "perObservedMinutes": 5.856,
+          "stdDev90": 16.385
+        },
+        "tackles": {
+          "per90": 11.332,
+          "perObservedMinutes": 0.252,
+          "stdDev90": 3.306
+        },
+        "assists": {
+          "per90": 0.617,
+          "perObservedMinutes": 0.014,
+          "stdDev90": 0.768
+        },
+        "possessionPercent": {
+          "per90": 43.3,
+          "perObservedMinutes": null,
+          "stdDev90": 0
+        }
+      }
+    },
+    {
+      "team": "Sunyshore City FC",
+      "originalTacticMeshObserved": {
+        "team": "Sunyshore City FC",
+        "teamId": "31",
+        "goals": 0,
+        "shots": 0,
+        "passes": 16,
+        "completedPasses": 8,
+        "tackles": 3,
+        "assists": 0,
+        "possessionPercent": 41.9
+      },
+      "quickSimMonteCarlo": {
+        "goals": {
+          "per90": 1.321,
+          "perObservedMinutes": 0.029,
+          "stdDev90": 1.107
+        },
+        "shots": {
+          "per90": 10.76,
+          "perObservedMinutes": 0.239,
+          "stdDev90": 3.217
+        },
+        "passes": {
+          "per90": 441.68,
+          "perObservedMinutes": 9.815,
+          "stdDev90": 20.911
+        },
+        "completedPasses": {
+          "per90": 300.428,
+          "perObservedMinutes": 6.676,
+          "stdDev90": 17.493
+        },
+        "tackles": {
+          "per90": 11.514,
+          "perObservedMinutes": 0.256,
+          "stdDev90": 3.409
+        },
+        "assists": {
+          "per90": 0.949,
+          "perObservedMinutes": 0.021,
+          "stdDev90": 0.951
+        },
+        "possessionPercent": {
+          "per90": 56.7,
+          "perObservedMinutes": null,
+          "stdDev90": 0
+        }
+      }
+    }
+  ],
+  "allScoreProbabilities": {
+    "0-1": 15.1,
+    "1-1": 13.25,
+    "0-0": 10.75,
+    "1-0": 9.75,
+    "0-2": 9.75,
+    "1-2": 9.25,
+    "2-1": 5.3,
+    "0-3": 4.8,
+    "2-2": 4.35,
+    "2-0": 4,
+    "1-3": 3.75,
+    "2-3": 1.65
+  },
+  "historicalScoreReference": {
+    "score": "0-3",
+    "source": "earlier FUTBOL XI completed benchmark discussion (NOT saved original official report)",
+    "monteCarloExactScorePct": 4.8
+  },
+  "limitations": [
+    "One shortened observational WINDOW of genuine full-speed TacticMesh physics, NOT a shortened match rule",
+    "Rate-normalized comparison is exploratory because events are clustered over a match",
+    "Possession percentages are definitions of different estimators; treat as diagnostic only",
+    "No TacticMesh full-match report included; no parameter fitting and no calibration activation"
+  ],
+  "franchiseUnchanged": true,
+  "validQuickSimReports": 2000
+}

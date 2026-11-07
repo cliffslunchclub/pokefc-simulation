@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="128" height="128" viewBox="0 0 128 128" aria-label="Classic black and white football">
+<defs>
+ <radialGradient id="surface" cx="32%" cy="25%" r="77%">
+  <stop offset="0" stop-color="#fff"/>
+  <stop offset=".70" stop-color="#f9faf8"/>
+  <stop offset=".92" stop-color="#c9cdd1"/>
+  <stop offset="1" stop-color="#859097"/>
+ </radialGradient>
+ <clipPath id="ball"><circle cx="64" cy="64" r="59"/></clipPath>
+</defs>
+<circle cx="64" cy="64" r="60" fill="url(#surface)" stroke="#131820" stroke-width="3"/>
+<g clip-path="url(#ball)" fill="#161b20" stroke="#161b20" stroke-width="3" stroke-linejoin="round">
+ <path d="M64 42 85 56 77 80 51 80 43 56Z"/>
+ <path d="M44 7 64-1 86 9 84 25 66 29 47 23Z"/>
+ <path d="M109 24 129 45 129 71 109 75 95 58 97 39Z"/>
+ <path d="M103 91 122 86 130 110 112 132 89 117 91 100Z"/>
+ <path d="M31 97 47 113 39 132 14 125-3 103 9 86Z"/>
+ <path d="M19 28 34 36 33 60 16 71-6 60 0 36Z"/>
+</g>
+<g fill="none" stroke="#303840" stroke-width="2.2" opacity=".65">
+ <path d="M64 42 66 29M85 56 97 39M77 80 91 100M51 80 47 113M43 56 33 60"/>
+ <path d="M84 25 97 39M109 75 91 100M47 113 31 97M16 71 9 86"/>
+</g>
+<ellipse cx="43" cy="26" rx="22" ry="12" fill="#fff" opacity=".21" transform="rotate(-27 43 26)"/>
+</svg>

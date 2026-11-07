@@ -1,0 +1,157 @@
+{
+  "format": "fxi-quick-vs-tm-diagnostic-v1",
+  "sourceCommit": "603312dcf037bed0b0c817f8ba8a194eaebce8da",
+  "engineMode": "verified-unmodified-original",
+  "provenance": {
+    "realTacticMeshTicks": 3600,
+    "realTacticMeshSeconds": 59.999999999997875,
+    "realTacticMeshStatus": "running",
+    "fullMatch": false,
+    "calibrationEligible": false,
+    "goalEventConsistent": true
+  },
+  "fixture": {
+    "home": "Violet City FC",
+    "away": "Blackthorn City FC",
+    "club": 8,
+    "matchId": "fxi-1546992591",
+    "seed": 1546992591
+  },
+  "parametersStatus": "provisional",
+  "replicates": 1000,
+  "wallSeconds": {
+    "realTM": 13.885,
+    "quickSimBatch": 2.623
+  },
+  "observations": [
+    {
+      "team": "Violet City FC",
+      "originalTacticMeshObserved": {
+        "team": "Violet City FC",
+        "teamId": "8",
+        "goals": 0,
+        "shots": 0,
+        "passes": 9,
+        "completedPasses": 5,
+        "tackles": 0,
+        "assists": 0,
+        "possessionPercent": 29.8
+      },
+      "quickSimMonteCarlo": {
+        "goals": {
+          "per90": 0.879,
+          "perObservedMinutes": 0.01,
+          "stdDev90": 0.941
+        },
+        "shots": {
+          "per90": 10.23,
+          "perObservedMinutes": 0.114,
+          "stdDev90": 3.225
+        },
+        "passes": {
+          "per90": 393.562,
+          "perObservedMinutes": 4.373,
+          "stdDev90": 20.242
+        },
+        "completedPasses": {
+          "per90": 267.628,
+          "perObservedMinutes": 2.974,
+          "stdDev90": 16.597
+        },
+        "tackles": {
+          "per90": 11.297,
+          "perObservedMinutes": 0.126,
+          "stdDev90": 3.364
+        },
+        "assists": {
+          "per90": 0.656,
+          "perObservedMinutes": 0.007,
+          "stdDev90": 0.816
+        },
+        "possessionPercent": {
+          "per90": 44.6,
+          "perObservedMinutes": null,
+          "stdDev90": 0
+        }
+      }
+    },
+    {
+      "team": "Blackthorn City FC",
+      "originalTacticMeshObserved": {
+        "team": "Blackthorn City FC",
+        "teamId": "15",
+        "goals": 0,
+        "shots": 0,
+        "passes": 8,
+        "completedPasses": 5,
+        "tackles": 0,
+        "assists": 0,
+        "possessionPercent": 70.2
+      },
+      "quickSimMonteCarlo": {
+        "goals": {
+          "per90": 1.488,
+          "perObservedMinutes": 0.017,
+          "stdDev90": 1.158
+        },
+        "shots": {
+          "per90": 10.997,
+          "perObservedMinutes": 0.122,
+          "stdDev90": 3.247
+        },
+        "passes": {
+          "per90": 436.802,
+          "perObservedMinutes": 4.853,
+          "stdDev90": 20.597
+        },
+        "completedPasses": {
+          "per90": 296.908,
+          "perObservedMinutes": 3.299,
+          "stdDev90": 17.362
+        },
+        "tackles": {
+          "per90": 11.674,
+          "perObservedMinutes": 0.13,
+          "stdDev90": 3.445
+        },
+        "assists": {
+          "per90": 1.106,
+          "perObservedMinutes": 0.012,
+          "stdDev90": 1.028
+        },
+        "possessionPercent": {
+          "per90": 55.4,
+          "perObservedMinutes": null,
+          "stdDev90": 0
+        }
+      }
+    }
+  ],
+  "allScoreProbabilities": {
+    "0-1": 14.9,
+    "1-1": 12.1,
+    "0-2": 12.1,
+    "1-2": 9.3,
+    "0-0": 8.4,
+    "1-0": 7,
+    "2-1": 5.8,
+    "0-3": 5.1,
+    "2-2": 4.5,
+    "1-3": 4.3,
+    "2-0": 3.7,
+    "2-3": 2
+  },
+  "historicalScoreReference": {
+    "score": "0-3",
+    "source": "earlier FUTBOL XI completed benchmark discussion (NOT saved original official report)",
+    "monteCarloExactScorePct": 5.1
+  },
+  "limitations": [
+    "One shortened observational WINDOW of genuine full-speed TacticMesh physics, NOT a shortened match rule",
+    "Rate-normalized comparison is exploratory because events are clustered over a match",
+    "Possession percentages are definitions of different estimators; treat as diagnostic only",
+    "No TacticMesh full-match report included; no parameter fitting and no calibration activation"
+  ],
+  "franchiseUnchanged": true,
+  "validQuickSimReports": 1000
+}
