@@ -57,6 +57,7 @@ jobs:
       - name: Run PSE and game-mode regression tests
         run: |
           set -euo pipefail
+          failures=0
           for test in \
             tests/test-national-dex.cjs \
             tests/test-pokemon-position-v2.cjs \
@@ -72,9 +73,10 @@ jobs:
             tests/test-phase10-quickplay-lifecycle.cjs \
             tests/test-franchise-soccerjs-watch.cjs; do
             echo "::group::$test"
-            node "$test"
+            if node "$test"; then :; else failures=$((failures+1)); fi
             echo "::endgroup::"
           done
+          test "$failures" -eq 0
 
   challenge-ui:
     name: Challenges and shared UI
