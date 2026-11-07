@@ -2,16 +2,11 @@ name: PokéFC Watch browser QA — no deployment
 on:
   workflow_dispatch:
   pull_request:
-    paths:
-      - 'watch/**'
-      - 'assets/js/quick-sim.js'
-      - 'assets/js/pse-knockout.js'
-      - 'assets/js/position-effectiveness.js'
-      - 'tests/ci-pse-120-browser.cjs'
-      - 'tests/ci-pse-enclosed-browser.cjs'
-      - '.github/workflows/watch-browser-qa.yml'
 permissions:
   contents: read
+concurrency:
+  group: pokefc-public-browser-${{ github.ref }}
+  cancel-in-progress: true
 jobs:
   browser-and-static-package:
     runs-on: ubuntu-24.04
@@ -27,8 +22,7 @@ jobs:
         run: bash watch/soccerjs/build-local.sh
       - name: Prepare Chromium browser
         run: |
-          npm install --no-save --no-audit --no-fund playwright@1.56.1
-          npx playwright install --with-deps chromium
+          ./node_modules/.bin/playwright install --with-deps chromium
       - name: 120-minute Watch, replay and mobile browser test
         run: node tests/ci-pse-120-browser.cjs
       - name: Enclosed pitch and wall physics browser test

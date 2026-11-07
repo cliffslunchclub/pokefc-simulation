@@ -46,3 +46,9 @@ For the native Watch renderer, use `bash watch/soccerjs/build-local.sh` and the 
 ## Security and ownership
 
 Read [SECURITY.md](SECURITY.md) and [RIGHTS_AND_ATTRIBUTION.md](RIGHTS_AND_ATTRIBUTION.md) before contributing. Public visibility does not automatically authorize reuse of original PokéFC source or Pokémon-related intellectual property. The game is an unofficial fan project, not affiliated with Nintendo, The Pokémon Company, Creatures Inc. or GAME FREAK.
+
+## Reproducible QA tools
+
+The root `package.json` and `package-lock.json` pin the native Watch bundler and Playwright browser tools. `bash watch/soccerjs/build-local.sh` uses `npm ci` with that lockfile and the pinned upstream source; it does not install upstream floating dependencies. Browser QA runs on every pull request, including HTML, CSS and shared UI changes, and cancels superseded runs on the same PR.
+
+To update tools, change the manifest and regenerate the lockfile in a public PR, then run the public regression and browser workflows before merging. Do not edit the lockfile by hand.

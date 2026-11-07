@@ -2,12 +2,15 @@
 # LOCAL BUILD ONLY. Never triggers private GitHub Actions, SiteGround, or Pages.
 set -euo pipefail
 HERE="$(cd "$(dirname "$0")" && pwd)"
+ROOT="$(cd "$HERE/../.." && pwd)"
 TMP="$(mktemp -d)"
 trap 'rm -rf "$TMP"' EXIT
 echo "Building isolated PokéFC Phase 10 Soccer-JS replay; no production files touched."
 git clone --filter=blob:none --no-checkout https://github.com/haeretici/soccer-js.git "$TMP/upstream"
 git -C "$TMP/upstream" checkout --detach 38970e0dade0865078c9e84bc1ecfd72aaa02fde
-(cd "$TMP/upstream" && npm install --no-audit --no-fund)
+# Install only the reviewed tools from the public mirror lockfile.
+# The pinned upstream source has no runtime npm dependencies.
+npm ci --prefix "$ROOT" --no-audit --no-fund
 cp "$HERE/viewer-entry.cjs" "$TMP/upstream/phase10-viewer-entry.cjs"
 cp "$HERE/phase10-motion.cjs" "$TMP/upstream/phase10-motion.cjs"
 cp "$HERE/phase10-play-director.cjs" "$TMP/upstream/phase10-play-director.cjs"
@@ -20,7 +23,7 @@ cp "$HERE/highlight-replay.cjs" "$TMP/upstream/highlight-replay.cjs"
 cp "$HERE/phase10-commentary.cjs" "$TMP/upstream/phase10-commentary.cjs"
 cp "$HERE"/pokemon-*.cjs "$TMP/upstream/"
 mkdir -p "$HERE/dist"
-"$TMP/upstream/node_modules/.bin/esbuild" "$TMP/upstream/phase10-viewer-entry.cjs" \
+"$ROOT/node_modules/.bin/esbuild" "$TMP/upstream/phase10-viewer-entry.cjs" \
   --bundle --platform=browser --format=iife --target=es2020 \
   --minify --outfile="$HERE/dist/viewer.bundle.js"
 cp "$HERE/index.html" "$HERE/viewer.css" "$HERE/fixture.json" "$HERE/dist/"
