@@ -1,0 +1,96 @@
+name: PokéFC Browser and Native Watch Tests
+
+on:
+  pull_request:
+    paths:
+      - 'assets/js/**'
+      - 'watch/**'
+      - 'play/**'
+      - 'challenge/**'
+      - 'franchise/**'
+      - 'tests/ci-pse-*-browser.cjs'
+      - '.github/workflows/pokefc-public-browser.yml'
+  push:
+    branches: [main, 'mirror/**']
+    paths:
+      - 'assets/js/**'
+      - 'watch/**'
+      - 'tests/ci-pse-*-browser.cjs'
+      - '.github/workflows/pokefc-public-browser.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: pfc-public-browser-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  native-watch:
+    name: Native Soccer-JS / desktop and mobile Chromium
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - name: Check out public PokéFC source
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          persist-credentials: false
+      - name: Check out pinned MIT-licensed Soccer-JS
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          repository: haeretici/soccer-js
+          ref: 38970e0dade0865078c9e84bc1ecfd72aaa02fde
+          path: soccer-js-upstream
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: '22'
+      - name: Install upstream renderer build dependencies
+        shell: bash
+        run: |
+          set -euo pipefail
+          (cd soccer-js-upstream && npm install --no-audit --no-fund)
+      - name: Build PSE-controlled native Watch viewer
+        shell: bash
+        run: |
+          set -euo pipefail
+          cp watch/soccerjs/viewer-entry.cjs soccer-js-upstream/pfc-viewer-entry.cjs
+          cp watch/soccerjs/phase10-motion.cjs soccer-js-upstream/
+          cp watch/soccerjs/phase10-play-director.cjs soccer-js-upstream/
+          cp watch/soccerjs/phase10-player-pace.cjs soccer-js-upstream/
+          cp watch/soccerjs/phase10-goalkeeper-rush.cjs soccer-js-upstream/
+          cp watch/soccerjs/phase10-camera-zoom.cjs soccer-js-upstream/
+          cp watch/soccerjs/phase10-team-shape.cjs soccer-js-upstream/
+          cp watch/soccerjs/phase10-wall-physics.cjs soccer-js-upstream/
+          cp watch/soccerjs/highlight-replay.cjs soccer-js-upstream/
+          cp watch/soccerjs/phase10-commentary.cjs soccer-js-upstream/
+          cp watch/soccerjs/pokemon-*.cjs soccer-js-upstream/
+          mkdir -p watch/soccerjs/dist
+          ./soccer-js-upstream/node_modules/.bin/esbuild \
+            soccer-js-upstream/pfc-viewer-entry.cjs \
+            --bundle --platform=browser --format=iife --target=es2020 \
+            --minify --outfile=watch/soccerjs/dist/viewer.bundle.js
+          cp watch/soccerjs/index.html watch/soccerjs/viewer.css watch/soccerjs/dist/
+          cp -R soccer-js-upstream/presets soccer-js-upstream/assets watch/soccerjs/dist/
+          cp watch/soccerjs/soccer-ball.svg watch/soccerjs/dist/assets/pfc-soccer-ball.svg
+          cp soccer-js-upstream/LICENSE watch/soccerjs/dist/SOCCER-JS-LICENSE.txt
+          test -s watch/soccerjs/dist/viewer.bundle.js
+          test -s watch/soccerjs/dist/assets/animation_rigs/1.json
+      - name: Install Chromium test harness
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm install --no-save --no-audit --no-fund playwright@1.55.0
+          npx playwright install --with-deps chromium
+      - name: Run desktop and mobile PSE browser tests
+        shell: bash
+        run: |
+          set -euo pipefail
+          node tests/ci-pse-120-browser.cjs
+          node tests/ci-pse-enclosed-browser.cjs
+      - name: Confirm no production deployment script ran
+        run: |
+          test ! -e .github/workflows/deploy-siteground.yml
+          test ! -e .github/workflows/deploy-arcade-soccer-js.yml
+          echo "Native browser tests completed without publishing to SiteGround"

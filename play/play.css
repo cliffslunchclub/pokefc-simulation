@@ -1,0 +1,106 @@
+*{box-sizing:border-box}body{font:14px/1.5 system-ui,-apple-system,"Segoe UI",sans-serif}.play-intro{padding:30px 0 23px}.play-intro .pfc-mode-title{margin:10px 0}.play-layout{display:grid;grid-template-columns:minmax(290px,.83fr) minmax(450px,1.45fr);align-items:start;gap:16px;margin-bottom:48px}.play-panel{background:#101d2c;border:1px solid #2e4960;border-radius:12px;min-width:0;overflow:hidden}.play-panel-title{display:flex;align-items:center;gap:10px;padding:13px 16px;background:#192c3e;border-bottom:1px solid #345064}.play-panel-title h2{font-size:13px;letter-spacing:.13em;font-weight:900;margin:0}.section-number{background:#ffcf76;color:#111d26;font-size:10px;font-weight:1000;padding:4px 7px;border-radius:4px}.tiny-label{margin-left:auto;color:#98b1c2;font-size:10px;font-weight:900;letter-spacing:.12em}.setup-panel{padding-bottom:17px}.xi-status{margin:14px 15px 9px;border:1px solid #385970;background:#1b3445;padding:11px;border-radius:7px;font-size:12px;color:#d2e6ef}.xi-status.ready{background:#173a34;border-color:#40846e;color:#9ff6c1}.xi-status.warning{background:#493321;border-color:#87663a;color:#ffe3ae}.team-actions{display:flex;gap:8px;flex-wrap:wrap;margin:0 15px 12px}.play-btn{border:1px solid #486279;background:#253c50;color:#eff8ff;border-radius:7px;padding:9px 11px;font-size:12px;font-weight:900;letter-spacing:.02em;min-height:38px;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;justify-content:center;gap:6px}.play-btn:hover:not(:disabled){background:#355a70}.play-btn:disabled{opacity:.38;cursor:not-allowed}.play-btn.primary{background:#c9f4ab;border-color:#c9f4ab;color:#0d271b}.play-btn.watch{background:#f8ce77;border-color:#f8ce77;color:#151e26}.play-btn.subtle{background:#162939;font-size:11px}.team-preview{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:6px;margin:0 15px}.mini-poke{text-align:center;background:#162b3b;border:1px solid #345269;border-radius:7px;padding:6px 3px;min-width:0}.mini-poke img{width:34px;height:34px;object-fit:contain;image-rendering:pixelated;display:block;margin:0 auto}.mini-poke b{font-size:10px;display:block;color:#f4d591}.mini-poke span{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:10px}.mini-poke.empty{border-style:dashed;color:#899ead}.play-divider{border-top:1px solid #30495b;margin:14px 0}.play-label{display:block;margin:10px 15px 4px;color:#a9bdca;text-transform:uppercase;letter-spacing:.12em;font-size:10px;font-weight:900}.play-select{display:block;width:calc(100% - 30px);background:#0c1a28;border:1px solid #466075;border-radius:7px;color:#f6f9fc;font:inherit;padding:10px 11px;margin:0 15px 8px;min-height:40px}.opponent-card{margin:12px 15px;background:#182d3e;border:1px solid #3b5a6d;border-radius:8px;padding:13px}.opponent-card strong{font-size:17px;letter-spacing:-.03em}.opponent-card p{margin:4px 0;color:#afc7d3;font-size:12px}.opponent-card .type-chip{display:inline-flex;background:#34414a;border-radius:4px;padding:3px 8px;font-size:10px;font-weight:850;margin-top:6px;color:#f9da93}.play-actions{display:flex;gap:8px;margin:15px 15px 5px}.play-actions .play-btn{flex:1;min-width:0}.setup-panel .pfc-footnote{margin:12px 15px 0}.scoreboard{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:9px;background:linear-gradient(110deg,#1a3445,#152437 45%,#344049 120%);padding:19px 16px;border-bottom:1px solid #476071}.scoreboard strong{font-size:16px;font-weight:900;line-height:1.12;display:block}.team-side{font-size:10px;font-weight:900;letter-spacing:.13em;color:#a8c0d1}.score-mid{text-align:center;min-width:120px}.score-mid #score{font-size:clamp(31px,4vw,52px);font-weight:1000;color:#fcfbec;font-variant-numeric:tabular-nums;line-height:1.15}.score-mid #matchClock{font-size:10px;letter-spacing:.12em;font-weight:900;color:#f7d689}.score-mid #matchState{font-size:10px;color:#aec9d2}.away-name{text-align:right}.field-shell{padding:14px;background:#0c2027}.field-shell canvas{display:block;width:100%;height:auto;border:3px solid #547e71;border-radius:5px;background:#0d5b46}.watch-controls{display:flex;gap:7px;flex-wrap:wrap;align-items:center;padding:12px 15px;border-top:1px solid #34505f}.watch-controls label{display:flex;align-items:center;gap:5px;color:#abc0ce;font-size:11px;margin-left:auto}.play-select.compact{width:auto;min-height:34px;padding:5px 7px;margin:0}.engine-status{margin:0;padding:0 15px 12px;font-size:11px;color:#a9c5d2}.match-result{border-top:1px solid #314f63;min-height:155px;padding:16px}.empty-state{text-align:center;color:#a9bdc9;padding:12px}.empty-state>span{display:block;font-size:28px}.empty-state strong{display:block;font-size:13px;color:#f2fbfd}.empty-state p{font-size:12px}.result-title{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px}.result-title strong{font-size:20px;letter-spacing:-.02em}.result-meta{font-size:10px;font-weight:900;color:#e5d59d;letter-spacing:.13em}.stat-table{margin-top:12px;display:grid;gap:4px}.stat-row{display:grid;grid-template-columns:1fr 1.25fr 1fr;align-items:center;text-align:center;font-size:12px;padding:5px 7px;border-radius:4px;background:#182c39}.stat-row span:first-child{font-weight:800;text-align:left}.stat-row span:last-child{font-weight:800;text-align:right}.stat-row small{color:#afc9d3;font-size:11px}.event-feed{max-height:160px;overflow:auto;margin:10px 0 0;padding:8px 11px;background:#0d1e2a;border:1px solid #2f485b;border-radius:7px}.event-feed p{margin:6px 0;font-size:11px;color:#d2e5ee}.event-feed strong{color:#fbd37d}.pfc-page-footer{font-size:11px;color:#90a5b4;border-top:1px solid #304a5a;padding-top:20px;padding-bottom:25px}@media(max-width:950px){.play-layout{grid-template-columns:1fr}.team-preview{grid-template-columns:repeat(11,minmax(0,1fr))}.mini-poke{padding:4px 1px}.mini-poke img{width:28px;height:28px}.mini-poke span{font-size:9px}}@media(max-width:580px){.team-preview{grid-template-columns:repeat(6,minmax(0,1fr))}.scoreboard strong{font-size:13px}.play-actions{flex-wrap:wrap}.play-actions .play-btn{flex-basis:100%}.watch-controls .play-btn{flex:1}.watch-controls label{width:100%;justify-content:flex-end}}
+/* Challenge-mode context: keep the global three-mode navigation unchanged. */
+.return-challenge{margin:12px 15px 16px}
+.return-challenge[hidden],.team-actions[hidden]{display:none!important}
+.result-meta{line-height:1.6}
+
+/* Recorded match events, shared by live Play and the Challenge run recaps. */
+.pfc-event-timeline{padding:0!important;margin:8px 0!important;list-style:none!important;display:grid;gap:6px}
+.pfc-event-entry{display:grid;grid-template-columns:41px 25px minmax(0,1fr);gap:7px;align-items:center;background:#172e3d;border:1px solid #426073;border-left:3px solid #698fa0;border-radius:7px;padding:8px 10px}
+.pfc-event-entry.home{border-left-color:#a3e8b9}
+.pfc-event-entry.away{border-left-color:#f0c888}
+.pfc-event-entry.neutral{border-left-color:#88a7c7}
+.pfc-event-entry.goal{background:#22433e}
+.pfc-event-entry.card{background:#413828}
+.pfc-event-entry.save{background:#1e384e}
+.pfc-event-minute{font-size:13px;font-weight:950;color:#f2d79a;font-variant-numeric:tabular-nums}
+.pfc-event-icon{font-size:17px;text-align:center;line-height:1}
+.pfc-event-content{display:flex;flex-direction:column;gap:2px;min-width:0}
+.pfc-event-content strong{font-size:11px;font-weight:950;color:#f4f7ef;letter-spacing:.035em}
+.pfc-event-content span{font-size:11px;color:#e0eaf3;overflow-wrap:anywhere}
+.pfc-event-content small{font-size:9px;color:#afcbd2;font-weight:800;letter-spacing:.045em}
+.pfc-event-origin{font-size:9px;white-space:nowrap;color:#bbd9cc;letter-spacing:.05em;font-weight:850}
+.match-event-empty{margin:8px 0!important;padding:10px 12px;border:1px dashed #547185;border-radius:7px;color:#b8cddd!important;font-size:11px!important;line-height:1.5}
+@media(max-width:570px){
+ .pfc-event-entry{grid-template-columns:35px 22px minmax(0,1fr);gap:6px;padding:7px}
+ .pfc-event-minute{font-size:12px}
+ .pfc-event-origin{grid-column:3;justify-self:start;font-size:8px}
+}
+
+/* Chronological live-event column directly below the match controls. */
+.play-live-events{margin:0 14px 14px;border:1px solid #3e6271;border-radius:9px;background:#102935;overflow:hidden}
+.play-live-head{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:10px 12px;background:#1c3946;border-bottom:1px solid #405e6e}
+.play-live-head h3{font-size:11px;font-weight:950;letter-spacing:.095em;color:#d8f0de;margin:0}
+.play-live-head span{font-size:10px;font-variant-numeric:tabular-nums;color:#e3d1a2;font-weight:900}
+.play-live-feed{max-height:285px;overflow:auto;padding:6px 10px}
+.play-live-feed .pfc-event-timeline{display:flex;flex-direction:column}
+.play-live-feed .pfc-event-entry{flex-shrink:0}
+.play-event-disclaimer{padding:0 13px 10px;color:#a8c4cd;font-size:10px;line-height:1.5;margin:0}
+.event-feed{max-height:400px}
+.event-feed h3{font-size:11px;font-weight:900;color:#d7eaca;letter-spacing:.06em;margin:0 0 8px}
+
+
+/* Soccer-JS development playback: 2.5D is mounted inside the normal match viewport. */
+.field-shell.soccerjs-active{padding:0;background:#0b2631;overflow:hidden}
+.field-shell.soccerjs-active #matchPitch{display:none!important}
+.soccerjs-inline-frame{display:block;width:100%;height:auto;aspect-ratio:1120 / 650;border:0;background:#163b36}
+.soccerjs-actions{margin:0 14px 12px;padding:10px 12px;border:1px solid #426774;border-radius:9px;background:#163543;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.soccerjs-actions[hidden]{display:none!important}
+.soccerjs-actions .play-btn{font-size:11px}
+.soccerjs-actions label{display:flex;align-items:center;gap:7px;font-size:11px;font-weight:800;color:#bcded6}
+.soccerjs-actions label select{min-width:110px}
+@media(max-width:600px){.soccerjs-actions{align-items:stretch}.soccerjs-actions .play-btn{flex:1 1 45%}.soccerjs-actions label{flex:1 1 100%;justify-content:space-between}.soccerjs-inline-frame{aspect-ratio:1120 / 650}}
+
+/* One match feed: goals open by default; saves and documented incidents are
+   in a second, independently expandable section. */
+.pfc-timeline-groups{display:grid;gap:7px}
+.pfc-timeline-group{border:1px solid #446b75;border-radius:8px;overflow:hidden;background:#122a3a}
+.pfc-timeline-group>summary{display:flex;align-items:center;justify-content:space-between;gap:7px;list-style:none;cursor:pointer;background:#203d4b;padding:11px 12px;color:#e1f5e9;font-size:11px;font-weight:950;letter-spacing:.045em}
+.pfc-timeline-group>summary::-webkit-details-marker{display:none}
+.pfc-timeline-group>summary:before{content:"▸";font-size:12px;color:#f0d28c}
+.pfc-timeline-group[open]>summary:before{content:"▾"}
+.pfc-timeline-group>summary>span{flex:1}
+.pfc-timeline-group>summary>strong{color:#f0dba3;font-size:10px;white-space:nowrap}
+.pfc-timeline-goals>summary{background:#21483f}
+.pfc-timeline-group-body{padding:4px 8px 9px}
+.pfc-timeline-group-body .pfc-event-timeline{margin:4px 0!important}
+.pfc-timeline-group>summary:focus-visible{outline:2px solid #ffe2a2;outline-offset:-2px}
+.play-live-feed{overscroll-behavior:contain;scrollbar-gutter:stable}
+
+
+/* Browser fullscreen where supported; iPhone-style theater otherwise. */
+.field-shell{position:relative}
+.field-shell .pfc-fullscreen-btn{position:absolute;top:10px;right:10px;z-index:40;border:2px solid #fff;background:#101719e8;color:#fff;font-size:12px;letter-spacing:.06em;font-weight:900;padding:10px 13px;border-radius:8px;cursor:pointer;touch-action:manipulation;box-shadow:0 3px 14px #0009}
+.field-shell .pfc-fullscreen-btn[hidden]{display:none!important}
+.field-shell .pfc-fullscreen-btn:focus-visible{outline:3px solid #f04b46;outline-offset:2px}
+body.pfc-watch-no-scroll{overflow:hidden!important;overscroll-behavior:none}
+.field-shell.soccerjs-active.pfc-watch-theater,.field-shell.soccerjs-active:fullscreen{position:fixed!important;inset:0!important;z-index:999990!important;width:100vw!important;height:100dvh!important;max-width:none!important;max-height:none!important;padding:0!important;margin:0!important;border:0!important;border-radius:0!important;background:#071311!important;display:flex!important;align-items:center;justify-content:center}
+.field-shell.soccerjs-active.pfc-watch-theater .soccerjs-inline-frame,.field-shell.soccerjs-active:fullscreen .soccerjs-inline-frame{display:block!important;width:100%!important;height:100%!important;max-width:100%!important;aspect-ratio:auto!important;border:0!important}
+@media(max-width:700px){.field-shell .pfc-fullscreen-btn{top:max(8px,env(safe-area-inset-top));right:max(8px,env(safe-area-inset-right));font-size:11px;padding:9px 11px}}
+
+/* Recorded PSE goals can be rewatched from the match timeline on Quick Sim
+   or after a watched fixture. This is a read-only separate Soccer-JS viewer. */
+.play-goal-replay-actions{margin:8px 10px 4px;padding:11px 12px;background:#1d333e;border:1px solid #5a8d84;border-radius:8px}
+.play-goal-replay-actions[hidden]{display:none!important}
+.play-goal-replay-actions>strong{display:flex;align-items:center;justify-content:space-between;gap:8px;color:#e9f4e8;font-size:11px;font-weight:1000;letter-spacing:.055em}
+.play-goal-replay-actions>strong small{color:#f2d991;font-size:9px}
+.play-goal-replay-list{display:flex;flex-wrap:wrap;gap:7px;margin:10px 0 7px}
+.play-goal-replay-list .play-goal-replay-button{font-size:11px!important;font-weight:950!important;min-height:33px!important;padding:7px 10px!important;background:#452b2e!important;color:#fff7ee!important;border:1px solid #b47b7b!important;border-radius:6px!important}
+.play-goal-replay-list .play-goal-replay-button:hover,.play-goal-replay-list .play-goal-replay-button:focus-visible{background:#733a40!important;border-color:#ffaea8!important}
+.play-goal-replay-actions>small{color:#bad1d2;font-size:9px;line-height:1.4}
+.play-goal-replay-dialog{position:fixed!important;inset:0;max-width:900px!important;width:min(94vw,900px)!important;max-height:90dvh!important;padding:0!important;border:1px solid #82ab94!important;border-radius:12px!important;background:#14232d!important;color:#f2f9f1!important;box-shadow:0 30px 80px #000c!important}
+.play-goal-replay-dialog::backdrop{background:#04080bc9}
+.play-goal-replay-bar{display:flex;align-items:center;justify-content:space-between;gap:10px;background:#25413e;border-bottom:1px solid #527d78;padding:11px 14px}
+.play-goal-replay-bar strong{font-size:12px;font-weight:1000;letter-spacing:.075em}
+.play-goal-replay-bar button{min-height:31px;padding:6px 10px;font-size:10px;font-weight:900;border:1px solid #779a90;border-radius:6px;background:#233740;color:#f2f9f5}
+.play-goal-replay-body{padding:12px 14px 16px}
+.play-goal-replay-body>p{margin:0 0 9px;color:#ffe2a7;font-size:11px;font-weight:850}
+.play-goal-replay-body>small{display:block;margin-top:8px;color:#acc7c4;font-size:10px;line-height:1.45}
+.play-goal-replay-stage{height:clamp(260px,55dvh,540px);width:100%;overflow:hidden;position:relative;border:1px solid #527870;border-radius:8px;background:#092020}
+.play-goal-replay-stage .soccerjs-inline-frame{display:block;width:100%;height:100%;border:0;aspect-ratio:auto}
+@media(max-width:760px){.play-goal-replay-dialog{width:100vw!important;max-width:none!important;max-height:100dvh!important}.play-goal-replay-body{padding:9px}.play-goal-replay-stage{height:clamp(270px,56dvh,500px)}}
+
+/* Tier and efficiency on each compact Quick Play / Challenge Watch XI card. */
+.mini-poke .mini-fit{display:block;font-size:9px;font-weight:950;color:#f3dfa7;white-space:nowrap;line-height:1.3;font-variant-numeric:tabular-nums}
+.mini-poke .mini-fit strong{color:#d6f5db}
+@media(max-width:580px){.mini-poke .mini-fit{font-size:8px}}

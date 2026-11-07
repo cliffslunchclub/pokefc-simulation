@@ -1,0 +1,15 @@
+# PokéFC static playtest: pfc.cliffslunchclub.com ONLY.
+# Installed by the GitHub Actions SiteGround build into this subdomain's
+# own public_html/.htaccess. Do not place in the primary domain root.
+#
+# Revalidate game HTML, JavaScript, CSS, and JSON on every visit so new
+# deployments are visible without an old browser or proxy cache.
+# "private" is the SiteGround-documented way to bypass Dynamic Cache.
+# Image files and remote PokeAPI sprites are intentionally unaffected.
+<IfModule mod_headers.c>
+  <FilesMatch "\.(html?|css|m?js|json|webmanifest)$">
+    Header set Cache-Control "private, no-cache, max-age=0, must-revalidate"
+    Header set Pragma "no-cache"
+    Header set Expires "0"
+  </FilesMatch>
+</IfModule>

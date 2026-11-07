@@ -1,0 +1,157 @@
+{
+  "format": "fxi-quick-vs-tm-diagnostic-v1",
+  "sourceCommit": "603312dcf037bed0b0c817f8ba8a194eaebce8da",
+  "engineMode": "verified-unmodified-original",
+  "provenance": {
+    "realTacticMeshTicks": 3600,
+    "realTacticMeshSeconds": 59.999999999997875,
+    "realTacticMeshStatus": "running",
+    "fullMatch": false,
+    "calibrationEligible": false,
+    "goalEventConsistent": true
+  },
+  "fixture": {
+    "home": "Pewter City FC",
+    "away": "Viridian City FC",
+    "club": 0,
+    "matchId": "fxi-2562584667",
+    "seed": 2562584667
+  },
+  "parametersStatus": "provisional",
+  "replicates": 1000,
+  "wallSeconds": {
+    "realTM": 11.367,
+    "quickSimBatch": 2.667
+  },
+  "observations": [
+    {
+      "team": "Pewter City FC",
+      "originalTacticMeshObserved": {
+        "team": "Pewter City FC",
+        "teamId": "0",
+        "goals": 0,
+        "shots": 0,
+        "passes": 6,
+        "completedPasses": 4,
+        "tackles": 0,
+        "assists": 0,
+        "possessionPercent": 76
+      },
+      "quickSimMonteCarlo": {
+        "goals": {
+          "per90": 0.871,
+          "perObservedMinutes": 0.01,
+          "stdDev90": 0.906
+        },
+        "shots": {
+          "per90": 9.945,
+          "perObservedMinutes": 0.11,
+          "stdDev90": 3.102
+        },
+        "passes": {
+          "per90": 392.418,
+          "perObservedMinutes": 4.36,
+          "stdDev90": 20.217
+        },
+        "completedPasses": {
+          "per90": 267.065,
+          "perObservedMinutes": 2.967,
+          "stdDev90": 16.109
+        },
+        "tackles": {
+          "per90": 11.624,
+          "perObservedMinutes": 0.129,
+          "stdDev90": 3.389
+        },
+        "assists": {
+          "per90": 0.64,
+          "perObservedMinutes": 0.007,
+          "stdDev90": 0.78
+        },
+        "possessionPercent": {
+          "per90": 44.3,
+          "perObservedMinutes": null,
+          "stdDev90": 0
+        }
+      }
+    },
+    {
+      "team": "Viridian City FC",
+      "originalTacticMeshObserved": {
+        "team": "Viridian City FC",
+        "teamId": "7",
+        "goals": 0,
+        "shots": 0,
+        "passes": 5,
+        "completedPasses": 4,
+        "tackles": 0,
+        "assists": 0,
+        "possessionPercent": 24
+      },
+      "quickSimMonteCarlo": {
+        "goals": {
+          "per90": 1.16,
+          "perObservedMinutes": 0.013,
+          "stdDev90": 1.038
+        },
+        "shots": {
+          "per90": 10.325,
+          "perObservedMinutes": 0.115,
+          "stdDev90": 3.153
+        },
+        "passes": {
+          "per90": 438.087,
+          "perObservedMinutes": 4.868,
+          "stdDev90": 21.254
+        },
+        "completedPasses": {
+          "per90": 297.966,
+          "perObservedMinutes": 3.311,
+          "stdDev90": 17.694
+        },
+        "tackles": {
+          "per90": 11.645,
+          "perObservedMinutes": 0.129,
+          "stdDev90": 3.453
+        },
+        "assists": {
+          "per90": 0.842,
+          "perObservedMinutes": 0.009,
+          "stdDev90": 0.888
+        },
+        "possessionPercent": {
+          "per90": 55.7,
+          "perObservedMinutes": null,
+          "stdDev90": 0
+        }
+      }
+    }
+  ],
+  "allScoreProbabilities": {
+    "0-1": 16.6,
+    "1-1": 13.2,
+    "0-0": 11.9,
+    "1-0": 11.6,
+    "0-2": 8,
+    "1-2": 7.4,
+    "2-1": 5.7,
+    "2-2": 5.3,
+    "2-0": 4.8,
+    "0-3": 3.7,
+    "1-3": 3.4,
+    "3-1": 1.5
+  },
+  "historicalScoreReference": {
+    "score": "0-3",
+    "source": "earlier FUTBOL XI completed benchmark discussion (NOT saved original official report)",
+    "monteCarloExactScorePct": 3.7
+  },
+  "limitations": [
+    "One shortened observational WINDOW of genuine full-speed TacticMesh physics, NOT a shortened match rule",
+    "Rate-normalized comparison is exploratory because events are clustered over a match",
+    "Possession percentages are definitions of different estimators; treat as diagnostic only",
+    "No TacticMesh full-match report included; no parameter fitting and no calibration activation"
+  ],
+  "franchiseUnchanged": true,
+  "validQuickSimReports": 1000
+}

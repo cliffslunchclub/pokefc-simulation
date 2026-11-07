@@ -1,0 +1,31 @@
+/* PokéFC shared broadcast-style design system. Inspired by contemporary sports-game dashboards, not a copy of other sites. */
+:root{--pfc-bg:#080f1b;--pfc-surface:#101d2c;--pfc-surface-2:#15283a;--pfc-border:#294256;--pfc-ink:#f4f8fa;--pfc-dim:#9dafbc;--pfc-mint:#8cfdba;--pfc-gold:#f6cf79;--pfc-red:#ff8686}
+html{scroll-behavior:smooth}body{background:radial-gradient(ellipse 90% 18% at 50% 0%,#1d344c 0%,transparent 80%),var(--pfc-bg)!important;color:var(--pfc-ink);min-width:320px}
+.pfc-header{position:sticky;top:0;z-index:100;background:#091321f3;backdrop-filter:blur(14px);border-bottom:1px solid #344c5e;box-shadow:0 8px 30px #050a1230}
+.pfc-shell{max-width:1240px;margin-inline:auto;padding-inline:24px}
+.pfc-head-row{min-height:70px;display:flex;align-items:center;gap:24px;flex-wrap:wrap}
+.pfc-logo{text-decoration:none;color:#f8fcfd;white-space:nowrap;font-size:23px;font-weight:950;letter-spacing:-1.4px}
+.pfc-logo b{font-weight:950;color:var(--pfc-mint)}.pfc-mark{display:inline-grid;place-items:center;width:32px;height:32px;color:#101923;background:var(--pfc-gold);transform:skew(-8deg);margin-right:9px;border-radius:5px;font-size:17px;font-weight:950}
+.pfc-nav{display:flex;gap:5px;margin-left:auto;align-items:center}
+.pfc-nav a{font-size:12px!important;letter-spacing:.075em;font-weight:850;color:#b8cad5!important;text-decoration:none!important;padding:11px 16px;border-radius:7px;border:1px solid transparent;white-space:nowrap}
+.pfc-nav a:hover,.pfc-nav a[aria-current="page"]{background:#203b4b!important;color:var(--pfc-mint)!important;border-color:#385a6b}
+.pfc-beta{font-size:9px;font-weight:900;letter-spacing:.12em;white-space:nowrap;color:var(--pfc-gold);padding:7px 9px;border:1px solid #655636;border-radius:5px}
+.pfc-eyebrow{font-size:11px;letter-spacing:.19em;font-weight:900;color:var(--pfc-mint)}
+.pfc-mode-title{margin:30px 0 12px;font-size:clamp(32px,4vw,51px);font-weight:950;letter-spacing:-.055em;line-height:1}
+.pfc-mode-intro{color:var(--pfc-dim);font-size:14px;max-width:760px}
+.pfc-card{border:1px solid var(--pfc-border);background:var(--pfc-surface);border-radius:12px;padding:18px}
+.pfc-footnote{font-size:11px;color:var(--pfc-dim);line-height:1.7}
+.pfc-header *{box-sizing:border-box}
+@media(max-width:720px){.pfc-shell{padding-inline:14px}.pfc-head-row{gap:6px;min-height:0;padding-block:9px}.pfc-beta{margin-left:auto}.pfc-nav{order:3;width:100%;margin:4px 0 0;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:5px}.pfc-nav a{font-size:11px!important;padding:8px 5px;text-align:center}.pfc-logo{font-size:21px}}
+
+/* Site-wide masthead contract. Keep ahead of mode-specific legacy selectors. */
+.pfc-header{display:block!important;width:100%!important;max-width:none!important;padding:0!important;margin:0!important;position:sticky!important}
+.pfc-header .pfc-head-row{display:flex!important;justify-content:initial!important;align-items:center!important;gap:24px;flex-wrap:wrap}
+.pfc-header .pfc-logo{display:inline-flex!important;align-items:center!important;gap:0;color:#f8fcfd!important;font-size:23px!important;font-weight:950!important;line-height:1.15!important;letter-spacing:-1.4px!important;text-decoration:none!important;border:0!important;padding:0!important;background:none!important}
+.pfc-header .pfc-logo:hover{color:#fff!important}
+.pfc-header .pfc-mark{display:inline-flex;align-items:center;justify-content:center;width:32px;height:32px;margin-right:10px;background:transparent;transform:none;box-shadow:none;padding:0;flex-shrink:0}
+.pfc-header .pfc-mark img{display:block;width:32px;height:32px;max-width:100%;object-fit:contain}
+.pfc-header .pfc-nav{display:flex;align-items:center;gap:5px;margin-left:auto}
+.pfc-header .pfc-nav a{display:inline-flex;align-items:center;justify-content:center;min-height:39px;line-height:1.1!important;border-radius:7px!important;text-transform:uppercase;text-decoration:none!important;box-shadow:none!important}
+.pfc-header .pfc-beta{display:inline-flex;align-items:center;justify-content:center;min-height:31px}
+@media(max-width:720px){.pfc-header .pfc-head-row{gap:6px}.pfc-header .pfc-logo{font-size:21px!important}.pfc-header .pfc-nav{display:grid;order:3;margin:4px 0 0;width:100%;grid-template-columns:repeat(3,minmax(0,1fr));gap:5px}.pfc-header .pfc-nav a{padding:8px 5px}.pfc-header .pfc-beta{margin-left:auto}}

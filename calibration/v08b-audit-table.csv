@@ -1,0 +1,5 @@
+Region,Fixture,Genuine TM game minutes,TM physics ticks,Quick Sim full matches,TM observed passes,Quick Sim expected passes in same minutes,TM observed completed passes,Quick Sim expected completed passes,TM observed tackles,Quick Sim expected tackles,TM observed shots,Quick Sim expected shots,TM Home Possession %,Quick Home Possession %
+Kanto,Pewter City FC vs Viridian City FC,1.0,3600,1000,11,9.228000000000002,8,6.2780000000000005,0,0.258,0,0.225,76,44.3
+Johto,Violet City FC vs Blackthorn City FC,1.0,3600,1000,17,9.225999999999999,10,6.273,0,0.256,0,0.236,29.8,44.6
+Hoenn,Rustboro City FC vs Sootopolis City FC,1.0,3600,1000,15,9.218,11,6.265000000000001,0,0.25,0,0.229,50.1,45.3
+Sinnoh,Oreburgh City FC vs Sunyshore City FC,2.0,7200,2000,34,18.438,18,12.532,4,0.508,0,0.46699999999999997,58.1,43.3

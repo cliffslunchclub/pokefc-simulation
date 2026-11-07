@@ -1,0 +1,15 @@
+{
+  "format": "fxi-calibration-comparison-v1",
+  "source": "pinned-original-tacticmesh-physics",
+  "status": "NO_VERIFIED_FULL_MATCHES",
+  "referenceCount": 0,
+  "minimumForExperimentalFit": 8,
+  "recommendedForStrongerCalibration": 32,
+  "engineCommits": [],
+  "referenceFiles": [],
+  "notes": [
+    "Reference matches are only counted when paired with their original full-length TacticMesh reports.",
+    "No estimate, shortened match or fabricated result is counted as a TacticMesh full-time reference.",
+    "Quick Sim saves and shots on target are not comparable with TacticMesh shotStops and null shotsOnTarget."
+  ]
+}

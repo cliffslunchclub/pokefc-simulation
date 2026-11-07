@@ -1,0 +1,157 @@
+{
+  "format": "fxi-quick-vs-tm-diagnostic-v1",
+  "sourceCommit": "603312dcf037bed0b0c817f8ba8a194eaebce8da",
+  "engineMode": "verified-unmodified-original",
+  "provenance": {
+    "realTacticMeshTicks": 3600,
+    "realTacticMeshSeconds": 59.999999999997875,
+    "realTacticMeshStatus": "running",
+    "fullMatch": false,
+    "calibrationEligible": false,
+    "goalEventConsistent": true
+  },
+  "fixture": {
+    "home": "Rustboro City FC",
+    "away": "Sootopolis City FC",
+    "club": 16,
+    "matchId": "fxi-1870436099",
+    "seed": 1870436099
+  },
+  "parametersStatus": "provisional",
+  "replicates": 1000,
+  "wallSeconds": {
+    "realTM": 13.52,
+    "quickSimBatch": 2.628
+  },
+  "observations": [
+    {
+      "team": "Rustboro City FC",
+      "originalTacticMeshObserved": {
+        "team": "Rustboro City FC",
+        "teamId": "16",
+        "goals": 0,
+        "shots": 0,
+        "passes": 10,
+        "completedPasses": 8,
+        "tackles": 0,
+        "assists": 0,
+        "possessionPercent": 50.1
+      },
+      "quickSimMonteCarlo": {
+        "goals": {
+          "per90": 0.877,
+          "perObservedMinutes": 0.01,
+          "stdDev90": 0.919
+        },
+        "shots": {
+          "per90": 10.173,
+          "perObservedMinutes": 0.113,
+          "stdDev90": 3.064
+        },
+        "passes": {
+          "per90": 395.967,
+          "perObservedMinutes": 4.4,
+          "stdDev90": 19.857
+        },
+        "completedPasses": {
+          "per90": 268.919,
+          "perObservedMinutes": 2.988,
+          "stdDev90": 16.036
+        },
+        "tackles": {
+          "per90": 10.957,
+          "perObservedMinutes": 0.122,
+          "stdDev90": 3.164
+        },
+        "assists": {
+          "per90": 0.625,
+          "perObservedMinutes": 0.007,
+          "stdDev90": 0.777
+        },
+        "possessionPercent": {
+          "per90": 45.3,
+          "perObservedMinutes": null,
+          "stdDev90": 0
+        }
+      }
+    },
+    {
+      "team": "Sootopolis City FC",
+      "originalTacticMeshObserved": {
+        "team": "Sootopolis City FC",
+        "teamId": "23",
+        "goals": 0,
+        "shots": 0,
+        "passes": 5,
+        "completedPasses": 3,
+        "tackles": 0,
+        "assists": 0,
+        "possessionPercent": 49.9
+      },
+      "quickSimMonteCarlo": {
+        "goals": {
+          "per90": 1.173,
+          "perObservedMinutes": 0.013,
+          "stdDev90": 1.035
+        },
+        "shots": {
+          "per90": 10.454,
+          "perObservedMinutes": 0.116,
+          "stdDev90": 3.176
+        },
+        "passes": {
+          "per90": 433.614,
+          "perObservedMinutes": 4.818,
+          "stdDev90": 21.299
+        },
+        "completedPasses": {
+          "per90": 294.913,
+          "perObservedMinutes": 3.277,
+          "stdDev90": 17.625
+        },
+        "tackles": {
+          "per90": 11.481,
+          "perObservedMinutes": 0.128,
+          "stdDev90": 3.488
+        },
+        "assists": {
+          "per90": 0.866,
+          "perObservedMinutes": 0.01,
+          "stdDev90": 0.894
+        },
+        "possessionPercent": {
+          "per90": 54.7,
+          "perObservedMinutes": null,
+          "stdDev90": 0
+        }
+      }
+    }
+  ],
+  "allScoreProbabilities": {
+    "0-1": 14.3,
+    "1-1": 13.8,
+    "0-0": 13,
+    "1-0": 10.4,
+    "0-2": 9.8,
+    "1-2": 8.2,
+    "2-1": 5.3,
+    "2-0": 4.7,
+    "2-2": 4.6,
+    "0-3": 3.5,
+    "1-3": 2.6,
+    "3-1": 1.8
+  },
+  "historicalScoreReference": {
+    "score": "0-3",
+    "source": "earlier FUTBOL XI completed benchmark discussion (NOT saved original official report)",
+    "monteCarloExactScorePct": 3.5
+  },
+  "limitations": [
+    "One shortened observational WINDOW of genuine full-speed TacticMesh physics, NOT a shortened match rule",
+    "Rate-normalized comparison is exploratory because events are clustered over a match",
+    "Possession percentages are definitions of different estimators; treat as diagnostic only",
+    "No TacticMesh full-match report included; no parameter fitting and no calibration activation"
+  ],
+  "franchiseUnchanged": true,
+  "validQuickSimReports": 1000
+}

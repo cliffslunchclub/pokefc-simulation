@@ -1,3 +1,22 @@
-results/
+# Public PokéFC test repository: never commit local secrets.
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.p12
+*.pfx
+id_rsa*
+id_ed25519*
+credentials*.json
 node_modules/
+dist/
+watch/soccerjs/dist/
+soccer-js-upstream/
+pse-browser-artifacts/
+playwright-report/
+test-results/
+results/
+coverage/
+*.log
 .DS_Store

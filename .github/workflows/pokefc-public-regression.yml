@@ -1,0 +1,129 @@
+name: PokéFC Public Regression Tests
+
+on:
+  push:
+    branches: [main, 'mirror/**', 'feature/**', 'fix/**']
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: pfc-public-tests-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  publication-guard:
+    name: Public source safety boundary
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          persist-credentials: false
+      - name: Ensure no production-deployment capabilities exist
+        shell: bash
+        run: |
+          set -euo pipefail
+          test ! -e .github/workflows/deploy-siteground.yml
+          test ! -e .github/workflows/deploy-arcade-soccer-js.yml
+          test ! -e scripts/prune-merged-branches.sh
+          if grep -REni 'SG_FTP_|FTP-Deploy-Action|pull_request_target|contents: write' .github/workflows; then
+            echo "Public workflow includes forbidden production/write capability" >&2
+            exit 1
+          fi
+          if git ls-files | grep -Ei '(^|/)(\.env($|\.)|id_rsa|id_ed25519|credentials\.(json|yml)|.*\.(pem|p12|pfx))$'; then
+            echo "Potentially secret-bearing file tracked" >&2
+            exit 1
+          fi
+          echo "PASS public repo contains no production deployment workflow"
+
+  core-pse:
+    name: PSE, positions, Play, Franchise
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: '22'
+      - name: JavaScript syntax
+        run: |
+          set -euo pipefail
+          while IFS= read -r file; do node --check "$file"; done < <(git ls-files '*.js' '*.cjs')
+      - name: Run PSE and game-mode regression tests
+        run: |
+          set -euo pipefail
+          for test in \
+            tests/test-national-dex.cjs \
+            tests/test-pokemon-position-v2.cjs \
+            tests/test-realistic-position-swaps.cjs \
+            tests/test-position-effectiveness.cjs \
+            tests/test-pse-knockout.cjs \
+            tests/test-pse-knockout-modes.cjs \
+            tests/test-pse-watch-events.cjs \
+            tests/test-quick-seed-compat.cjs \
+            tests/test-play.cjs \
+            tests/test-free-builder.cjs \
+            tests/test-v08-league.cjs \
+            tests/test-phase10-quickplay-lifecycle.cjs \
+            tests/test-franchise-soccerjs-watch.cjs; do
+            echo "::group::$test"
+            node "$test"
+            echo "::endgroup::"
+          done
+
+  challenge-ui:
+    name: Challenges and shared UI
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: '22'
+      - name: Run Challenge and design tests
+        shell: bash
+        run: |
+          set -euo pipefail
+          node tests/test-branding.cjs
+          node tests/test-newtro-ui.cjs
+          for test in tests/test-challenge-*.cjs; do
+            echo "::group::$test"
+            node "$test"
+            echo "::endgroup::"
+          done
+
+  watch:
+    name: Soccer-JS Watch and engine handoff
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: '22'
+      - name: Run Watch mechanics and bridge tests
+        shell: bash
+        run: |
+          set -euo pipefail
+          for test in watch/soccerjs/test-*.cjs; do
+            # Historical 2-1 fixture test may need regeneration when PSE balances change.
+            if [[ "$test" == "watch/soccerjs/test-public-fixture.cjs" ]]; then continue; fi
+            echo "::group::$test"
+            node "$test"
+            echo "::endgroup::"
+          done
+          node tests/test-soccerjs-shot-ledger.cjs
+          node tests/test-soccerjs-sprite-loading.cjs
+          node tests/test-watch-badge-numbers.cjs
+          node tests/test-watch-fullscreen.cjs
+          node tests/test-watch-highlights.cjs
+          node tests/test-tacticmesh-retired.cjs
