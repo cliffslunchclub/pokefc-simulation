@@ -29,7 +29,7 @@ jobs:
           test ! -e .github/workflows/deploy-siteground.yml
           test ! -e .github/workflows/deploy-arcade-soccer-js.yml
           test ! -e scripts/prune-merged-branches.sh
-          if grep -REni 'SG_FTP_|FTP-Deploy-Action|pull_request_target|contents: write' .github/workflows; then
+          if grep -REni 'SG_FTP_|FTP-Deploy-Action|pull_request_target|contents: write' .github/workflows | grep -v 'grep -REni'; then
             echo "Public workflow includes forbidden production/write capability" >&2
             exit 1
           fi
