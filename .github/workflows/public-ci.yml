@@ -71,24 +71,25 @@ jobs:
           for f in assets/js/*.js play/*.js challenge/*.js match-director/*.js watch/soccerjs/*.cjs; do
             node --check "$f"
           done
-      - name: Run full game and PSE regression inventory
+      - name: Run all game, PSE, and Watch regression tests (report every failure)
         shell: bash
         run: |
-          set -euo pipefail
-          for f in tests/test-*.cjs; do
+          set -uo pipefail
+          failures=0
+          count=0
+          for f in tests/test-*.cjs watch/soccerjs/test-*.cjs; do
             echo "::group::$f"
-            node "$f"
+            if node "$f"; then
+              echo "PASS $f"
+            else
+              echo "::error file=$f::Regression failed"
+              failures=$((failures+1))
+            fi
+            count=$((count+1))
             echo "::endgroup::"
           done
-      - name: Run Soccer-JS Watch and controller regressions
-        shell: bash
-        run: |
-          set -euo pipefail
-          for f in watch/soccerjs/test-*.cjs; do
-            echo "::group::$f"
-            node "$f"
-            echo "::endgroup::"
-          done
+          echo "Completed $count tests; failures=$failures"
+          test "$failures" -eq 0
       - name: Validate local static build, without native bundle or publishing
         run: |
           bash scripts/build-siteground.sh
