@@ -16,7 +16,7 @@ for(let side=0;side<2;side++){
  assert.equal(a.score[side],a.stats[side].goals);
  assert.ok(a.stats[side].shots>=a.stats[side].shotsOnTarget);
  assert.ok(a.stats[side].passes>=a.stats[side].completedPasses);
- assert.equal(a.events.filter(e=>String(e.team)===String(side===0?pr.home.id:pr.away.id)).length,a.score[side]);
+ assert.equal(a.events.filter(e=>e.type==='goal'&&String(e.team)===String(side===0?pr.home.id:pr.away.id)).length,a.score[side]);
 }
 assert.ok(Math.abs(a.stats[0].possession+a.stats[1].possession-100)<.01);
 assert.equal(sim.profile().status,'provisional','missing real profile must be treated as provisional');
@@ -28,11 +28,11 @@ assert.throws(()=>fit.fit([]),/at least 8 real/);
 const fictional=[];
 for(let i=0;i<12;i++){
  const p=fixture(i+20),r=sim.simulate(p,{seed:p.seed+'|test-target'}),byId=[p.home.id,p.away.id];
- const stats=r.stats.map((s,side)=>({...s,teamId:byId[side],assists:r.events.filter(e=>String(e.team)===String(byId[side])&&e.assist).length}));
+ const stats=r.stats.map((s,side)=>({...s,teamId:byId[side],assists:r.events.filter(e=>e.type==='goal'&&String(e.team)===String(byId[side])&&e.assist).length}));
  fictional.push({format:fit.REFERENCE_FORMAT,fullMatch:true,verified:true,
   engineCommit:fit.SOURCE_COMMIT,engineBuild:'unit-test-synthetic-not-real',referenceId:'UNIT-TEST-'+i,matchId:'UNIT-TEST-MATCH-'+i,
   preview:p,elapsedSeconds:5400,teamStats:stats,
-  goalEvents:r.events.map(e=>({teamId:e.team,scorerId:e.player,assistId:e.assist,time:e.minute*60}))});
+  goalEvents:r.events.filter(e=>e.type==='goal').map(e=>({teamId:e.team,scorerId:e.player,assistId:e.assist,time:e.minute*60}))});
 }
 for(const r of fictional)fit.validateReference(r);
 const result=fit.fit(fictional,{minMatches:8,replicates:6});
