@@ -9,6 +9,7 @@ const PlayDirector=require('./phase10-play-director.cjs');
 const TeamShape=require('./phase10-team-shape.cjs');
 const Wall=require('./phase10-wall-physics.cjs');
 const Keeper=require('./phase10-goalkeeper-rush.cjs');
+const Onside=require('./phase10-onside-movement.cjs');
 const limit=(n,a,b)=>Math.min(b,Math.max(a,n));
 const lerp=(a,b,u)=>a+(b-a)*limit(u,0,1);
 const ease=u=>{const t=limit(u,0,1);return t*t*(3-2*t)};
@@ -290,6 +291,12 @@ function motionFrame(fixture,t,field,options=false){
   }
   if(u>=.88){finisher.frame=3;keeper.frame=8;}
   if(t>=event.minute){ball=net;ownerIndex=-1;keeper.frame=8;finisher.frame=3;}
+  // Hold supporting attackers and the scorer onside until the through
+  // ball leaves the foot. Then permit the scorer's receiving run.
+  Onside.apply(actors,field,ball,side,{
+   carrier:ownerIndex,runner:scorerId,run:(u-.34)/.36,
+   strength:enter
+  });
   return {actors,ball,ownerIndex,contact:phase,
    action:t>=event.minute?'official-goal':u>=.88?'illustrative-shot':'illustrative-goal-buildup',
    label:t>=event.minute?'GOAL! '+roster.lineup[scorer].name:'',
@@ -367,6 +374,18 @@ function motionFrame(fixture,t,field,options=false){
  const attackerSide=Math.floor(visual.stage.owner/11);
  const defenderSide=1-attackerSide;
  const keeperTarget=Keeper.target(defenderSide,field,visual.stage,ball);
+ // Keep the outgoing attack's constraint during its existing recovery
+ // blend, so a possession change never releases stranded players in a jump.
+ let offsideBoundary;
+ for(const side of [defenderSide,attackerSide]){
+  const boundary=Onside.apply(actors,field,ball,side,{
+   carrier:visual.ownerIndex,
+   runner:step.mode!=='carry'?step.receiver:-1,
+   run:step.mode!=='carry'?(seconds-step.start)/Math.min(.6,step.duration):0,
+   strength:shape.attack[side]
+  });
+  if(side===attackerSide)offsideBoundary=boundary;
+ }
  return {actors,ball,action:visual.action,ownerIndex:visual.ownerIndex,
   contact:visual.contact,label:'',officialEvent:null,illustrative:true,
   sequenceType:visual.sequenceType,sequenceIndex:visual.sequenceIndex,
@@ -376,6 +395,7 @@ function motionFrame(fixture,t,field,options=false){
   segmentStart:visual.segmentStart,segmentEnd:visual.segmentEnd,
   passStart:visual.passStart,passArrival:visual.passArrival,
   passOrigin:visual.passOrigin,passTarget:visual.passTarget,
+  offsideBoundary,
   wall:visual.wall,wallImpactSeconds:visual.wallImpactSeconds};
 
 }

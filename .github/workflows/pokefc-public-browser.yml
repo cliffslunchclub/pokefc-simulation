@@ -57,6 +57,7 @@ jobs:
           set -euo pipefail
           cp watch/soccerjs/viewer-entry.cjs soccer-js-upstream/pfc-viewer-entry.cjs
           cp watch/soccerjs/phase10-motion.cjs soccer-js-upstream/
+          cp watch/soccerjs/phase10-onside-movement.cjs soccer-js-upstream/
           cp watch/soccerjs/phase10-play-director.cjs soccer-js-upstream/
           cp watch/soccerjs/phase10-player-pace.cjs soccer-js-upstream/
           cp watch/soccerjs/phase10-goalkeeper-rush.cjs soccer-js-upstream/

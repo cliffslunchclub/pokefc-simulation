@@ -10,6 +10,7 @@ git -C "$TMP/upstream" checkout --detach 38970e0dade0865078c9e84bc1ecfd72aaa02fd
 (cd "$TMP/upstream" && npm install --no-audit --no-fund)
 cp "$HERE/viewer-entry.cjs" "$TMP/upstream/phase10-viewer-entry.cjs"
 cp "$HERE/phase10-motion.cjs" "$TMP/upstream/phase10-motion.cjs"
+cp "$HERE/phase10-onside-movement.cjs" "$TMP/upstream/phase10-onside-movement.cjs"
 cp "$HERE/phase10-play-director.cjs" "$TMP/upstream/phase10-play-director.cjs"
 cp "$HERE/phase10-player-pace.cjs" "$TMP/upstream/phase10-player-pace.cjs"
 cp "$HERE/phase10-goalkeeper-rush.cjs" "$TMP/upstream/phase10-goalkeeper-rush.cjs"
