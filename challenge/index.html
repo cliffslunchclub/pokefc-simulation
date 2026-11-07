@@ -1,0 +1,1741 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#0b0d10"><title>PokéFC · Challenges</title>
+<link rel="icon" type="image/svg+xml" href="../assets/icons/favicon.svg?v=2">
+<style>
+:root{color-scheme:dark;font:15px system-ui;background:#071a1c;color:#e8f7f2}body{max-width:1120px;margin:auto;padding:22px}h1{margin-bottom:5px}p,.muted{color:#a4c2bd}button,select,input{font:inherit;padding:9px;border:1px solid #47746b;background:#153d39;color:white;border-radius:7px}button{cursor:pointer}button:disabled{opacity:.35;cursor:not-allowed}.panel{background:#102d2d;border:1px solid #315650;padding:17px;border-radius:12px;margin:15px 0}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px}.slot,.pick{padding:10px;border:1px solid #315650;border-radius:8px;margin:5px 0}.pick{display:flex;align-items:center;justify-content:space-between;gap:8px}.pick img{width:40px;height:40px;object-fit:contain;image-rendering:pixelated}.active{border-color:#8fe7b2;background:#1d5145}.good{color:#8fe7b2}.warning{color:#f5cb77}.scroll{max-height:360px;overflow:auto}small{color:#9bbab4}label{display:inline-block;margin:6px}button.primary{background:#286c50}a{color:#9fe1c0}
+</style>
+<link rel="stylesheet" href="../assets/css/site.css?v=3">
+<style>
+body{max-width:none!important;padding:0!important;font:14px/1.55 system-ui,sans-serif}
+.challenge-frame{max-width:1240px;margin:0 auto;padding:26px 24px 54px}
+.challenge-heading{margin-bottom:20px}
+.challenge-heading h1{font-size:clamp(32px,4vw,50px);font-weight:950;letter-spacing:-.055em;margin:4px 0}
+.challenge-heading p{max-width:680px;color:#a9c5d2}
+.panel{background:#101d2c;border-color:#324c60;border-radius:12px}
+.panel h2{font-size:20px;letter-spacing:-.035em}
+.slot{background:#15283b;border-color:#3c576a}
+.slot.active{background:#1d3a41;border-color:#9de8b6}
+.pick{background:#132638;border-color:#365267}
+.pick small{display:block;color:#aec4d2}
+.pick img{width:49px;height:49px}
+.pick button{background:#315b54}
+button.primary{background:#c5eeb0!important;color:#142b24!important;font-weight:900}
+.panel>label{margin:6px 12px 8px 0}
+.panel select,.panel button{max-width:100%}
+.watch-challenge{display:inline-flex;padding:10px 14px;border-radius:8px;text-decoration:none;color:#142b24!important;font-weight:900;background:#f8d889!important;line-height:1.7}.mode-pill{font-size:11px;color:#f6d587;border:1px solid #76683e;border-radius:7px;padding:5px 10px;display:inline-block;margin-right:6px}
+.controls-inline{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:12px 0}
+.statline{font-size:11px;color:#b7cbd5}
+.challenge-banner{background:linear-gradient(90deg,#1c3549,#0f2134);border:1px solid #405d6d;padding:13px;border-radius:8px}
+@media(max-width:720px){.challenge-frame{padding:17px 14px 38px}.grid{grid-template-columns:repeat(auto-fit,minmax(200px,1fr))}}
+</style>
+<link rel="stylesheet" href="./challenge.css?v=37">
+<link rel="stylesheet" href="../assets/css/newtro.css?v=1">
+</head>
+<body>
+<header class="pfc-header">
+  <div class="pfc-shell pfc-head-row">
+    <a href="../" class="pfc-logo" aria-label="PokéFC home"><span class="pfc-mark"><img src="../assets/icons/favicon.svg?v=2" alt="" width="32" height="32"></span>POKÉ<b>FC</b></a>
+    <nav class="pfc-nav" aria-label="Game modes">
+      <a href="../play/">QUICK PLAY</a>
+      <a href="../challenge/" aria-current="page">CHALLENGES</a>
+      <a href="../franchise/">FRANCHISE</a>
+    </nav>
+    <span class="pfc-beta">OPEN ALPHA</span>
+  </div>
+</header>
+<div class="challenge-frame">
+<section class="challenge-hero" aria-labelledby="challenge-title">
+  <div class="challenge-hero-copy">
+    <span class="challenge-kicker">INDIGO LEAGUE · CHALLENGE MODE</span>
+    <h1 id="challenge-title">THE ROAD TO<br><em>CHAMPION.</em></h1>
+    <p>Draft a one-of-a-kind eleven, equip your stars and run the gauntlet. Every choice counts across six straight matches against the Elite Four and Champions.</p>
+    <div class="challenge-hero-stats"><span>11-PLAYER XI</span><span>6 BOSSES</span><span>GEN I–IV OR I–IX</span><span>₽1,000 SHOP</span></div>
+  </div>
+  <div class="challenge-hero-art" aria-hidden="true">
+    <span class="hero-number">XI</span>
+    <img class="hero-poke-one" src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/149.png" alt="">
+    <img class="hero-poke-two" src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/94.png" alt="">
+  </div>
+</section>
+<nav class="challenge-subnav" aria-label="Challenge sections">
+ <button id="challengeTabRun" type="button" class="active" aria-current="page">PLAY CHALLENGE</button>
+ <button id="challengeTabRankings" type="button">LEADERBOARDS <span>LOCAL BETA</span></button>
+</nav>
+<main id="app"></main>
+<dialog id="challengeMessageModal" class="challenge-dialog challenge-message-modal" aria-labelledby="challengeMessageTitle" aria-describedby="challengeMessageText">
+ <div class="challenge-message-content">
+  <span class="challenge-dialog-kicker">POKÉFC · CHALLENGES</span>
+  <h2 id="challengeMessageTitle">MESSAGE</h2><p id="challengeMessageText"></p>
+  <textarea id="challengeMessageCopy" readonly hidden aria-label="Text to copy manually"></textarea>
+  <div class="challenge-message-actions"><button type="button" id="challengeMessageCancel">CANCEL</button><button type="button" id="challengeMessageConfirm" class="primary">OK</button></div>
+ </div>
+</dialog>
+
+</div>
+<script src="../assets/js/national-species.js?v=1"></script><script src="../assets/js/calibration-profile.js"></script><script src="../assets/js/position-effectiveness.js?v=3"></script><script src="../assets/js/quick-sim.js?v=5"></script><script src="../assets/js/pse-knockout.js?v=2"></script><script src="./special-items-data.js?v=2"></script>
+<script src="../watch/soccerjs/watch-bridge.js?v=16"></script><script src="./item-optimizer.js?v=1"></script><script src="./drag-drop.js?v=3"></script><script src="./performance.js?v=3"></script><script src="./leaderboard.js?v=1"></script><script src="./run-card.js?v=1"></script><script src="./slot-reels.js?v=4"></script><script src="./picker-window.js?v=3"></script><script src="./tiers.js?v=1"></script><script src="./match-report.js?v=7"></script><script src="../play/opponents.js"></script><script>
+(()=>{'use strict';
+const KEY='pokefc-challenge-alpha-1',S=window.FXI_SPECIES||[],BY=new Map(S.map(s=>[s.id,s]));
+const BOSSES=(window.PFC_PLAY_OPPONENTS||[]).filter(x=>x.tier!=='gym');
+const FORMS={'4-3-3':['GK','LB','CB','CB','RB','CM','CM','CM','LW','ST','RW'],'4-2-3-1':['GK','LB','CB','CB','RB','CDM','CDM','LW','CAM','RW','ST'],'4-4-2':['GK','LB','CB','CB','RB','LM','CM','CM','RM','ST','ST'],'3-5-2':['GK','CB','CB','CB','LWB','RWB','CM','CM','CAM','ST','ST'],'5-3-2':['GK','LWB','CB','CB','CB','RWB','CM','CM','CM','ST','ST']};
+// Qualitative soccer shape descriptions, not hidden numerical match bonuses.
+const FORMATION_GUIDES={
+ '4-3-3':{pro:'Three forwards provide natural width and options for attacking runs.',con:'Three central midfield roles can be outnumbered by a packed midfield.'},
+ '4-2-3-1':{pro:'Two holding midfielders protect the back line; a CAM links the attack.',con:'A lone striker may lack close support if the attacking midfield drops deep.'},
+ '4-4-2':{pro:'Two strikers offer passing combinations; four midfielders provide wide cover.',con:'Only two central midfield spots can surrender possession in the middle.'},
+ '3-5-2':{pro:'Three central defenders, central midfield options, and two forwards.',con:'Wing-backs must cover both ends, leaving space behind when they push up.'},
+ '5-3-2':{pro:'Five defenders form a compact base for defending and counterattacks.',con:'Few high wide outlets can isolate the two strikers when playing forward.'}
+};
+const draftOrder=formation=>FORMS[formation].map((pos,index)=>({
+ index,priority:pos==='ST'?0:['LW','RW'].includes(pos)?1:pos==='GK'?4:['CB','LB','RB','LWB','RWB'].includes(pos)?3:2
+})).sort((a,b)=>a.priority-b.priority||a.index-b.index).map(x=>x.index);
+const nextDraftSlot=()=>draftOrder(st.formation).find(i=>!st.roster[i])??-1;
+const ITEMS=[
+['Leftovers',100,{hp:10}],['Muscle Band',100,{attack:10}],['Wise Glasses',100,{spAttack:10}],['Quick Claw',100,{speed:10}],['Hard Stone',100,{defense:10}],['Mental Herb',100,{spDefense:10}],['Silk Scarf',100,{attack:5,speed:5}],['Wide Lens',100,{spAttack:5,speed:5}],['Sitrus Berry',100,{hp:5,spDefense:5}],['Focus Band',100,{defense:5,spDefense:5}],
+['Choice Scarf',200,{speed:20}],['Scope Lens',200,{attack:15,speed:5}],['Rocky Helmet',200,{defense:15,hp:5}],['Shell Bell',200,{hp:10,spDefense:10}],['Expert Belt',200,{attack:10,spAttack:10}],['Light Clay',200,{defense:10,spDefense:10}],['Zoom Lens',200,{spAttack:15,spDefense:5}],['Float Stone',200,{speed:15,hp:5}],['Safety Goggles',200,{spDefense:15,defense:5}],['Grip Claw',200,{attack:10,defense:10}],
+['Choice Band',400,{attack:40}],['Choice Specs',400,{spAttack:40}],['Assault Vest',400,{defense:20,spDefense:15,hp:5}],['Life Orb',400,{attack:15,spAttack:15,speed:10}],['Iron Ball',400,{defense:30,attack:10}],['Power Anklet',400,{speed:30,hp:10}],['Power Lens',400,{spAttack:30,speed:10}],['Power Weight',400,{hp:30,defense:10}],['Power Band',400,{spDefense:30,defense:10}],['Weakness Policy',400,{attack:20,spAttack:20}]];
+const SPECIAL=window.PFC_CHALLENGE_SPECIAL||{evolvable:[],megas:{}};
+const EVOLVABLE=new Set(SPECIAL.evolvable);
+const EVIOLITE=['Eviolite',700,{hp:20,attack:20,defense:20,spAttack:20,spDefense:20,speed:20}];
+function megaForm(s,item){return s&&item?(SPECIAL.megas[s.id]||[]).find(m=>m.stone===item):null}
+function displayPokemon(s,item){
+ if(!s)return {name:'Unknown',spriteId:0,fallbackId:0,mega:false};
+ const form=megaForm(s,item),fallbackId=s.spriteId||s.id;
+ if(!form)return {name:s.name,spriteId:fallbackId,fallbackId,mega:false};
+ const variant=form.form.split('-mega')[1]||'';
+ const suffix=variant?' '+variant.replace(/^-/, '').toUpperCase():'';
+ const name=form.primal?'Primal '+s.name:'Mega '+s.name+suffix;
+ return {name,spriteId:window.PFC_CHALLENGE_MEGA_SPRITES?.[form.form]||fallbackId,fallbackId,mega:true};
+}
+function displaySprite(s,item,cssClass=''){
+ const data=displayPokemon(s,item);
+ const root='https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/';
+ return '<img class="'+cssClass+'" loading="lazy" alt="" src="'+root+data.spriteId+'.png" onerror="this.onerror=null;this.src=\''+root+data.fallbackId+'.png\'">';
+}
+function itemSprite(name,className='item-sprite'){
+ if(!name)return '';
+ const slug=String(name).toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');
+ return '<img class="'+className+'" loading="lazy" alt="" src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/'+slug+'.png" onerror="this.onerror=null;this.style.display=\'none\'">';
+}
+function itemFor(s,name){
+ if(!s||!name)return null;
+ if(name==='Eviolite')return EVOLVABLE.has(s.id)?EVIOLITE:null;
+ if(megaForm(s,name))return [name,700,{}];
+ return ITEMS.find(it=>it[0]===name)||null;
+}
+function effectiveStats(s,item){
+ if(!s)return null;
+ const mega=megaForm(s,item);
+ if(mega)return {...mega.stats};
+ const b={...s.baseStats},it=itemFor(s,item);
+ if(it)for(const [k,v] of Object.entries(it[2]))b[k]+=v;
+ return b;
+}
+// Fixed opponent item rules shared between the scouting UI and Quick Sim.
+function opponentHeldItem(boss,id){
+ if(boss?.key==='champion-blue'&&id===18)return 'Pidgeotite';
+ if(boss?.key==='champion-red'&&id===6)return 'Charizardite X';
+ if(boss?.key==='champion-red'&&id===25)return 'Light Ball';
+ return null;
+}
+function matchEffectiveStats(s,item){
+ const b=effectiveStats(s,item);
+ if(b&&item==='Light Ball'&&s.id===25){b.attack*=2;b.spAttack*=2}
+ return b;
+}
+function offeredItems(s){
+ return [...ITEMS,...(EVOLVABLE.has(s.id)?[EVIOLITE]:[]),...(SPECIAL.megas[s.id]||[]).map(m=>[m.stone,700,{}])];
+}
+const SHOP_STAT_FILTERS=[['hp','HP'],['attack','ATK'],['defense','DEF'],['spAttack','SpA'],['spDefense','SpD'],['speed','SPE']];
+function itemBoostsStat(item,stat){
+ if(Number(item?.[2]?.[stat])>0)return true;
+ return st.roster.some(id=>{
+  const pokemon=BY.get(id),form=megaForm(pokemon,item?.[0]);
+  return Boolean(form&&Number(form.stats?.[stat])>Number(pokemon.baseStats?.[stat]));
+ });
+}
+function shopCatalog(){
+ const stones=st.roster.flatMap(id=>(SPECIAL.megas[id]||[]).map(m=>[m.stone,700,{}]));
+ return [...ITEMS,EVIOLITE,...stones.filter((it,i,a)=>a.findIndex(v=>v[0]===it[0])===i)];
+}
+function itemEffect(item){
+ if(item[0]==='Eviolite')return '+20 to every base stat (evolvable only)';
+ const form=st.roster.map(id=>megaForm(BY.get(id),item[0])).find(Boolean);
+ if(form)return (form.primal?'Primal Reversion':'Mega Evolution')+' · one transformation per XI';
+ return Object.entries(item[2]).map(([k,v])=>k.replace('spAttack','Sp. Atk').replace('spDefense','Sp. Def')+' +'+v).join(' · ');
+}
+function itemTargets(name){
+ return st.roster.map((id,i)=>({id,i,pokemon:BY.get(id)})).filter(x=>Boolean(itemFor(x.pokemon,name)));
+}
+function equipShopItem(name,index){
+ if(st.phase!=='shop')return {ok:false,error:'The equipment window is locked.'};
+ const i=Number(index),pokemon=BY.get(st.roster[i]);
+ if(!Number.isInteger(i)||i<0||i>=11||!pokemon)return {ok:false,error:'Select a Pokémon.'};
+ if(name&&!itemFor(pokemon,name))return {ok:false,error:'This item is not compatible with '+pokemon.name+'.'};
+ const proposal=st.items.slice(),previous=proposal.indexOf(name);
+ if(previous!==-1&&previous!==i)proposal[previous]=null; // Moving a unique item is allowed until lock.
+ proposal[i]=name||null; // The replaced item is automatically refunded.
+ const megaCount=proposal.filter((item,j)=>Boolean(megaForm(BY.get(st.roster[j]),item))).length;
+ if(megaCount>1)return {ok:false,error:'Only one Mega Evolution or Primal Reversion is allowed per team.'};
+ const total=proposal.reduce((sum,item,j)=>sum+(itemFor(BY.get(st.roster[j]),item)?.[1]||0),0);
+ if(total>1000)return {ok:false,error:'That assignment exceeds your ₽1,000 equipment budget.'};
+ if(new Set(proposal.filter(Boolean)).size!==proposal.filter(Boolean).length)return {ok:false,error:'Each held item is unique.'};
+ st.items=proposal;
+ save();
+ return {ok:true,total};
+}
+function shopMarkup(used){
+ const fullCatalog=shopCatalog();
+ const remaining=Math.max(0,1000-used);
+ // Keep existing equipment visible for reassignment/removal, but hide new
+ // purchases that cannot fit in the remaining budget.
+ const withinBudget=fullCatalog.filter(it=>it[1]<=remaining||st.items.includes(it[0]));
+ const catalog=(shopStatFilters.size?withinBudget.filter(it=>Array.from(shopStatFilters).some(stat=>itemBoostsStat(it,stat))):withinBudget)
+  .sort((a,b)=>b[1]-a[1]||a[0].localeCompare(b[0],'en',{sensitivity:'base'}));
+ const current=catalog.some(x=>x[0]===selectedShopItem)?selectedShopItem:null;
+ if(!current)selectedShopItem=catalog[0]?.[0]||null;
+ const item=catalog.find(x=>x[0]===selectedShopItem),name=item?.[0]||'';
+ const order=draftOrder(st.formation).sort((a,b)=>Number(FORMS[st.formation][b]==='ST')-Number(FORMS[st.formation][a]==='ST'));
+ const eligible=itemTargets(name).sort((a,b)=>order.indexOf(a.i)-order.indexOf(b.i)),held=st.items.indexOf(name);
+ const selected=eligible.find(x=>x.i===held)||eligible[0];
+ const options=eligible.map(x=>'<option value="'+x.i+'" '+(x.i===selected?.i?'selected':'')+'>'+esc(FORMS[st.formation][x.i]+' · '+x.pokemon.name)+(st.items[x.i]&&st.items[x.i]!==name?' · replacing '+esc(st.items[x.i]):'')+'</option>').join('');
+ const assigned=draftOrder(st.formation).map(i=>{
+  const n=st.items[i];if(!n)return '';
+  return '<div class="shop-equipped-row"><span>'+esc(displayPokemon(BY.get(st.roster[i]),n).name)+' <small>('+FORMS[st.formation][i]+')</small></span><b class="shop-equipped-item">'+itemSprite(n)+esc(n)+'</b><button data-shop-clear="'+i+'" type="button" aria-label="Remove '+esc(n)+' from '+esc(BY.get(st.roster[i]).name)+'">×</button></div>';
+ }).filter(Boolean).join('');
+ return '<section class="panel challenge-item-shop" aria-label="Equipment shop">'+
+  '<div class="challenge-section-heading"><div><span class="pfc-eyebrow">STEP 02 · EQUIPMENT</span><h2>ITEM SHOP</h2></div><span class="formation-tag">₽'+(1000-used)+' LEFT</span></div>'+
+  '<p>Drag an item or its DRAG grip onto a Pokémon, or use the dropdown (forwards first). Items above your remaining budget disappear; equipped items stay listed so you can move or remove them. Opponents stay hidden until lock.</p>'+
+  '<div class="shop-budget"><div class="shop-budget-track"><span style="width:'+Math.min(100,Math.max(0,used/10))+'%"></span></div><small>₽'+used+' / ₽1,000 SPENT</small></div>'+
+  '<div class="shop-auto-equip"><div><strong>AI ITEM PICK</strong><small>Finds the best legal item combination for your current positions. Replaces your existing items.</small></div>'+
+   '<button type="button" id="autoEquip" class="primary">AUTO-EQUIP · MAX SCORE →</button>'+
+   (autoEquipSummary?'<p role="status" class="shop-auto-result">'+esc(autoEquipSummary)+'</p>':'')+'</div>'+
+  '<div class="shop-stat-filter" role="group" aria-label="Filter items by boosted stats">'+
+   '<div class="shop-stat-filter-head"><strong>FILTER BY STAT BOOST</strong><span>'+catalog.length+' / '+fullCatalog.length+' ITEMS · ₽'+remaining+' LEFT</span></div>'+
+   '<div class="shop-stat-buttons">'+SHOP_STAT_FILTERS.map(([key,label])=>'<button type="button" data-shop-stat="'+key+'" class="shop-stat-button'+(shopStatFilters.has(key)?' active':'')+'" aria-pressed="'+shopStatFilters.has(key)+'">+'+label+'</button>').join('')+'</div>'+
+   '<small>Choose one or more boosts (matches any). Tap a selected filter again to clear it.</small></div>'+
+  '<div id="shopCatalog" class="shop-item-catalog" role="group" aria-label="Available items">'+catalog.map(it=>{
+   const n=it[0],holder=st.items.indexOf(n),targets=itemTargets(n),active=n===selectedShopItem;
+   return '<button type="button" data-shop-pick="'+esc(n)+'" '+(!targets.length?'disabled':'')+' class="shop-item-card '+(active?'active':'')+'" aria-pressed="'+active+'">'+
+    '<span class="shop-item-main">'+itemSprite(n)+'<span class="shop-item-head"><b>'+esc(n)+'</b><strong>₽'+it[1]+'</strong></span></span><span class="challenge-drag-grip item-grip" data-drag-grip="item" data-drag-value="'+esc(n)+'" title="Drag onto Pokémon">⠿ DRAG</span><small>'+esc(itemEffect(it))+'</small>'+
+    '<span class="shop-item-status">'+(holder>=0?'✓ EQUIPPED · '+esc(BY.get(st.roster[holder]).name):targets.length?'CHOOSE ITEM':'NOT ELIGIBLE')+'</span></button>';
+  }).join('')+(catalog.length?'':'<p class="shop-filter-empty">No affordable items match your filters. Remove equipment or clear the stat filters to see more items.</p>')+'</div>'+
+  '<div class="shop-assign-panel"><div class="shop-selected-item">'+itemSprite(name)+'<h3>'+esc(name)+'</h3></div><p>'+esc(item?itemEffect(item):'Choose an item above')+'</p>'+
+   '<label for="shopTarget">Assign to Pokémon</label><select id="shopTarget" '+(!eligible.length?'disabled':'')+'>'+options+'</select>'+
+   '<button type="button" id="equipShopItem" class="primary" '+(!eligible.length?'disabled':'')+'>'+(held>=0?'MOVE / REASSIGN ITEM':'EQUIP ITEM')+'</button>'+
+   (held>=0?'<button type="button" id="removeSelectedItem" class="shop-remove">REMOVE FROM '+esc(BY.get(st.roster[held]).name.toUpperCase())+'</button>':'')+
+   '<p id="shopFeedback" role="status" aria-live="polite">'+esc(shopMessage)+'</p></div>'+
+  '<div class="shop-equipped"><h3>CURRENT EQUIPMENT</h3>'+(assigned||'<p>No items equipped yet.</p>')+'</div>'+
+  '<div class="shop-lock-panel"><label for="tactic">Team tactics</label><select id="tactic">'+['balanced','attacking','defensive','press','counter','possession'].map(t=>'<option '+(st.tactic===t?'selected':'')+'>'+t+'</option>').join('')+'</select><button class="primary" id="lock">LOCK FINAL XI →</button></div>'+
+ '</section>';
+}
+const gen=id=>id<=151?1:id<=251?2:id<=386?3:id<=493?4:id<=649?5:id<=721?6:id<=809?7:id<=905?8:9;
+const rollKey=r=>r?String(r.gen)+':'+String(r.type):'';
+function rememberRoll(result){
+ if(!result)return;
+ if(!Array.isArray(st.rollHistory))st.rollHistory=[];
+ const key=rollKey(result);
+ if(!st.rollHistory.includes(key))st.rollHistory.push(key);
+}
+function seed(){return (crypto.getRandomValues(new Uint32Array(1))[0]||1)>>>0}
+function next(){let x=st.rng>>>0;x^=x<<13;x^=x>>>17;x^=x<<5;st.rng=x>>>0;return st.rng/4294967296}
+const initial=()=>({version:1,phase:'setup',pool:4,legends:false,formation:'4-3-3',tactic:'balanced',roster:Array(11).fill(null),items:Array(11).fill(null),roll:null,rollHistory:[],selected:0,rng:seed(),rerollType:1,rerollGen:1,moves:1,formationChanges:1,locked:null,result:null,round:0,history:[]});
+let st;try{st=JSON.parse(localStorage.getItem(KEY));if(st?.version!==1)st=initial();else{st.round=Number.isInteger(st.round)?st.round:0;st.history=Array.isArray(st.history)?st.history:[];st.rollHistory=Array.isArray(st.rollHistory)?st.rollHistory:(st.roll?[rollKey(st.roll)]:[])}}catch{st=initial()}
+const save=()=>localStorage.setItem(KEY,JSON.stringify(st));
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const pool=()=>S.filter(s=>(s.gen||gen(s.id))<=st.pool&& (st.legends||!s.legendary)&&(!s.legendary||st.roster.filter(id=>BY.get(id)?.legendary).length<2)&&!st.roster.includes(s.id));
+const eligible=()=>st.roll?pool().filter(s=>s.types.includes(st.roll.type)&&(s.gen||gen(s.id))===st.roll.gen):[];
+function rating(s,pos,item){return s?window.PFC_POSITION_EFFECTIVENESS.preciseFit(matchEffectiveStats(s,item),pos):0}
+const teamScore=()=>st.roster.reduce((a,id,i)=>a+rating(BY.get(id),FORMS[st.formation][i],st.items[i]),0)/11;
+const opponentTeamScore=boss=>{
+ const positions=FORMS[boss?.formation],ids=boss?.roster;
+ if(!positions||!Array.isArray(ids)||ids.length!==positions.length)return null;
+ return ids.reduce((sum,id,i)=>sum+rating(BY.get(id),positions[i],opponentHeldItem(boss,id)),0)/ids.length;
+};
+function availableRolls(){
+ const available=pool(),byPair=new Map();
+ for(const species of available){
+  for(const type of species.types){
+   const candidate={type,gen:species.gen||gen(species.id)};
+   byPair.set(rollKey(candidate),candidate);
+  }
+ }
+ return [...byPair.values()];
+}
+function roll(){
+ const valid=availableRolls();
+ if(!valid.length){st.roll=null;return}
+ const seen=new Set(st.rollHistory||[]);
+ const fresh=valid.filter(result=>!seen.has(rollKey(result)));
+ // A normal new round can reuse a pair only if every remaining pair has
+ // already appeared; a paid reroll, by contrast, never repeats one.
+ const options=fresh.length?fresh:valid;
+ st.roll=options[Math.floor(next()*options.length)];
+ rememberRoll(st.roll);pendingRollAnimation=true;
+}
+function rerollOptions(which){
+ if(!st.roll||!['type','gen'].includes(which))return [];
+ const old=st.roll,seen=new Set([...(st.rollHistory||[]),rollKey(old)]);
+ return availableRolls().filter(result=>
+  which==='type'?
+   result.gen===old.gen&&result.type!==old.type&&!seen.has(rollKey(result)):
+   result.type===old.type&&result.gen!==old.gen&&!seen.has(rollKey(result))
+ );
+}
+function reroll(which){
+ if((which==='type'&&!st.rerollType)||(which==='gen'&&!st.rerollGen))return false;
+ const options=rerollOptions(which);
+ if(!options.length)return false; // No repeat and no spent reroll credit.
+ st.roll=options[Math.floor(next()*options.length)];
+ rememberRoll(st.roll);
+ if(which==='type')st.rerollType--;else st.rerollGen--;
+ pendingRollAnimation=true;return true;
+}
+const SLOT=window.PFC_CHALLENGE_SLOT_REELS;
+const PICKER_WINDOW=window.PFC_CHALLENGE_PICKER_WINDOW;
+const TIERS=window.PFC_CHALLENGE_TIERS;
+const tierFor=(s,pos,item)=>s?(TIERS?.tier(rating(s,pos,item))||"D"):"—";
+const efficiencyFor=(s,pos,item)=>s?Math.round(window.PFC_POSITION_EFFECTIVENESS.competitiveProfile(matchEffectiveStats(s,item),pos).efficiency*100)+'%':'—';
+let selectedShopItem=null,shopMessage="",shopScrollTop=0,dragStatus="",shopStatFilters=new Set(),autoEquipSummary="";
+let goalReplaySession=null;
+let draftPickerOpen=true,shopDrawerOpen=true,matchResultDismissed=false,draftWindowPosition=null,draftWindowCleanup=null,shopWindowPosition=null,shopWindowCleanup=null;
+let formationWindowOpen=false,moveWindowOpen=false,formationWindowPosition=null,moveWindowPosition=null,formationWindowCleanup=null,moveWindowCleanup=null;
+let formationPreview=null; // UI-only: never saved or used to simulate a match until Apply.
+let pendingRollAnimation=false,slotAnimationBusy=false;
+const BOARD=window.PFC_CHALLENGE_LEADERBOARD;
+const RUN_CARD=window.PFC_CHALLENGE_RUN_CARD;
+const MATCH_REPORT=window.PFC_MATCH_REPORT;
+const ITEM_OPTIMIZER=window.PFC_CHALLENGE_ITEM_OPTIMIZER;
+const PERFORMANCE=window.PFC_CHALLENGE_PERFORMANCE;
+let challengeView='run',boardCategory='classic-standard',runRecapDismissed=false,runRecapStage='match',draftScrollTop=0;
+function openDialog(d){
+ if(!d)return;
+ if(typeof d.showModal==='function'){if(!d.open)d.showModal()}
+ else{d.setAttribute?.('open','');d.open=true}
+}
+function openFloatingDialog(d){
+ if(!d||d.open)return;
+ // A non-modal <dialog> lets players still click/drag onto the pitch.
+ if(typeof d.show==='function')d.show();
+ else{d.setAttribute?.('open','');d.open=true}
+}
+function closeDialog(d){
+ if(!d)return;
+ if(typeof d.close==='function'){if(d.open)d.close()}
+ else{d.removeAttribute?.('open');d.open=false}
+}
+function showChallengeMessage(title,message,options={}){
+ const d=document.getElementById('challengeMessageModal');
+ if(!d)return;
+ const cancel=document.getElementById('challengeMessageCancel'),ok=document.getElementById('challengeMessageConfirm'),copy=document.getElementById('challengeMessageCopy');
+ document.getElementById('challengeMessageTitle').textContent=title;
+ document.getElementById('challengeMessageText').textContent=message;
+ const needsConfirm=typeof options.onConfirm==='function';
+ cancel.hidden=!needsConfirm;
+ ok.textContent=options.confirmLabel||(needsConfirm?'CONFIRM':'OK');
+ ok.classList?.toggle?.('is-destructive',Boolean(options.destructive));
+ if(copy){copy.hidden=typeof options.copyText!=='string';copy.value=options.copyText||''}
+ cancel.onclick=()=>closeDialog(d);
+ ok.onclick=()=>{closeDialog(d);if(needsConfirm)options.onConfirm()};
+ openDialog(d);
+ if(options.copyText&&typeof copy?.select==='function')copy.select();
+}
+
+
+function syncChallengeNav(){
+ const run=document.getElementById('challengeTabRun'),board=document.getElementById('challengeTabRankings');
+ run.className=challengeView==='run'?'active':'';
+ board.className=challengeView==='leaderboard'?'active':'';
+ if(run.setAttribute)run.setAttribute('aria-current',challengeView==='run'?'page':'false');
+ if(board.setAttribute)board.setAttribute('aria-current',challengeView==='leaderboard'?'page':'false');
+ run.onclick=()=>{challengeView='run';render()};
+ board.onclick=()=>{challengeView='leaderboard';boardCategory=BOARD?.categoryOf(st)||boardCategory;render()};
+}
+function leaderboardMarkup(){
+ const categories=BOARD?.CATEGORIES||[];
+ const selected=categories.find(c=>c.id===boardCategory)||categories[0];
+ if(!selected)return '<section class="panel">Local rankings unavailable. Reload this page.</section>';
+ const rows=BOARD.rankings(selected.id,localStorage);
+ const summary=BOARD.stats(selected.id,localStorage);
+ const filter=categories.map(c=>
+  '<button class="leaderboard-category '+(c.id===selected.id?'active':'')+'" id="lb-'+c.id+'" type="button" aria-pressed="'+(c.id===selected.id?'true':'false')+'">'+esc(c.label)+'</button>').join('');
+ const listing=rows.length?rows.map((run,i)=>{
+   const players=(run.roster||[]).map(id=>BY.get(id)?.name||'Unknown').join(' · ');
+   const matches=(run.matches||[]).map(m=>'<details class="lb-match-details"><summary>'+esc(versusLabel(m.boss))+' · '+esc(resultLabel(m.outcome,true))+' · '+esc(m.score.join('–')+penaltyScore(m))+'</summary>'+matchReportHtml(m)+'</details>').join('');
+   return '<div class="leaderboard-row">'+
+    '<span class="lb-rank">#'+(i+1)+'</span><div class="lb-identity"><strong>'+(run.champion?'🏆 CHAMPION RUN':'INDIGO RUN')+'</strong><small>'+
+    esc(run.formation||'4-3-3')+' · '+esc(String(run.finishedAt||'').slice(0,10))+'</small></div>'+
+    '<strong class="lb-record">'+Number(run.wins||0)+'W–'+Number(run.losses||0)+'L</strong>'+
+    '<strong class="lb-score">'+Number(run.teamScore||0).toFixed(1)+'</strong>'+
+    '<span class="lb-gd">'+(Number(run.goalDifference||0)>=0?'+':'')+Number(run.goalDifference||0)+' GD</span>'+
+    '<details class="lb-details"><summary>View XI &amp; matches</summary><p>'+esc(players)+'</p><div>'+matches+'</div></details></div>';
+  }).join(''):'<div class="leaderboard-empty"><strong>NO COMPLETED RUNS YET</strong><p>Finish a Challenge in this category to appear here. Results are saved only in this browser.</p><button id="leaderboardStart" type="button">START A CHALLENGE →</button></div>';
+ return '<section class="panel challenge-leaderboard-panel">'+
+  '<div class="lb-heading"><div><span class="pfc-eyebrow">CHALLENGES · PERSONAL HALL OF FAME</span>'+
+   '<h2>LEADERBOARDS</h2><p>Only completed runs from this browser are listed. No global profiles or verified rankings yet.</p></div>'+
+   '<span class="lb-local-tag">LOCAL BETA · UNVERIFIED</span></div>'+
+  '<div class="leaderboard-categories" role="group" aria-label="Challenge division">'+filter+'</div>'+
+  '<div class="lb-stats"><div><span>RECORDED RUNS</span><strong>'+summary.runs+'</strong></div>'+
+    '<div><span>CHAMPIONS</span><strong>'+summary.champions+'</strong></div>'+
+    '<div><span>BEST WINS</span><strong>'+summary.bestWins+' / 6</strong></div>'+
+    '<div><span>BEST TEAM SCORE</span><strong>'+(summary.bestScore==null?'—':summary.bestScore.toFixed(1))+'</strong></div></div>'+
+  '<p class="lb-sort-note">Sorted by champion status, victories, goal difference and team score. Saved locally; results can be edited using browser tools.</p>'+
+  '<div class="leaderboard-list"><div class="leaderboard-header"><span>RANK / RUN</span><span>W–L</span><span>TEAM</span><span>GD</span></div>'+listing+'</div>'+
+  '<div class="leaderboard-coming"><h3>GLOBAL LEADERBOARDS</h3><p>COMING LATER · Real player rankings will require accounts and server-verified match results.</p></div>'+
+  '</section>';
+}
+function renderLeaderboards(app){
+ app.innerHTML=leaderboardMarkup();
+ for(const cat of BOARD?.CATEGORIES||[]){
+  document.getElementById('lb-'+cat.id).onclick=()=>{boardCategory=cat.id;render()};
+ }
+ const start=document.getElementById('leaderboardStart');
+ if(start)start.onclick=()=>{challengeView='run';render()};
+}
+function runStats(){
+ const matches=Array.isArray(st.history)?st.history:[];
+ const wins=matches.filter(m=>m.outcome==='Victory').length;
+ const lost=matches.length-wins;
+ const champion=matches.length===6&&wins===6;
+ const line=st.locked?.roster||st.roster;
+ const formation=st.locked?.formation||st.formation;
+ const score=Number(st.locked?.score);
+ return {matches,wins,lost,champion,line,formation,score:Number.isFinite(score)?score:teamScore(),
+  category:(st.pool===4?'CLASSIC · GEN I–IV':'NATIONAL · GEN I–IX')+' / LEGENDS '+(st.legends?'ON':'OFF')};
+}
+function resultLabel(outcome,compact=false){
+ if(outcome==='Victory')return compact?'WIN':'VICTORY';
+ if(outcome==='Defeat')return compact?'LOSS':'DEFEAT';
+ if(outcome==='Draw')return 'DRAW';
+ return 'RESULT';
+}
+function versusLabel(boss){return 'VS '+String(boss||'OPPONENT').toUpperCase()}
+function runShareText(){
+ const r=runStats();
+ const roster=r.line.map((id,i)=>FORMS[r.formation][i]+' '+displayPokemon(BY.get(id),(st.locked?.items||st.items)[i]).name).join(', ');
+ const equipment=(st.locked?.items||st.items).map((item,i)=>item?(BY.get(r.line[i])?.name||'Pokémon')+': '+item:null).filter(Boolean);
+ return [
+  '⚽ PokéFC CHALLENGE · '+(r.champion?'CHAMPION RUN':'RUN COMPLETE'),
+  r.category,
+  'TEAM SCORE: '+r.score.toFixed(1)+' · FORMATION: '+r.formation,
+  'RECORD: '+r.wins+'W–'+r.lost+'L · MATCHES: '+r.matches.length+'/6',
+  'RESULTS: '+r.matches.map(m=>versusLabel(m.boss)+' · '+resultLabel(m.outcome,true)+' · '+m.score.join('–')+penaltyScore(m)).join(' | '),
+  'FINAL XI: '+roster,
+  'HELD ITEMS: '+(equipment.length?equipment.join(', '):'None'),
+  'Try the challenge: https://pfc.cliffslunchclub.com/challenge/',
+  'Local browser run summary · Not an official leaderboard entry'
+ ].join('\n');
+}
+function shootoutMarkup(match){
+ const p=match?.shootout;
+ if(!p){
+  if(!match?.tiebreak)return '';
+  return '<div class="challenge-penalty-summary"><strong>PENALTY SHOOTOUT</strong><p>'+esc(match.tiebreak)+'</p><small>Individual attempts were not saved for this earlier result.</small></div>';
+ }
+ const attempts=Array.isArray(p.attempts)?p.attempts:[];
+ const rows=attempts.map(kick=>'<div class="shootout-attempt '+(kick.scored?'scored':'missed')+'">'+
+  '<span class="shootout-side">'+(kick.side==='home'?'YOUR XI':esc(match.boss||'OPPONENT'))+'</span>'+
+  '<span class="shootout-round">'+(kick.round<=5?'R'+kick.round:'SD'+(kick.round-5))+'</span>'+
+  '<strong>'+esc(kick.kicker||'Unknown kicker')+'</strong>'+
+  '<span class="shootout-mark">'+(kick.scored?'✓ GOAL':'× MISS')+'</span></div>').join('');
+ return '<section class="challenge-penalty-summary" aria-label="Penalty shootout details">'+
+  '<div class="shootout-heading"><span>PENALTY SHOOTOUT</span><strong>YOUR XI '+p.home+' – '+p.away+' '+esc(match.boss||'OPPONENT')+'</strong></div>'+
+  '<p>'+(match.extraTime?'After extra time':'Regulation ended')+' '+esc((match.score||[0,0]).join(' – '))+'. '+(p.winner==='home'?'Your XI wins':'Opponent wins')+' on penalties.</p>'+
+  '<details class="shootout-kicks"><summary>VIEW PENALTY KICKS · '+attempts.length+' ATTEMPTS</summary>'+rows+'</details>'+
+  '<small>'+(p.version==='pse-shootout-v1'?'PSE-modeled penalty attempts, separate from the match goal ledger. Ball physics and keeper collisions remain illustrative.':'Provisional seeded Quick Sim shootout. Attempts are modeled separately from match goals; full extra-time and penalty physics are not yet available.')+'</small></section>';
+}
+function penaltyScore(match,verbose=false){
+ const p=match?.shootout;
+ return p?' ('+(verbose?'PENALTIES ':'P ')+p.home+'–'+p.away+')':'';
+}
+function lineupPerformance(ids,formation,items=[],boss=null){
+ const positions=FORMS[formation]||FORMS['4-3-3'];
+ return (ids||[]).map((id,i)=>{
+  const s=BY.get(id),item=boss?opponentHeldItem(boss,id):items[i],d=displayPokemon(s,item);
+  return {id,name:d.name,aliases:s?[s.name,d.name]:[],spriteId:d.spriteId,
+   pos:positions[i],fit:s?rating(s,positions[i],item):0};
+ });
+}
+function calculateMatchAward(match){
+ if(!PERFORMANCE||!match)return null;
+ const b=BOSSES.find(x=>x.leader===match.boss)||BOSSES[(Number(match.round)||1)-1];
+ if(!b)return null;
+ const home=lineupPerformance(st.locked?.roster||st.roster,st.locked?.formation||st.formation,st.locked?.items||st.items);
+ const away=lineupPerformance(b.roster,b.formation,[],b);
+ return PERFORMANCE.matchAward(match,home,away);
+}
+function tournamentStats(){
+ return PERFORMANCE?.tournament(st.history||[],lineupPerformance(st.locked?.roster||st.roster,st.locked?.formation||st.formation,st.locked?.items||st.items))||null;
+}
+function awardMarkup(match){
+ const a=match?.award;if(!a)return '';
+ const extras=[a.goals?a.goals+' goal'+(a.goals>1?'s':''):null,a.assists?a.assists+' assist'+(a.assists>1?'s':''):null,
+  a.saves?a.saves+' saves':null,a.penalties?a.penalties+' shootout goal'+(a.penalties>1?'s':''):null].filter(Boolean).join(' · ');
+ return '<div class="challenge-player-award" aria-label="Player of the match">'+
+  '<img loading="lazy" alt="" src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/'+a.spriteId+'.png">'+
+  '<div><span class="pfc-eyebrow">★ PLAYER OF THE MATCH · '+(a.side===0?'YOUR XI':'OPPONENT')+'</span><strong>'+esc(a.name)+'</strong>'+
+  '<small>'+esc(extras||(a.method==='position-fit-fallback'?'Fit-based pick · player-level events unavailable':'Clean sheet / positional fit'))+'</small></div>'+
+  '</div>';
+}
+function individualShotsHtml(match){
+ const all=Array.isArray(match?.report?.playerShotsOnTarget)?match.report.playerShotsOnTarget:[];
+ if(!all.length)return '<p class="match-report-note">Individual Pokémon shots on goal were not recorded for this match.</p>';
+ const recorded=all.filter(s=>Number(s.count)>0).sort((a,b)=>Number(a.side)-Number(b.side)||Number(b.count)-Number(a.count)||String(a.player).localeCompare(String(b.player)));
+ const rows=recorded.map(p=>'<div class="individual-shot-row"><span>'+((Number(p.side)===0)?'YOUR XI':'OPPONENT')+'</span>'+
+  '<strong>'+esc(p.player||'Pokémon')+'</strong><b>'+Number(p.count)+' SOG</b></div>').join('');
+ return '<section class="individual-shots-on-goal" aria-label="Pokémon shots on goal">'+
+  '<h4>POKÉMON SHOTS ON GOAL</h4>'+
+  (rows||'<p>No Pokémon recorded a shot on goal in this match.</p>')+
+  '<small>From individual match-box data. Penalty shootout attempts are excluded.</small></section>';
+}
+function matchReplayControls(match){
+ // New results retain their immutable official PSE fixture. Old match reports
+ // remain readable, but we never invent a replay from a newly simulated game.
+ const entry=(st.history||[]).find(m=>m.round===match?.round&&m.seed===match?.seed&&m.boss===match?.boss);
+ const data=entry?.replay;
+ if(!data||data.version!==1||data.result?.origin!=='quick-sim'||
+  !Array.isArray(data.result.events)||!data.preview?.home?.lineup||!data.preview?.away?.lineup)return '';
+ const goals=data.result.events.filter(e=>e?.type==='goal').slice().sort((a,b)=>a.minute-b.minute);
+ const score=data.result.score||[];
+ if(!goals.length||goals.length!==Number(score[0])+Number(score[1]))return '';
+ const teams=[data.preview.home,data.preview.away];
+ const buttons=goals.map((goal,i)=>{
+  const team=teams.find(t=>String(t.id)===String(goal.team));
+  const player=team?.lineup?.find(p=>String(p.id)===String(goal.player));
+  if(!team||!player||!Number.isFinite(Number(goal.minute)))return '';
+  return '<button type="button" class="challenge-goal-replay-button" data-match-replay="'+Number(match.round)+
+   '" data-replay-id="goal-'+i+'" aria-label="Replay goal by '+esc(player.name)+'">'+
+   '▶ '+(Math.floor(goal.minute)+1)+'′ · '+esc(player.name)+'</button>';
+ }).join('');
+ const kicks=data.result.shootout?.version==='pse-shootout-v1'?
+  data.result.shootout.attempts.map((kick,i)=>
+   '<button type="button" class="challenge-goal-replay-button" data-match-replay="'+Number(match.round)+
+   '" data-replay-id="pk-'+i+'" aria-label="Replay penalty attempt '+(i+1)+'">'+
+   '▶ PENALTY '+(i+1)+'</button>').join(''):'';
+ if(!buttons&&!kicks)return '';
+ return '<section class="challenge-replay-controls" aria-label="Match video highlights">'+
+  '<h4>GOAL REPLAYS <small>2.5D INSTANT REPLAY</small></h4>'+
+  '<div class="challenge-replay-buttons">'+buttons+kicks+'</div>'+
+  '<p>Illustrative Soccer-JS playback of official PSE events, not a video recording.</p></section>';
+}
+function matchReportHtml(match){
+ if(!match)return '<p class="match-report-note">No game record available.</p>';
+ const report=match.report;
+ const label=String(match.origin||report?.origin||'quick-sim');
+ const source=label==='tacticmesh'?'WATCHED MATCH':label==='hybrid'?'WATCH → QUICK SIM':'QUICK SIM';
+ const score=Array.isArray(match.score)?match.score:[0,0];
+ const scoreText=esc(score.join(' – '));
+ const rawStats=report?.stats||{shots:match.shots,passes:match.passes};
+ const rate=(made,total)=>made!=null&&total!=null&&Number.isFinite(Number(made))&&
+  Number.isFinite(Number(total))&&Number(total)>0&&Number(made)>=0&&Number(made)<=Number(total)?
+  (100*Number(made)/Number(total)).toFixed(1):null;
+ const stats={...rawStats,
+  passAccuracy:[0,1].map(side=>rate(rawStats.completedPasses?.[side],rawStats.passes?.[side])),
+  tackleSuccess:[0,1].map(side=>rate(rawStats.tackles?.[side],rawStats.tackleAttempts?.[side]))};
+ const rows=[
+  ['SHOTS','shots',''],['SHOTS ON TARGET','shotsOnTarget',''],['POSSESSION','possession','%'],
+  ['PASSES','passes',''],['COMPLETED PASSES','completedPasses',''],['PASS ACCURACY','passAccuracy','%'],
+  ['TACKLES ATTEMPTED','tackleAttempts',''],['TACKLES WON','tackles',''],['TACKLE WIN RATE','tackleSuccess','%'],['SAVES','saves','']
+ ].filter(([,key])=>Array.isArray(stats[key])&&stats[key].some(v=>v!==null&&v!==undefined));
+ const table=rows.map(([label,key,unit])=>
+  '<div class="match-stat-row"><strong>'+esc(stats[key][0]??'—')+(stats[key][0]==null?'':unit)+'</strong><span>'+label+'</span><strong>'+
+  esc(stats[key][1]??'—')+(stats[key][1]==null?'':unit)+'</strong></div>').join('');
+ const goals=Array.isArray(report?.goals)?report.goals:[];
+ const goalFeed=goals.length?goals.map(goal=>{
+  const side=Number(goal.side)===0?'home':'away';
+  const player=esc(goal.player||'Scorer unavailable');
+  const assist=goal.assist?'<small>Assist: '+esc(goal.assist)+'</small>':'';
+  const minute=String(goal.minuteLabel||'?').replace(/[^0-9+?]/g,'')||'?';
+  return '<li class="match-goal-event '+side+'"><span class="goal-minute">'+minute+'′</span>'+
+   '<span class="goal-club">'+(side==='home'?'YOUR XI':'OPPONENT')+'</span><div class="goal-info">'+
+   '<strong>⚽ '+player+'</strong>'+assist+'</div></li>';
+ }).join(''):'<li class="match-no-goals">'+(Number(score[0])===0&&Number(score[1])===0?'No goals in regulation.':'Goal scorer and minute details were not recorded for this match.')+'</li>';
+ const savedTimeline=Array.isArray(report?.timeline)&&report.timeline.length?report.timeline:
+  goals.map(goal=>({...goal,type:'goal'})); // Legacy runs retain their real scorer ledger.
+ const timelineHtml=MATCH_REPORT?.renderGroupedTimeline?.(savedTimeline,{
+  goalsEmpty:'No goals recorded for this match.',
+  otherEmpty:'No saves or other events recorded for this match.'
+ })||'<ol class="match-goal-feed">'+goalFeed+'</ol>';
+ const incomplete=report?.status&&report.status!=='complete'?'<p class="match-report-warning">'+esc(report.note||'Not all goal events were recorded.')+'</p>':!report&&score.some(x=>Number(x)>0)?'<p class="match-report-warning">This earlier game was saved before detailed goal logs were supported.</p>':'';
+ return '<div class="gauntlet-match-report">'+
+  awardMarkup(match)+
+  '<div class="match-report-heading"><span class="pfc-eyebrow">'+esc(source)+'</span><strong>YOUR XI&nbsp; '+scoreText+'&nbsp; '+esc(match.boss||'OPPONENT')+'</strong></div>'+
+  matchReplayControls(match)+
+  '<h4>MATCH TIMELINE</h4>'+timelineHtml+incomplete+
+  (table?'<h4>MATCH STATISTICS</h4><div class="match-stats">'+
+  '<div class="match-stats-label"><span>YOUR XI</span><span>OPPONENT</span></div>'+table+'</div>':'<p class="match-report-note">Detailed match statistics were not saved for this game.</p>')+
+  individualShotsHtml(match)+
+  '<p class="match-report-note">Enclosed pitch: no throw-ins, corners, fouls, free kicks or in-match penalties. Knockout shootouts remain a separate tiebreaker.</p>'+
+  shootoutMarkup(match)+
+ '</div>';
+}
+function matchHistoryHtml(history){
+ if(!history?.length)return '';
+ return '<div class="gauntlet-history"><h3>PREVIOUS MATCH REPORTS</h3>'+
+  history.map((m,i)=>'<details class="gauntlet-history-game"><summary><span>0'+(i+1)+' · '+esc(versusLabel(m.boss))+'</span>'+
+  '<strong>'+esc((m.score||[0,0]).join(' – ')+penaltyScore(m))+'</strong><small>'+esc(resultLabel(m.outcome,true))+'</small></summary>'+
+  matchReportHtml(m)+'</details>').join('')+'</div>';
+}
+function completedRunCard(){
+ const r=runStats(),last=r.matches[r.matches.length-1]||st.result;
+ const tournament=tournamentStats(),playerStats=tournament?.players||lineupPerformance(r.line,r.formation,st.locked?.items||st.items).map(p=>({...p,goals:0,assists:0,saves:0,penalties:0,potm:0,appearances:r.matches.length,cleanSheets:0}));
+ const recordedShotMatches=r.matches.filter(m=>m.report?.playerShotsOnTarget?.some?.(p=>Number(p.side)===0)).length;
+ const recordedTackleMatches=r.matches.filter(m=>m.report?.playerTackles?.some?.(p=>Number(p.side)===0)).length;
+ const validTotals=(part,total)=>part!=null&&total!=null&&Number.isFinite(Number(part))&&
+  Number.isFinite(Number(total))&&Number(part)>=0&&Number(total)>=Number(part);
+ const passMatches=r.matches.filter(m=>validTotals(m.report?.stats?.completedPasses?.[0],m.report?.stats?.passes?.[0]));
+ const tackleMatches=r.matches.filter(m=>validTotals(m.report?.stats?.tackles?.[0],m.report?.stats?.tackleAttempts?.[0]));
+ const possessionMatches=r.matches.filter(m=>m.report?.stats?.possession?.[0]!=null&&
+  Number.isFinite(Number(m.report.stats.possession[0])));
+ const sumStat=(matches,key)=>matches.reduce((n,m)=>n+Number(m.report.stats[key][0]),0);
+ const attemptedPasses=sumStat(passMatches,'passes'),completedPasses=sumStat(passMatches,'completedPasses');
+ const tackleAttempts=sumStat(tackleMatches,'tackleAttempts'),tacklesWon=sumStat(tackleMatches,'tackles');
+ const teamTotals='<div class="tournament-team-summary"><h4>TEAM PASSING &amp; DEFENSE</h4>'+
+  ((passMatches.length||tackleMatches.length||possessionMatches.length)?
+   '<div class="tournament-team-metrics">'+
+   (passMatches.length?'<div><small>COMPLETED PASSES</small><strong>'+completedPasses+' / '+attemptedPasses+'</strong></div>'+
+    '<div><small>PASS ACCURACY</small><strong>'+(attemptedPasses?(100*completedPasses/attemptedPasses).toFixed(1)+'%':'—')+'</strong></div>':'')+
+   (tackleMatches.length?'<div><small>TACKLES WON</small><strong>'+tacklesWon+' / '+tackleAttempts+'</strong></div>'+
+    '<div><small>TACKLE WIN RATE</small><strong>'+(tackleAttempts?(100*tacklesWon/tackleAttempts).toFixed(1)+'%':'—')+'</strong></div>':'')+
+   (possessionMatches.length?'<div><small>AVG POSSESSION</small><strong>'+(sumStat(possessionMatches,'possession')/possessionMatches.length).toFixed(1)+'%</strong></div>':'')+
+   '</div><p>Passing '+passMatches.length+'/'+r.matches.length+' matches · Tackles '+tackleMatches.length+'/'+r.matches.length+
+   ' matches · Possession '+possessionMatches.length+'/'+r.matches.length+' matches. Totals include only matches with recorded data.</p>':
+   '<p>Passing, tackle and possession statistics were not saved for this run.</p>')+'</div>';
+ const tournamentBest=tournament?.best;
+ const tournamentBadge=tournamentBest?'<div class="tournament-mvp">'+
+  '<img loading="lazy" alt="" src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/'+tournamentBest.spriteId+'.png">'+
+  '<div><span class="pfc-eyebrow">★ BEST PLAYER OF THE TOURNAMENT</span><strong>'+esc(tournamentBest.name)+'</strong>'+
+  '<small>'+tournamentBest.goals+' goals · '+tournamentBest.assists+' assists · '+tournamentBest.potm+' match awards · '+tournamentBest.saves+' saves</small>'+
+  '<small class="tournament-award-method">'+(tournament?.method==='position-fit-fallback'?'Provisional: chosen by positional fit because individual contributions were unavailable.':'Provisional award calculated from recorded match contributions.')+'</small></div></div>':'';
+ const tournamentCards='<div class="tournament-players">'+draftOrder(r.formation).map(i=>{
+  const id=r.line[i],species=BY.get(id),item=(st.locked?.items||st.items)[i],d=displayPokemon(species,item),p=playerStats[i];
+  return '<div class="tournament-pokemon'+(tournamentBest?.id===id?' tournament-top-player':'')+'">'+
+   displaySprite(species,item,'tournament-pokemon-sprite')+
+   '<div class="tournament-pokemon-name"><span>'+esc(FORMS[r.formation][i])+'</span><strong>'+esc(d.name)+'</strong><small>'+esc(item||'NO ITEM')+'</small></div>'+
+   '<div class="tournament-pokemon-stats"><span><b>'+p.goals+'</b>G</span><span><b>'+p.assists+'</b>A</span>'+
+   '<span><b>'+p.appearances+'</b>APP</span><span><b>'+p.potm+'</b>POTM</span>'+
+   '<span class="pokemon-shot-stat"><b>'+(p.shotGames?p.shotsOnGoal:'—')+'</b>SOG</span>'+
+   (p.pos==='GK'?'<span><b>'+p.saves+'</b>SV</span><span><b>'+p.cleanSheets+'</b>CS</span>':'')+
+   (p.penalties?'<span><b>'+p.penalties+'</b>PK</span>':'')+
+   '<span class="pokemon-tackle-stat"><b>'+(p.tackleGames?p.tacklesWon+'/'+p.tackleAttempts:'—')+'</b>TCK</span>'+
+   '<span class="pokemon-tackle-rate"><b>'+(p.tackleGames&&p.tackleAttempts?(100*p.tacklesWon/p.tackleAttempts).toFixed(0)+'%':'—')+'</b>WIN</span>'+
+   '</div></div>';
+ }).join('')+'</div>';
+ const roster=r.line.map((id,i)=>'<span>'+esc(FORMS[r.formation][i])+' · '+esc(displayPokemon(BY.get(id),(st.locked?.items||st.items)[i]).name)+'</span>').join('');
+ const matchList=r.matches.map((m,i)=>'<details class="run-match '+(m.outcome==='Victory'?'won':'lost')+'"'+(!r.champion&&i===r.matches.length-1?' open':'')+'><summary><span>0'+(i+1)+' · '+esc(versusLabel(m.boss))+'</span><strong>'+esc(m.score.join('–')+penaltyScore(m))+'</strong><small>'+esc(resultLabel(m.outcome,true))+'</small></summary>'+matchReportHtml(m)+'</details>').join('');
+ return '<section class="panel challenge-complete-panel">'+
+  '<div class="run-result-heading"><span class="pfc-eyebrow">'+(r.champion?'CHALLENGE CHAMPION':'RUN COMPLETE')+'</span><span class="run-outcome '+(r.champion?'success':'ended')+'">'+(r.champion?'🏆 SIX WINS · CHAMPION':'LOSS · '+esc(versusLabel(last?.boss)))+'</span></div>'+
+  '<h2 id="runResultTitle">'+(r.champion?'INDIGO CHAMPION.':'YOUR RUN RECAP.')+'</h2>'+
+  '<p>'+(r.champion?'An undefeated six-match gauntlet.':'Your run has ended. Your result is in the local leaderboard records.')+'</p>'+
+  '<div class="run-metrics"><div><span>TEAM SCORE</span><strong>'+r.score.toFixed(1)+'</strong></div>'+
+  '<div><span>RECORD</span><strong>'+r.wins+'W · '+r.lost+'L</strong></div>'+
+  '<div><span>MATCHES PLAYED</span><strong>'+r.matches.length+' / 6</strong></div>'+
+  '<div><span>FORMATION</span><strong>'+esc(r.formation)+'</strong></div></div>'+
+  '<p class="run-category">'+esc(r.category)+'</p>'+
+  '<div class="run-actions"><button type="button" id="shareRun" class="primary">SHARE / POST RUN</button><button type="button" id="downloadRunCard" class="run-download">↓ DOWNLOAD PNG CARD</button><button type="button" id="startNewRun" class="run-restart">↻ START NEW RUN</button></div>'+
+  '<div id="runSharePanel" class="run-share-panel" hidden>'+
+   '<h3>SHARE YOUR RUN</h3><p>Your run card includes the Final XI sprites, team score, and all six gauntlet fixtures. Direct X posting and shareable profiles are coming later.</p>'+
+   '<canvas id="runCardPreview" class="run-card-canvas" width="1200" height="1600" role="img" aria-label="PokéFC Challenge team results poster" hidden></canvas>'+ 
+  '<p id="runCardPreviewStatus" class="statline">Preview loads when sharing.</p>'+ 
+  '<pre class="run-share-preview">'+esc(runShareText())+'</pre>'+
+   '<div class="run-share-actions"><button id="copyRunSummary" type="button">COPY RUN SUMMARY</button>'+
+   '<button id="postTwitter" type="button" disabled title="X posting is not available yet">POST TO X / TWITTER · COMING SOON</button></div>'+
+   '<p id="runShareStatus" role="status" aria-live="polite"></p></div>'+
+  '<section class="run-tournament-panel"><h3>TOURNAMENT STATS</h3>'+tournamentBadge+
+  teamTotals+'<p>G = goals · A = assists · APP = appearances · POTM = match awards · SOG = individual shots on goal · TCK = tackles won/attempted · WIN = tackle win % · PK = shootout conversions · SV/CS = goalkeeper saves/clean sheets.</p>'+
+  tournamentCards+'<p class="run-sog-coverage">Individual shots on goal recorded for '+recordedShotMatches+' of '+r.matches.length+
+  ' matches. Pokémon tackle data recorded for '+recordedTackleMatches+' of '+r.matches.length+
+  ' matches. A dash (—) means player-level data was unavailable; zero means a recorded zero. Individual passes are not yet tracked by Quick Sim.</p></section>'+ 
+   '<div class="run-match-recap"><h3>GAUNTLET RESULTS</h3>'+matchList+'</div>'+
+  '<details class="run-roster-details"><summary>VIEW FINAL XI &amp; EQUIPMENT</summary><div class="run-roster-list">'+roster+'</div></details>'+
+  '</section>';
+}
+function draftPokemon(id,index){
+ const i=Number(index),pokemon=BY.get(Number(id));
+ if(st.phase!=='draft'||slotAnimationBusy)return {ok:false,error:'Finish the current scouting animation first.'};
+ if(!Number.isInteger(i)||i<0||i>=11||st.roster[i])return {ok:false,error:'Drop a draft pick on an empty position.'};
+ if(!pokemon||!eligible().some(s=>s.id===pokemon.id))return {ok:false,error:'That Pokémon is not in the current scouting roll.'};
+ if(pokemon.legendary&&st.roster.filter(n=>BY.get(n)?.legendary).length>=2)return {ok:false,error:'Your XI is already at the Legendary limit.'};
+ st.roster[i]=pokemon.id;
+ dragStatus=pokemon.name+' drafted at '+FORMS[st.formation][i]+'.';
+ if(st.roster.every(Boolean)){st.phase='shop';draftPickerOpen=false;shopDrawerOpen=true}
+ else{st.selected=nextDraftSlot();roll();draftPickerOpen=true}
+ save();render();return {ok:true};
+}
+function moveDraftedPokemon(from,to){
+ const a=Number(from),b=Number(to);
+ if(!['draft','shop'].includes(st.phase))return {ok:false,error:'The Final XI is locked.'};
+ if(st.moves<=0)return {ok:false,error:'You have already used your one Pokémon move.'};
+ if(!Number.isInteger(a)||!Number.isInteger(b)||a<0||a>=11||b<0||b>=11||a===b||!st.roster[a])return {ok:false,error:'Choose two different valid positions.'};
+ const target=st.roster[b],pokemon=BY.get(st.roster[a]);
+ [st.roster[a],st.roster[b]]=[st.roster[b],st.roster[a]];
+ [st.items[a],st.items[b]]=[st.items[b],st.items[a]]; // Keep equipment on its Pokémon.
+ st.moves--;
+ if(st.phase==='draft'&&!target){st.selected=nextDraftSlot();draftPickerOpen=true}
+ dragStatus=(pokemon?.name||'Pokémon')+(target?' swapped positions.':' moved to '+FORMS[st.formation][b]+'.')+' No Pokémon moves remaining.';
+ save();render();return {ok:true};
+}
+function pokemonDetailMarkup(index){
+ const i=Number(index),species=BY.get(st.roster[i]);
+ if(!Number.isInteger(i)||i<0||i>=11||!species)return '';
+ const position=FORMS[st.formation][i],item=st.items[i],display=displayPokemon(species,item);
+ const stats=effectiveStats(species,item);
+ const cost=itemFor(species,item)?.[1]||0;
+ const statNames=[['HP','hp'],['ATK','attack'],['DEF','defense'],['SpA','spAttack'],['SpD','spDefense'],['SPE','speed']];
+ return '<section class="pokemon-detail-profile" data-detail-slot="'+i+'">'+
+  '<div class="pokemon-detail-lead">'+displaySprite(species,item,'pokemon-detail-sprite')+
+  '<div><span class="pfc-eyebrow">#'+String(species.id).padStart(4,'0')+' · GEN '+(species.gen||gen(species.id))+'</span>'+
+  '<h2>'+esc(display.name)+'</h2><p>'+esc(species.types.join(' / ').toUpperCase())+'</p>'+
+  '<div class="pokemon-detail-tags"><span>'+esc(position)+' POSITION</span>'+
+  '<span class="pokemon-detail-tier tier-'+tierFor(species,position,item).toLowerCase()+'">'+esc(tierFor(species,position,item))+' TIER · '+efficiencyFor(species,position,item)+' EFF</span>'+
+  (species.legendary?'<span>LEGENDARY CLASS</span>':'')+'</div></div></div>'+
+  '<div class="pokemon-detail-equipment"><strong>HELD ITEM</strong>'+
+  (item?'<span>'+itemSprite(item)+esc(item)+' <small>₽'+cost+'</small></span>':'<span>NONE EQUIPPED</span>')+'</div>'+
+  '<h3>EFFECTIVE PLAYER STATS</h3>'+
+  '<div class="pokemon-detail-stats">'+statNames.map(([label,key])=>{
+   const value=stats[key],diff=value-species.baseStats[key];
+   return '<div class="pokemon-detail-stat'+(diff>0?' is-boosted':diff<0?' is-reduced':'')+'"><span>'+label+'</span>'+
+    '<strong>'+value+'</strong><small>'+(diff?(diff>0?'+':'')+diff+' FROM ITEM':'BASE '+species.baseStats[key])+'</small></div>';
+  }).join('')+'</div>'+
+  '<p class="pokemon-detail-note">Position tier reflects item-adjusted fit. The underlying numerical position-fit rating stays hidden.</p>'+
+  '</section>';
+}
+function render(){const app=document.getElementById('app');
+ if(st.phase==='shop'&&app?.querySelector){
+  const drawer=app.querySelector('#challengeShopDrawer');
+  if(drawer&&!drawer.hidden)shopScrollTop=drawer.scrollTop||0;
+ }
+ draftWindowCleanup?.();draftWindowCleanup=null;
+ shopWindowCleanup?.();shopWindowCleanup=null;
+ formationWindowCleanup?.();formationWindowCleanup=null;
+ goalReplaySession?.destroy?.();goalReplaySession=null;
+ moveWindowCleanup?.();moveWindowCleanup=null;
+ window.PFC_CHALLENGE_DND?.cancel?.();
+ let awardsAdded=false;
+ for(const match of st.history||[]){
+  if(!match.award){match.award=calculateMatchAward(match);awardsAdded=Boolean(match.award)||awardsAdded}
+ }
+ if(st.result&&!st.result.award){st.result.award=calculateMatchAward(st.result);awardsAdded=Boolean(st.result.award)||awardsAdded}
+ if(awardsAdded)save();
+ if(st.phase==='finished')BOARD?.archive(st,localStorage);
+ syncChallengeNav();
+ if(challengeView==='leaderboard'){renderLeaderboards(app);return}
+ if(st.phase==='setup'){
+ let records={};try{records=JSON.parse(localStorage.getItem('pokefc-challenge-personal-records-v1'))||{}}catch{}
+ const categories=[['classic-standard','CLASSIC / STANDARD'],['classic-legends','CLASSIC / LEGENDS'],['national-standard','NATIONAL / STANDARD'],['national-legends','NATIONAL / LEGENDS']];
+ const recordsHtml=categories.map(([key,label])=>{
+  const record=records[key]||{attempts:0,best:0,champions:0};
+  const top=BOARD?.stats?.(key,localStorage);
+  const bestScore=top?.bestScore;
+  return '<div class="challenge-record"><div><span class="record-name">'+label+'</span><small>'+record.attempts+' runs · '+record.champions+' champions</small></div>'+
+   '<div class="challenge-record-metrics"><strong>'+record.best+'<small>BEST / 6</small></strong>'+
+   '<strong class="challenge-record-score">'+(bestScore==null?'—':Number(bestScore).toFixed(1))+'<small>TOP TEAM SCORE</small></strong></div></div>';
+ }).join('');
+ app.innerHTML='<div class="challenge-hub">'+
+ '<section class="panel challenge-setup-panel"><div class="challenge-heading-row"><span class="challenge-step">01</span><h2>CHOOSE YOUR CHALLENGE</h2></div>'+
+ '<p class="challenge-subtitle">Two Pokédex pools. Four leaderboard categories. One road to the Champion.</p>'+
+ '<div class="challenge-options">'+
+ '<button type="button" class="challenge-option selected" id="classicMode" aria-pressed="true"><span class="option-top">CLASSIC CUP / 01</span><strong>GEN I–IV</strong><small>493 Pokémon · the original four regions</small></button>'+
+ '<button type="button" class="challenge-option" id="nationalMode" aria-pressed="false"><span class="option-top">NATIONAL CUP / 02</span><strong>GEN I–IX</strong><small>1,025 Pokémon · every generation</small></button></div>'+
+ '<div class="challenge-run-settings"><div class="controls-inline">'+
+ '<label>Pokédex pool <select id="pool"><option value="4">CLASSIC · Gen I–IV (493)</option><option value="9">NATIONAL · Gen I–IX (1,025)</option></select></label>'+
+ '<label>Legendaries <select id="leg"><option value="off">OFF · No Legendary / Mythical / Ultra Beast</option><option value="on">ON · Up to 2 per XI</option></select></label>'+
+ '<label>Starting formation <select id="form">'+Object.keys(FORMS).map(f=>'<option>'+f+'</option>').join('')+'</select></label></div></div>'+
+ '<p class="statline">11 unique picks · 1 type reroll · 1 generation reroll · 1 drafted-player move · 1 formation change · ₽1,000 equipment budget · max 1 Mega · 6 bosses.</p>'+
+ '<button class="primary challenge-start" id="start">BEGIN YOUR RUN →</button></section>'+
+ '<aside class="panel challenge-records-panel"><div class="challenge-records-header"><h2>YOUR CHALLENGE CARD</h2><span>LOCAL RECORDS</span></div>'+
+ '<div class="challenge-record-list">'+recordsHtml+'</div>'+
+ '<div class="challenge-steps"><h3>THE ROAD TO INDIGO</h3>'+
+ '<p>01 / Draft eleven Pokémon using type and generation rolls.</p>'+
+ '<p>02 / Spend your budget and lock the same Final XI for all matches.</p>'+
+ '<p>03 / Beat Lorelei → Bruno → Agatha → Lance → Blue → Red.</p>'+
+ '<p>Personal records stay in this browser. No online leaderboard yet.</p></div>'+ '<div class="challenge-leaderboard-teaser"><div class="leaderboard-top"><h3>LEADERBOARDS</h3><span>LOCAL BETA</span></div>'+ '<p>Four divisions: Classic Standard, Classic Legends, National Standard and National Legends.</p>'+ '<button id="openLeaderboards" type="button">VIEW LEADERBOARDS →</button><p>Global rankings require verified match results and will launch separately.</p></div></aside></div>';
+ document.getElementById('openLeaderboards').onclick=()=>{challengeView='leaderboard';boardCategory=BOARD?.categoryOf(st)||boardCategory;render()};
+ const poolSelect=document.getElementById('pool');
+ const sync=()=>{for(const [id,val] of [['classicMode','4'],['nationalMode','9']]){
+  const node=document.getElementById(id),selected=poolSelect.value===val;
+  node.className='challenge-option'+(selected?' selected':'');
+  if(node.setAttribute)node.setAttribute('aria-pressed',String(selected));
+ }};
+ document.getElementById('classicMode').onclick=()=>{poolSelect.value='4';sync()};
+ document.getElementById('nationalMode').onclick=()=>{poolSelect.value='9';sync()};
+ poolSelect.onchange=sync;
+ document.getElementById('start').onclick=()=>{draftPickerOpen=true;shopDrawerOpen=true;draftWindowPosition=null;shopWindowPosition=null;st.pool=+poolSelect.value;st.legends=document.getElementById('leg').value==='on';st.formation=document.getElementById('form').value;st.round=0;st.history=[];st.rollHistory=[];st.phase='draft';st.selected=nextDraftSlot();roll();save();render()};return}
+const slots=FORMS[st.formation],filled=st.roster.filter(Boolean).length,used=st.items.reduce((a,n,i)=>a+(itemFor(BY.get(st.roster[i]),n)?.[1]||0),0);
+const draftTierCache=new Map();
+const rankTier={S:0,A:1,B:2,C:3,D:4};
+const roleGroup=pos=>window.PFC_POSITION_EFFECTIVENESS.archetype(pos);
+const cachedDraftTier=(pokemon,pos)=>{
+ const key=pokemon.id+':'+roleGroup(pos);
+ if(!draftTierCache.has(key))draftTierCache.set(key,tierFor(pokemon,pos));
+ return draftTierCache.get(key);
+};
+const draftCompare=(a,b,pos)=>rankTier[cachedDraftTier(a,pos)]-rankTier[cachedDraftTier(b,pos)]||a.name.localeCompare(b.name)||a.id-b.id;
+const legendCount=st.roster.filter(id=>BY.get(id)?.legendary).length;
+const posMap={
+ '4-3-3':[[50,89],[14,73],[38,75],[62,75],[86,73],[24,54],[50,52],[76,54],[19,26],[50,17],[81,26]],
+ '4-2-3-1':[[50,89],[14,75],[38,77],[62,77],[86,75],[35,58],[65,58],[18,36],[50,37],[82,36],[50,18]],
+ '4-4-2':[[50,89],[14,75],[38,76],[62,76],[86,75],[16,49],[38,50],[62,50],[84,49],[35,23],[65,23]],
+ '3-5-2':[[50,89],[22,74],[50,77],[78,74],[13,52],[87,52],[35,51],[65,51],[50,35],[35,19],[65,19]],
+ '5-3-2':[[50,89],[13,58],[25,76],[50,79],[75,76],[87,58],[28,45],[50,48],[72,45],[35,19],[65,19]]
+};
+const isShop=st.phase==='shop';
+const isDraft=st.phase==='draft';
+const stage=isDraft?'DRAFT '+(filled+1)+'/11':isShop?'EQUIPMENT':st.phase==='locked'?'BOSS '+(st.round+1)+'/6':st.phase==='finished'?'FULL TIME':'MATCH '+(st.round+1)+'/6';
+const gauntletStarted=['locked','result','finished'].includes(st.phase);
+const currentBoss=gauntletStarted?BOSSES[st.round]:null;
+const bossScore=currentBoss?opponentTeamScore(currentBoss):null;
+const lockedScore=Number(st.locked?.score);
+const playerScore=Number.isFinite(lockedScore)?lockedScore:teamScore();
+let body='<section class="challenge-scorebug" aria-label="Challenge progress">'+
+ '<div class="metric is-highlight"><span>RUN STATUS</span><strong>'+stage+'</strong></div>'+
+ '<div class="metric"><span>POKÉDEX</span><strong>'+(st.pool===4?'CLASSIC · I–IV':'NATIONAL · I–IX')+'</strong></div>'+
+ '<div class="metric"><span>STARTING XI</span><strong>'+filled+' / 11</strong><div class="challenge-progress"><span style="width:'+(100*filled/11)+'%"></span></div></div>'+
+ '<div class="metric"><span>LEGENDARIES</span><strong>'+(st.legends?legendCount+' / 2':'OFF')+'</strong></div>'+
+ '</section>';
+if(gauntletStarted){
+ const completed=st.history.length,hasReports=completed>0;
+ body+='<section class="panel challenge-road-strip" aria-label="Road to Champion progress">'+
+  '<div class="challenge-road-head"><div><span class="pfc-eyebrow">INDIGO LEAGUE · GAUNTLET</span><h2>ROAD TO CHAMPION <small>'+completed+' / 6 PLAYED</small></h2></div>'+
+  '<div class="challenge-road-controls">'+
+  '<button type="button" id="openOpponentModal" class="challenge-history-button">SCOUT OPPONENT XI</button>'+
+  (hasReports?'<button type="button" id="openHistoryModal" class="challenge-history-button">VIEW MATCH REPORTS</button>':'<span class="challenge-road-hint">SIX OPPONENTS · ONE FINAL XI</span>')+'</div></div>'+
+  '<div class="challenge-gauntlet-track">'+BOSSES.map((boss,i)=>{
+   const result=st.history[i],current=i===st.round;
+   const status=result?(result.outcome==='Victory'?'✓':'×'):current?'●':'–';
+   return '<div class="challenge-road-step'+(result?' done '+(result.outcome==='Victory'?'won':'lost'):'')+(current?' current':'')+'" aria-label="'+esc(versusLabel(boss.leader)+' · '+(result?resultLabel(result.outcome,true):'UPCOMING'))+'">'+
+    '<span class="road-step-number">MATCH '+(i+1)+'</span><strong>'+esc(versusLabel(boss.leader))+'</strong>'+
+    '<span class="road-step-status">'+(result?esc(resultLabel(result.outcome,true)+' · '+(result.score?.join(' – ')||status)+penaltyScore(result)):status)+'</span></div>';
+  }).join('')+'</div>'+
+  '<div class="challenge-versus-rating" aria-label="Team rating comparison">'+
+   '<div class="team-rating home"><span>YOUR XI · '+esc(st.formation)+'</span><strong>'+playerScore.toFixed(1)+'</strong></div>'+
+   '<span class="team-versus">VS</span>'+
+   '<div class="team-rating away"><span>'+esc((currentBoss?.leader||'OPPONENT').toUpperCase())+' · '+esc(currentBoss?.formation||'—')+'</span><strong>'+(bossScore==null?'—':bossScore.toFixed(1))+'</strong></div></div>'+
+  '<p class="challenge-rating-note">Team scores are average positional-fit ratings (0–100), including held-item effects—not predicted match odds.</p>'+
+  (st.phase==='locked'?'<div class="challenge-gauntlet-actions" aria-label="Gauntlet match controls">'+
+   '<div class="challenge-gauntlet-action-copy"><strong>MATCH '+(st.round+1)+' / 6 · '+esc(versusLabel(currentBoss?.leader))+'</strong>'+
+   '<span>'+esc(currentBoss?.formation||'4-3-3')+' · '+esc(currentBoss?.tactic||'balanced')+' tactics · Final XI and items locked</span></div>'+
+   '<div class="challenge-gauntlet-action-buttons"><button id="play" class="primary" type="button">QUICK SIM →</button>'+
+   '<a class="challenge-watch-link" href="../play/?challenge=1&amp;watch=soccerjs">WATCH MATCH ↗</a></div>'+
+   '<p class="challenge-gauntlet-action-note">Watch the same locked XI and boss, or Quick Sim instantly. Watched matches can hand off to Quick Sim.</p></div>':
+   st.phase==='result'&&st.result?.outcome==='Victory'?'<div class="challenge-gauntlet-actions challenge-gauntlet-next" aria-label="Match result access">'+
+   '<div class="challenge-gauntlet-action-copy"><strong>'+esc(versusLabel(st.result.boss))+' · WIN</strong><span>Review the score and recorded match events before facing the next boss.</span></div>'+
+   '<div class="challenge-gauntlet-action-buttons"><button id="openMatchResultModal" class="primary" type="button">VIEW MATCH RESULT →</button></div></div>':'')+
+ '</section>';
+ if(hasReports)body+='<dialog id="challengeHistoryModal" class="challenge-dialog challenge-history-dialog" aria-labelledby="challengeHistoryTitle">'+
+  '<div class="challenge-dialog-bar"><span id="challengeHistoryTitle">PREVIOUS MATCH REPORTS</span><button type="button" id="closeHistoryModal" aria-label="Close match history">✕ CLOSE</button></div>'+
+  '<div class="challenge-history-content">'+matchHistoryHtml(st.history)+'</div></dialog>';
+}
+const draftRollMarkup=isDraft?'<section class="panel challenge-draft-reels" aria-label="Scouting roll">'+
+ '<div id="challengeSlotMachine" class="challenge-draw challenge-slot-machine" aria-label="Scouting draw reels"><div class="slot-machine-head"><span>◉ DRAFT REELS · ROUND '+(filled+1)+'</span><span class="slot-machine-status">SCOUTING DRAW</span></div>'+ 
+ '<div class="slot-machine-reels"><div class="slot-reel" data-reel="region"><span class="slot-reel-label">REGION</span><div class="slot-window"><span data-reel-value="region">'+esc((SLOT?.regions||[])[(st.roll?.gen||1)-1]||'—')+'</span></div></div>'+ 
+ '<div class="slot-reel" data-reel="type"><span class="slot-reel-label">TYPE</span><div class="slot-window"><span data-reel-value="type">'+esc((st.roll?.type||'—').toUpperCase())+'</span></div></div></div>'+ 
+ '<div class="slot-payline" aria-hidden="true"><i></i><b>◆</b><i></i></div>'+ 
+ '<span data-reel-live class="challenge-reel-screenreader" role="status" aria-live="polite"></span>'+
+ '<div class="slot-machine-bottom"><button type="button" data-reel-skip hidden>SKIP ANIMATION →</button></div></div>'+
+ '<p>Hover or click a position to scout its fit. Drag a Pokémon from the list to an empty spot, or use DRAFT. You have one move or swap before locking.</p>'+
+ '<div class="controls-inline"><button id="typeR" '+(!st.rerollType||!rerollOptions('type').length?'disabled':'')+' title="Reroll to a new, never-before-seen type and generation combination">↻ TYPE · '+st.rerollType+'</button><button id="genR" '+(!st.rerollGen||!rerollOptions('gen').length?'disabled':'')+' title="Reroll to a new, never-before-seen type and generation combination">↻ GENERATION · '+st.rerollGen+'</button></div>'+
+ '<p class="reroll-unique-note">Rerolls never repeat an earlier type and region combination. Unavailable rerolls are disabled without using your credit.</p>'+
+ '</section>':'';
+body+='<div class="challenge-run-layout stage-'+esc(st.phase)+(isShop&&shopDrawerOpen?' shop-open':'')+'">'+
+ '<div class="challenge-stage-toolbar" aria-label="Challenge gameplay tools">'+
+ (isDraft?'<div><strong>DRAFT ROOM · '+(filled+1)+' / 11</strong><small>Select an open position, then draft a Pokémon in the floating picker.</small></div>'+
+  '<button type="button" class="primary" id="openDraftPicker">CHOOSE '+esc(slots[st.selected]||'POSITION')+' POKÉMON →</button>':
+  isShop?'<div><strong>EQUIPMENT · ₽'+(1000-used)+' LEFT</strong><small>Select an item, then tap a Pokémon on the pitch to equip it.</small></div>'+
+  '<button type="button" class="primary" id="toggleShopDrawer">'+(shopDrawerOpen?'HIDE ITEM SHOP':'OPEN ITEM SHOP')+'</button>':
+  '<div><strong>FINAL XI · '+esc(st.formation)+'</strong><small>Your Pokémon lineup is locked for the Indigo League.</small></div>')+
+ '</div>'+
+ '<section class="panel challenge-roster-panel"><div class="challenge-section-heading"><div><h2>'+(isDraft?'BUILD YOUR XI':isShop?'EQUIP YOUR TEAM':'YOUR FINAL XI')+'</h2>'+
+ '<p>'+(isDraft?'Tap an open position to open the Pokémon picker.':isShop?'Choose an item in the floating shop, then click a compatible Pokémon on the pitch.':'The same eleven stay together for the gauntlet.')+'</p></div><span class="formation-tag" id="challengeFormationTag">'+esc(st.formation)+' · '+(filled===11?teamScore().toFixed(1)+' SCORE':'IN PROGRESS')+'</span></div>'+
+ (isDraft||isShop?'<div class="challenge-drag-tip" role="note"><strong>⠿ DRAG &amp; DROP POKÉMON</strong><span>'+
+  (isDraft?'Click an open spot to choose Pokémon in a popup, or drag a candidate from the picker onto the pitch.':
+   st.moves>0?'Click and hold a Pokémon on the pitch to move or swap it (1 move). Drag shop items onto Pokémon to equip them.':
+   'Your Pokémon move has been used. You can still drag shop items onto Pokémon to equip them.')+
+  '</span></div>':'')+
+ '<div class="challenge-pitch-shell">'+
+ (isDraft||isShop?'<div class="challenge-pitch-controls" role="toolbar" aria-label="Formation and position adjustments">'+
+ '<button type="button" id="openFormationWindow" aria-controls="challengeFormationModal" aria-expanded="'+formationWindowOpen+'"'+(!st.formationChanges?' disabled':'')+' title="Open formation selector (one change before locking)">↻ SWAP FORMATION <small>'+st.formationChanges+' LEFT</small></button>'+
+ '<button type="button" id="openMoveWindow" aria-controls="challengeMoveModal" aria-expanded="'+moveWindowOpen+'"'+(!st.moves||!filled?' disabled':'')+' title="Move or swap one drafted Pokémon between positions">⇄ SWAP POSITION <small>'+st.moves+' LEFT</small></button></div>':'')+
+ '<div id="challengePitch" class="challenge-pitch">'+
+ '<div class="pitch-line"></div><div class="pitch-circle"></div><div class="pitch-box pitch-box-top"></div><div class="pitch-box pitch-box-bottom"></div>';
+body+=slots.map((pos,i)=>{
+ const s=BY.get(st.roster[i]),point=posMap[st.formation][i],style=' style="left:'+point[0]+'%;top:'+point[1]+'%"';
+ const sprite=s?displaySprite(s,st.items[i],'slot-sprite'):'<span class="slot-placeholder" aria-hidden="true">+</span>';
+ const item=st.items[i],letter=s?tierFor(s,pos,item):'—',effective=s?effectiveStats(s,item):null;
+ const visibleStats=s?'<div class="slot-stats" aria-label="'+esc('Effective stats for '+displayPokemon(s,item).name+(item?' with '+item:''))+'">'+
+  [['HP','hp'],['ATK','attack'],['DEF','defense'],['SpA','spAttack'],['SpD','spDefense'],['SPE','speed']].map(([label,key])=>{
+   const value=effective[key],base=s.baseStats[key],diff=value-base;
+   return '<span class="slot-stat'+(diff>0?' stat-up':diff<0?' stat-down':'')+'" title="'+esc(label+': '+value+(diff?' (base '+base+', '+(diff>0?'+':'')+diff+' via '+item+')':''))+'"><b>'+label+'</b><span>'+value+'</span></span>';
+  }).join('')+'</div>':'';
+ return '<div data-slot-card="'+i+'" class="slot '+(isDraft&&st.selected===i?'active ':'')+
+  (isShop&&selectedShopItem&&s?(itemFor(s,selectedShopItem)?'shop-target ':'shop-not-eligible '):'')+
+  (s?'filled':'empty')+'"'+style+'><span class="slot-role">'+pos+'</span>'+sprite+
+ '<span class="slot-name">'+(s?esc(displayPokemon(s,item).name):'OPEN SLOT')+'</span>'+
+ '<button type="button" data-slot="'+i+'" '+(!((isDraft&&!s)||s)?'disabled':'')+
+ ' aria-label="'+esc(isShop&&selectedShopItem?'Equip selected item to '+(s?.name||'empty slot'):s?'View '+s.name+' details':pos+' empty slot')+'"></button>'+
+ (s?'<button type="button" class="slot-info" data-pokemon-info="'+i+'" aria-label="View '+esc(displayPokemon(s,item).name)+' details" title="Pokémon details">ⓘ</button>':'')+
+ (s?'<span class="slot-fit-badges"><span class="slot-tier tier-'+letter.toLowerCase()+'">'+letter+' TIER</span><span class="slot-efficiency" title="Competitive match efficiency">'+efficiencyFor(s,pos,item)+'</span></span>':'<small>AVAILABLE</small>')+
+ visibleStats+
+ (s&&(isDraft||isShop)&&st.moves>0?'<span class="challenge-drag-grip slot-grip" data-drag-grip="pokemon" data-drag-value="'+i+'" title="Drag to move/swap (uses one move)">⠿</span>':'')+
+ (s&&st.items[i]?'<span class="held-item-badge" '+(isShop?'data-held-item-source="'+i+'" data-drag-grip="held-item" data-drag-value="'+i+'" ':'')+'title="'+esc(st.items[i])+'">'+itemSprite(st.items[i])+'<span>'+esc(st.items[i])+'</span></span>':'')+'</div>';
+}).join('');
+body+='</div></div>'+
+'<details class="challenge-fit-guide"><summary>HOW POSITION FIT WORKS <small>ROLE WEIGHTS · ITEMS · TIERS</small></summary>'+
+'<div class="fit-guide-body"><p>Position fit uses your Pokémon\'s effective stats, including any equipped item or Mega Evolution.</p>'+
+'<p class="fit-formula">Fit score = min(100, 20 + 0.55 × weighted effective stat total)</p>'+
+'<div class="fit-role-list">'+
+'<div class="fit-role-row"><strong>GK · Goalkeeper</strong><span>DEF 30% · SpD 30% · HP 20% · SPE 20%</span></div>'+
+'<div class="fit-role-row"><strong>CB · Center Back</strong><span>DEF 45% · HP 25% · SpD 20% · ATK 10%</span></div>'+
+'<div class="fit-role-row"><strong>LB/RB · Fullback</strong><span>SPE 40% · DEF 35% · HP 15% · SpD 10%</span></div>'+
+'<div class="fit-role-row"><strong>LWB/RWB/LM/RM · Wide Support</strong><span>SPE 40% · DEF 25% · SpA 20% · ATK 15%</span></div>'+
+'<div class="fit-role-row"><strong>CDM · Defensive Midfielder</strong><span>DEF 35% · SpD 30% · HP 20% · SpA 15%</span></div>'+
+'<div class="fit-role-row"><strong>CM · Central Midfielder</strong><span>HP 20% · SPE 20% · ATK 15% · DEF 15% · SpA 15% · SpD 15%</span></div>'+
+'<div class="fit-role-row"><strong>CAM · Attacking Midfielder</strong><span>SpA 40% · SPE 25% · ATK 20% · SpD 15%</span></div>'+
+'<div class="fit-role-row"><strong>LW/RW · Winger</strong><span>SPE 40% · ATK 25% · SpA 25% · HP 10%</span></div>'+
+'<div class="fit-role-row"><strong>ST · Striker</strong><span>ATK 45% · SPE 25% · SpA 20% · HP 10%</span></div></div>'+
+'<p class="fit-tier-note">Tier boundaries: S ≥85 · A ≥75 · B ≥65 · C ≥55 · D below 55. Fit scores remain hidden; the tier updates with items.</p>'+
+'<p>Competitive efficiency compares this position with the Pokémon\'s own best role (100% down to 70%). The tier letter itself adds no bonus.</p><p>On-pitch numbers show item-adjusted stats. Highlighted values differ from base stats; hover a number to see the change.</p></div></details>'+
+'<div class="challenge-roster-footer"><span>'+(isDraft?'Click an empty position to open the scout picker.':isShop?'Tap an eligible Pokémon to equip the selected shop item · ₽'+(1000-used)+' available':'This lineup is locked for the gauntlet.')+'</span><span>Autosaved locally</span></div>'+
+ (dragStatus?'<p class="challenge-drop-status" id="challengeDropStatus" role="status">'+esc(dragStatus)+'</p>':'')+'</section><div class="challenge-side-stack">';
+if(st.phase==='draft'){
+ const opts=eligible().sort((a,b)=>draftCompare(a,b,slots[st.selected]));
+ const legendaryCount=st.roster.filter(id=>BY.get(id)?.legendary).length;
+ body+='<dialog id="challengeDraftModal" class="challenge-dialog challenge-draft-panel" aria-modal="false" aria-labelledby="challengeDraftTitle">'+
+  '<div id="challengeDraftDragHandle" class="challenge-dialog-bar challenge-draft-titlebar" role="group" tabindex="0" aria-label="Move Pokémon draft window with mouse or arrow keys" title="Drag title bar to move · Arrow keys to nudge"><span class="challenge-draft-drag-handle" aria-hidden="true">⠿ MOVE WINDOW</span><span class="challenge-mobile-picker-label">POKÉMON DRAFT</span><button type="button" id="closeDraftPicker" aria-label="Close Pokémon picker" title="Close Pokémon picker">✕ CLOSE</button></div>'+
+  '<div class="challenge-section-heading"><div><span class="pfc-eyebrow">DRAFT ROOM · ROUND '+(filled+1)+' / 11</span><h2 id="challengeDraftTitle">CHOOSE YOUR POKÉMON</h2></div><span class="formation-tag" id="selectedDraftPosition">'+slots[st.selected]+' POSITION</span></div>'+
+  '<p class="challenge-draft-modal-help">Select a pitch position or choose it below, then draft a Pokémon. On desktop, you can drag picks onto empty slots.</p>'+
+  '<label class="challenge-draft-position" for="draftPositionSelect"><span>DRAFT PICK '+(filled+1)+' OF 11</span><select id="draftPositionSelect" aria-label="Choose an empty position">'+
+  slots.map((pos,i)=>!st.roster[i]?'<option value="'+i+'" '+(i===st.selected?'selected':'')+'>'+esc(pos)+' · SLOT '+(i+1)+'</option>':'').join('')+
+  '</select></label>'+
+  draftRollMarkup+
+  '<p id="challengeDraftRollingNote" class="challenge-draft-rolling-note" role="status"'+(!pendingRollAnimation?' hidden':'')+'>SCOUTING IN PROGRESS · Pokémon choices appear when the reels stop.</p>'+
+  '<div id="challengeDraftCandidates" class="challenge-draft-candidates"'+(pendingRollAnimation?' hidden':'')+'>'+
+  '<label class="challenge-draft-search" for="draftSearch"><span>SEARCH ELIGIBLE POKÉMON</span><input id="draftSearch" type="search" placeholder="Name, number or type" autocomplete="off" aria-controls="challengePickGrid"></label>'+
+  '<p class="draft-search-count" id="draftSearchCount">MATCHING POKÉMON</p>'+
+ '<div class="challenge-pick-sort" aria-label="Pokémon sorting">SORTED BY POSITION FIT <strong>S → A → B → C → D</strong></div>'+ 
+ '<div id="challengePickGrid" class="challenge-pick-grid scroll">'+opts.map((s,i)=>{
+ const tier=cachedDraftTier(s,slots[st.selected]);
+ const first=i===0||cachedDraftTier(opts[i-1],slots[st.selected])!==tier;
+ const stats=[['HP','hp'],['ATK','attack'],['DEF','defense'],['SpA','spAttack'],['SpD','spDefense'],['SPE','speed']];
+ const statText=stats.map(([short,key])=>'<span><b>'+short+'</b> '+s.baseStats[key]+'</span>').join('');
+ return '<div class="pick'+(first?' tier-group-start':'')+'" data-species-id="'+s.id+'"'+(first?' data-tier-group="'+tier+' TIER"':'')+'><img loading="lazy" alt="" src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/'+(s.spriteId||s.id)+'.png"><span class="pick-info"><b>'+esc(s.name)+'</b><small>#'+String(s.id).padStart(4,'0')+' · '+s.types.map(esc).join('/')+' · Gen '+(s.gen||gen(s.id))+(s.legendary?' · ★ Legendary class':'')+' · <span class="pick-tier tier-'+tier.toLowerCase()+'" data-position-tier="'+s.id+'">'+tier+' TIER</span></small><span class="pick-base-stats" aria-label="Base stats for '+esc(s.name)+'">'+statText+'</span></span><span class="challenge-drag-grip pick-grip" data-drag-grip="candidate" data-drag-value="'+s.id+'" title="Drag onto an empty position">⠿</span><button data-pick="'+s.id+'" '+(st.roster[st.selected]||s.legendary&&legendaryCount>=2?'disabled':'')+'>DRAFT</button></div>';
+}).join('')+'</div></div></dialog>';
+}
+if(isDraft||isShop){
+ body+='<dialog id="challengeFormationModal" class="challenge-dialog challenge-lineup-window challenge-formation-window" aria-modal="false" aria-labelledby="challengeFormationTitle">'+
+  '<div id="challengeFormationDragHandle" class="challenge-dialog-bar challenge-lineup-drag-bar" role="group" tabindex="0" aria-label="Move formation window with mouse or arrow keys" title="Drag to move · Arrow keys to nudge"><span>⠿ MOVE WINDOW · FORMATION</span><button type="button" id="closeFormationWindow" aria-label="Close formation window">✕ CLOSE</button></div>'+
+  '<div class="challenge-lineup-window-body"><div class="challenge-lineup-window-heading"><h3 id="challengeFormationTitle">SWAP FORMATION</h3><small>'+st.formationChanges+' LEFT</small></div>'+
+  '<p>Choose a shape to preview every role and Pokémon position on the pitch. Nothing is spent until you apply it.</p>'+
+  '<label for="formationChange">FORMATION<select id="formationChange" '+(!st.formationChanges?'disabled':'')+'>'+Object.keys(FORMS).map(x=>'<option '+(x===st.formation?'selected':'')+'>'+x+'</option>').join('')+'</select></label>'+
+  '<div class="challenge-formation-analysis" aria-label="Formation strengths and weaknesses">'+
+   '<strong id="formationPreviewStatus" role="status" aria-live="polite">CURRENT · '+esc(st.formation)+'</strong>'+
+   '<div><b>STRENGTHS</b><p id="formationPros">'+esc(FORMATION_GUIDES[st.formation].pro)+'</p></div>'+
+   '<div><b>WEAKNESSES</b><p id="formationCons">'+esc(FORMATION_GUIDES[st.formation].con)+'</p></div>'+
+   '<small>Descriptions explain the soccer shape; Pokémon position fit determines effectiveness.</small>'+
+  '</div>'+
+  '<button type="button" id="applyFormation" class="primary" disabled>APPLY FORMATION</button></div></dialog>';
+ body+='<dialog id="challengeMoveModal" class="challenge-dialog challenge-lineup-window challenge-move-window" aria-modal="false" aria-labelledby="challengeMoveTitle">'+
+  '<div id="challengeMoveDragHandle" class="challenge-dialog-bar challenge-lineup-drag-bar" role="group" tabindex="0" aria-label="Move position window with mouse or arrow keys" title="Drag to move · Arrow keys to nudge"><span>⠿ MOVE WINDOW · POSITION</span><button type="button" id="closeMoveWindow" aria-label="Close position window">✕ CLOSE</button></div>'+
+  '<div class="challenge-lineup-window-body"><div class="challenge-lineup-window-heading"><h3 id="challengeMoveTitle">SWAP POSITION</h3><small>'+st.moves+' LEFT</small></div>'+
+  '<p>Move a drafted Pokémon to an empty position, or swap two Pokémon. Held items follow their Pokémon. Uses one move.</p>'+
+  '<label for="moveFrom">FROM POKÉMON<select id="moveFrom" '+(!st.moves||!filled?'disabled':'')+'>'+st.roster.map((id,i)=>id?'<option value="'+i+'">'+esc(slots[i])+' · '+esc(displayPokemon(BY.get(id),st.items[i]).name)+'</option>':'').join('')+'</select></label>'+
+  '<label for="moveTo">TO POSITION<select id="moveTo" '+(!st.moves||!filled?'disabled':'')+'>'+slots.map((pos,i)=>'<option value="'+i+'">'+esc(pos)+' · '+esc(BY.get(st.roster[i])?.name||'EMPTY')+'</option>').join('')+'</select></label>'+
+  '<button type="button" id="movePick" class="primary" '+(!st.moves||!filled?'disabled':'')+'>MOVE / SWAP POKÉMON</button></div></dialog>';
+}
+if(st.phase==='shop')body+='<aside id="challengeShopDrawer" class="challenge-shop-drawer" aria-label="Floating item shop" '+(!shopDrawerOpen?'hidden':'')+'>'+
+ '<div id="challengeShopDragHandle" class="challenge-shop-drawer-bar" role="group" tabindex="0" aria-label="Move Item Shop window with mouse or arrow keys" title="Drag title bar to move · Arrow keys to nudge"><span class="challenge-shop-drag-handle" aria-hidden="true">⠿ ITEM SHOP · MOVE WINDOW</span><strong class="challenge-shop-mobile-label">ITEM SHOP · EQUIP YOUR XI</strong><button type="button" id="closeShopDrawer" aria-label="Hide item shop" title="Hide item shop">✕ HIDE SHOP</button></div>'+
+ shopMarkup(used)+'</aside>';
+if(gauntletStarted){
+ const opponent=BOSSES[st.round];
+ if(opponent&&Array.isArray(opponent.roster)&&opponent.roster.length===11){
+  const enemyFormation=FORMS[opponent.formation]?opponent.formation:'4-3-3';
+  const opponentXI=opponent.roster.map((id,i)=>{
+   const species=BY.get(id),pos=FORMS[enemyFormation][i],point=posMap[enemyFormation][i];
+   const item=opponentHeldItem(opponent,id),stats=species?matchEffectiveStats(species,item):null;
+   return {id,species,pos,point,item,stats};
+  });
+  const opponentCards=opponentXI.map(({id,species,pos,point,item})=>{
+   const name=species?displayPokemon(species,item).name:'#'+id;
+   return '<div class="opponent-slot'+(id===opponent.signature?' is-signature':'')+'" data-opponent-slot="'+esc(pos)+'" data-opponent-id="'+id+'" style="left:'+point[0]+'%;top:'+point[1]+'%" title="'+esc(pos+' · '+name+(item?' · '+item:''))+'">'+
+    '<span class="opponent-slot-role">'+esc(pos)+'</span>'+
+    (species?displaySprite(species,item):'')+
+    '<span class="opponent-slot-name">'+esc(name)+'</span>'+
+    (item?'<span class="opponent-held-tag">'+(item==='Light Ball'?'BALL':'MEGA')+'</span>':'')+
+    '</div>';
+  }).join('');
+  const statNames=[['HP','hp'],['ATK','attack'],['DEF','defense'],['SpA','spAttack'],['SpD','spDefense'],['SPE','speed']];
+  const opponentRows=opponentXI.map(({id,species,pos,item,stats})=>{
+   const name=species?displayPokemon(species,item).name:'#'+id,types=species?.types?.join(' / ')||'Unknown';
+   return '<div class="opponent-roster-row" data-opponent-roster-id="'+id+'">'+
+    '<span class="opponent-row-position">'+esc(pos)+'</span>'+
+    (species?displaySprite(species,item):'')+
+    '<div class="opponent-row-info"><strong>'+esc(name)+'</strong><small>'+esc(types)+(item?' · '+esc(item):'')+'</small>'+
+    (stats?'<span class="opponent-row-stats">'+statNames.map(([label,key])=>'<span><b>'+label+'</b> '+stats[key]+'</span>').join('')+'</span>':'')+
+    '</div></div>';
+  }).join('');
+  body+='<dialog id="challengeOpponentModal" class="challenge-dialog challenge-opponent-dialog" aria-label="Opponent XI: '+esc(opponent.leader)+'">'+
+   '<div class="challenge-dialog-bar"><span>GAUNTLET · OPPONENT SCOUTING</span><button type="button" id="closeOpponentModal">✕ CLOSE</button></div>'+
+   '<section class="panel challenge-opponent-panel">'+
+   '<div class="challenge-section-heading"><div><span class="pfc-eyebrow">GAUNTLET '+(st.round+1)+' / 6 · '+(st.phase==='locked'?'NEXT OPPONENT':'MATCH OPPONENT')+'</span><h2>'+esc(opponent.leader.toUpperCase())+' · OPPONENT XI</h2>'+
+   '<p>'+esc((opponent.region||'Indigo League')+' · '+opponent.roster.length+' fixed Pokémon · '+(opponent.tactic||'balanced')+' tactics')+'</p></div>'+
+   '<span class="formation-tag">'+esc(enemyFormation)+' · '+(opponentTeamScore(opponent)?.toFixed(1)||'—')+' TEAM</span></div>'+
+   '<div class="challenge-pitch opponent-pitch" aria-label="'+esc(opponent.leader+' football pitch, '+enemyFormation+' formation')+'">'+
+   '<div class="pitch-line"></div><div class="pitch-circle"></div><div class="pitch-box pitch-box-top"></div><div class="pitch-box pitch-box-bottom"></div>'+
+   opponentCards+'</div>'+
+   '<div class="opponent-pitch-legend"><span><b class="opponent-signature-marker">★</b> Signature Pokémon</span><span>Item markers show Mega Stones / Light Ball</span></div>'+
+   '<details class="opponent-roster-details"><summary>VIEW ALL 11 POKÉMON &amp; STATS</summary><div class="opponent-roster-list">'+opponentRows+'</div></details>'+
+   '</section></dialog>';
+ }
+
+}
+if(st.phase==='result'){
+ body+='<dialog id="challengeMatchResultModal" class="challenge-dialog challenge-match-result-dialog" aria-labelledby="challengeMatchResultTitle">'+
+  '<div class="challenge-dialog-bar"><span>MATCH '+(st.round+1)+' / 6 · OFFICIAL RESULT</span>'+
+  '<button type="button" id="closeMatchResultModal" aria-label="Close match result">✕ CLOSE</button></div>'+
+  '<div class="challenge-match-result-content"><span class="challenge-dialog-kicker">MATCH '+(st.round+1)+' · '+esc(versusLabel(st.result?.boss))+'</span>'+
+  '<h2 id="challengeMatchResultTitle" class="challenge-result-verdict '+(st.result?.outcome==='Victory'?'win':'loss')+'">'+esc(resultLabel(st.result?.outcome))+'</h2>'+
+  '<div class="challenge-final-score"><h1>'+esc((st.result?.score||[0,0]).join(' – '))+'</h1></div>'+
+  matchReportHtml(st.result)+'</div>'+
+  '<footer class="challenge-match-result-actions"><button type="button" id="closeMatchResultFooter">BACK TO MY XI</button>'+
+  '<button type="button" id="next" class="primary">ADVANCE TO '+esc((BOSSES[st.round+1]?.leader||'NEXT').toUpperCase())+' →</button></footer>'+
+ '</dialog>';
+}
+if(st.phase==='finished'&&st.result)body+='<section class="panel challenge-last-match" aria-label="Final match summary">'+
+ '<span class="pfc-eyebrow">FINAL MATCH · '+esc(versusLabel(st.result?.boss))+'</span>'+
+ '<h2>'+esc(resultLabel(st.result?.outcome))+' · '+esc((st.result.score||[0,0]).join(' – ')+penaltyScore(st.result,true))+'</h2>'+
+ '<p class="challenge-last-match-summary">Review the last match first, then continue to your tournament overview.</p>'+
+ '<button type="button" id="openLastMatchModal" class="primary">VIEW FINAL MATCH →</button></section>';
+if(st.phase==='finished')body+='<section class="panel challenge-recap-access"><div><strong>RUN COMPLETE</strong><p>Your finished Gauntlet results are saved in this browser.</p></div><button type="button" id="openRunModal" class="primary">VIEW TOURNAMENT OVERVIEW →</button></section>'+
+ '<dialog id="runCompleteModal" class="challenge-dialog challenge-run-dialog" aria-labelledby="runRecapModalTitle">'+
+ '<div class="challenge-dialog-bar"><span id="runRecapModalTitle">POKÉFC · MATCH RESULT</span><button type="button" id="closeRunModal" aria-label="Close results">✕ CLOSE</button></div>'+
+ '<div id="runFinishMatchStep" class="challenge-run-step">'+
+ '<div class="challenge-match-result-content"><span class="challenge-dialog-kicker">FINAL MATCH · '+esc(versusLabel(st.result?.boss))+'</span>'+
+ '<h2 id="finalMatchHeading" class="challenge-result-verdict '+(st.result?.outcome==='Victory'?'win':'loss')+'">'+esc(resultLabel(st.result?.outcome))+'</h2>'+
+ '<div class="challenge-final-score"><h1>'+esc((st.result?.score||[0,0]).join(' – '))+'</h1>'+(st.result?.shootout?'<p class="challenge-shootout-caption">PENALTIES '+esc(st.result.shootout.home+'–'+st.result.shootout.away)+'</p>':'')+'</div>'+
+ matchReportHtml(st.result)+'</div>'+
+ '<footer class="challenge-match-result-actions"><button type="button" id="finishCloseMatch">BACK TO PITCH</button>'+
+ '<button type="button" id="continueTournamentOverview" class="primary">CONTINUE TO TOURNAMENT OVERVIEW →</button></footer></div>'+
+ '<div id="runFinishOverviewStep" class="challenge-run-step" hidden>'+
+ '<div class="challenge-overview-back"><button type="button" id="backToFinalMatch">← BACK TO FINAL MATCH</button></div>'+
+ completedRunCard()+'</div></dialog>';
+if(st.phase==='result'||st.phase==='finished')body+='<dialog id="challengeGoalReplayModal" class="challenge-dialog challenge-goal-replay-dialog" aria-labelledby="challengeGoalReplayTitle">'+
+ '<div class="challenge-dialog-bar"><span id="challengeGoalReplayTitle">2.5D INSTANT REPLAY</span><button type="button" id="closeGoalReplayModal">✕ CLOSE</button></div>'+
+ '<div class="challenge-goal-replay-content"><p id="challengeReplayStatus" role="status">Loading official goal highlight…</p>'+
+ '<div id="challengeReplayStage" class="challenge-goal-replay-stage"></div>'+
+ '<p>Visual reconstruction of the recorded PSE event. No gameplay or saved result changes.</p></div></dialog>';
+body+='</div></div>'+
+ '<dialog id="challengePokemonDetailModal" class="challenge-dialog challenge-pokemon-detail-dialog" aria-labelledby="pokemonDetailTitle">'+
+ '<div class="challenge-dialog-bar"><span id="pokemonDetailTitle">POKÉMON PROFILE · FINAL XI</span>'+
+ '<button type="button" id="closePokemonDetailModal" aria-label="Close Pokémon profile">✕ CLOSE</button></div>'+
+ '<div id="pokemonDetailContent" class="pokemon-detail-content"></div></dialog>'+
+ '<section class="panel challenge-reset-panel"><button id="reset">ABANDON RUN / START OVER</button> <small>Autosaved on this device · Unranked alpha</small></section>';app.innerHTML=body;
+const mountDraftWindow=()=>{
+ draftWindowCleanup?.();draftWindowCleanup=null;
+ const picker=document.getElementById('challengeDraftModal');
+ const grip=document.getElementById('challengeDraftDragHandle');
+ if(picker?.open&&grip)draftWindowCleanup=PICKER_WINDOW?.mount?.(picker,grip,{
+  currentPosition:()=>draftWindowPosition,onMove:position=>{draftWindowPosition=position}
+ })||null;
+};
+const mountShopWindow=()=>{
+ shopWindowCleanup?.();shopWindowCleanup=null;
+ const drawer=document.getElementById('challengeShopDrawer');
+ const grip=document.getElementById('challengeShopDragHandle');
+ if(shopDrawerOpen&&drawer&&!drawer.hidden&&grip)shopWindowCleanup=PICKER_WINDOW?.mount?.(drawer,grip,{
+  currentPosition:()=>shopWindowPosition,onMove:position=>{shopWindowPosition=position}
+ })||null;
+};
+// Live formation preview touches the DOM only. It does NOT mutate st,
+// autosave, spend a change, move roster entries, or change item assignments.
+const paintFormationPreview=formation=>{
+ const choice=FORMS[formation]?formation:st.formation;
+ const previewing=formationWindowOpen&&choice!==st.formation;
+ formationPreview=previewing?choice:null;
+ const shape=formationPreview||st.formation;
+ const layout=FORMS[shape],coordinates=posMap[shape],guide=FORMATION_GUIDES[shape];
+ app.querySelectorAll('[data-slot-card]').forEach(card=>{
+  const i=Number(card.dataset?.slotCard);
+  if(!Number.isInteger(i)||i<0||i>=11)return;
+  const point=coordinates[i],pokemon=BY.get(st.roster[i]),item=st.items[i];
+  if(card.style){card.style.left=point[0]+'%';card.style.top=point[1]+'%'}
+  const role=card.querySelector?.('.slot-role');
+  if(role)role.textContent=layout[i];
+  const tier=card.querySelector?.('.slot-tier');
+  if(tier&&pokemon){
+   const value=tierFor(pokemon,layout[i],item);
+   tier.textContent=value+' TIER';
+   tier.className='slot-tier tier-'+value.toLowerCase();
+   const efficiency=card.querySelector?.('.slot-efficiency');
+   if(efficiency)efficiency.textContent=efficiencyFor(pokemon,layout[i],item);
+  }
+  const click=card.querySelector?.('button[data-slot]');
+  if(click){
+   click.disabled=previewing||!((isDraft&&!pokemon)||pokemon);
+   if(!pokemon)click.setAttribute?.('aria-label',layout[i]+' empty slot'+(previewing?' (preview only)':''));
+  }
+ });
+ const pitch=document.getElementById('challengePitch');
+ pitch?.classList?.toggle('is-formation-preview',previewing);
+ pitch?.setAttribute?.('aria-label',previewing?'Preview of '+shape+' formation; not applied':'Current '+st.formation+' formation');
+ const badge=document.getElementById('challengeFormationTag');
+ if(badge){
+  const score=filled===11?(st.roster.reduce((sum,id,i)=>sum+rating(BY.get(id),layout[i],st.items[i]),0)/11).toFixed(1)+' SCORE':'IN PROGRESS';
+  badge.textContent=shape+(previewing?' · PREVIEW':'')+' · '+score;
+ }
+ const status=document.getElementById('formationPreviewStatus');
+ if(status)status.textContent=previewing?'PREVIEW ONLY · '+shape+' · NOT APPLIED':'CURRENT · '+st.formation;
+ const pros=document.getElementById('formationPros');
+ if(pros)pros.textContent=guide.pro;
+ const cons=document.getElementById('formationCons');
+ if(cons)cons.textContent=guide.con;
+ const apply=document.getElementById('applyFormation');
+ if(apply)apply.disabled=!previewing||st.formationChanges<1;
+};
+// Formation and move/swap windows share the same keyboard/pointer movement
+// behavior as the draft and item windows. Positions survive a draft rerender.
+if(isDraft||isShop){
+ const mountLineupWindow=(dialog,grip,kind)=>{
+  const isFormation=kind==='formation';
+  const oldCleanup=isFormation?formationWindowCleanup:moveWindowCleanup;
+  oldCleanup?.();
+  const cleanup=dialog?.open&&grip?PICKER_WINDOW?.mount?.(dialog,grip,{
+   currentPosition:()=>isFormation?formationWindowPosition:moveWindowPosition,
+   onMove:position=>{if(isFormation)formationWindowPosition=position;else moveWindowPosition=position}
+  })||null:null;
+  if(isFormation)formationWindowCleanup=cleanup;else moveWindowCleanup=cleanup;
+ };
+ const setupLineupWindow=(kind)=>{
+  const isFormation=kind==='formation';
+  const dialog=document.getElementById(isFormation?'challengeFormationModal':'challengeMoveModal');
+  const grip=document.getElementById(isFormation?'challengeFormationDragHandle':'challengeMoveDragHandle');
+  const button=document.getElementById(isFormation?'openFormationWindow':'openMoveWindow');
+  const closeButton=document.getElementById(isFormation?'closeFormationWindow':'closeMoveWindow');
+  const canOpen=()=>isFormation?st.formationChanges>0:st.moves>0&&st.roster.some(Boolean);
+  const close=()=>{
+   if(isFormation){
+    formationWindowOpen=false;
+    paintFormationPreview(st.formation); // restore exact original cards/tiers
+    formationWindowCleanup?.();formationWindowCleanup=null;
+   }else{moveWindowOpen=false;moveWindowCleanup?.();moveWindowCleanup=null}
+   closeDialog(dialog);
+   button?.setAttribute?.('aria-expanded','false');
+  };
+  const open=()=>{
+   if(!canOpen())return;
+   // Keep only one small lineup popup open, particularly on phones where
+   // both use the same bottom-sheet position.
+   const otherId=isFormation?'challengeMoveModal':'challengeFormationModal';
+   const otherButton=document.getElementById(isFormation?'openMoveWindow':'openFormationWindow');
+   if(isFormation){moveWindowOpen=false;moveWindowCleanup?.();moveWindowCleanup=null}
+   else{
+    formationWindowOpen=false;
+    paintFormationPreview(st.formation); // swapping windows cancels the preview
+    formationWindowCleanup?.();formationWindowCleanup=null;
+   }
+   closeDialog(document.getElementById(otherId));
+   otherButton?.setAttribute?.('aria-expanded','false');
+   if(isFormation)formationWindowOpen=true;else moveWindowOpen=true;
+   openFloatingDialog(dialog);
+   mountLineupWindow(dialog,grip,kind);
+   if(isFormation){
+    const selector=document.getElementById('formationChange');
+    if(selector)selector.value=st.formation;
+    paintFormationPreview(st.formation);
+   }
+   button?.setAttribute?.('aria-expanded','true');
+  };
+  if(button)button.onclick=open;
+  if(closeButton)closeButton.onclick=close;
+  if(dialog){
+   dialog.oncancel=e=>{e?.preventDefault?.();close()};
+   dialog.onkeydown=e=>{if(e.key==='Escape'){e.preventDefault?.();close();button?.focus?.()}};
+   if(isFormation)dialog.onclose=()=>{
+    if(formationWindowOpen){formationWindowOpen=false;paintFormationPreview(st.formation)}
+   };
+   if((isFormation?formationWindowOpen:moveWindowOpen)&&canOpen())open();
+  }
+ };
+ setupLineupWindow('formation');setupLineupWindow('move');
+ const formationChoice=document.getElementById('formationChange');
+ if(formationChoice){
+  formationChoice.onchange=()=>paintFormationPreview(formationChoice.value);
+  formationChoice.oninput=formationChoice.onchange; // live keyboard selection
+ }
+}
+const detailDialog=document.getElementById('challengePokemonDetailModal');
+const closePokemonDetail=()=>closeDialog(detailDialog);
+const openPokemonDetail=index=>{
+ const markup=pokemonDetailMarkup(index),content=document.getElementById('pokemonDetailContent');
+ if(!markup||!content)return;
+ content.innerHTML=markup;
+ openDialog(detailDialog);
+};
+const detailClose=document.getElementById('closePokemonDetailModal');
+if(detailClose)detailClose.onclick=closePokemonDetail;
+if(detailDialog)detailDialog.onclick=e=>{if(e?.target===detailDialog)closePokemonDetail()};
+app.querySelectorAll('[data-pokemon-info]').forEach(button=>button.onclick=e=>{
+ e?.stopPropagation?.();
+ openPokemonDetail(Number(button.dataset.pokemonInfo));
+});
+if(st.phase==='result'||st.phase==='finished'){
+ const replayModal=document.getElementById('challengeGoalReplayModal');
+ const closeReplay=()=>{
+  goalReplaySession?.destroy?.();goalReplaySession=null;
+  closeDialog(replayModal);
+ };
+ const replayCloseButton=document.getElementById('closeGoalReplayModal');
+ if(replayCloseButton)replayCloseButton.onclick=closeReplay;
+ if(replayModal){
+  replayModal.oncancel=e=>{e?.preventDefault?.();closeReplay()};
+  replayModal.onclick=e=>{if(e?.target===replayModal)closeReplay()};
+  replayModal.onclose=()=>{goalReplaySession?.destroy?.();goalReplaySession=null};
+ }
+ app.querySelectorAll('[data-match-replay]').forEach(button=>button.onclick=()=>{
+  const round=Number(button.dataset.matchReplay),id=String(button.dataset.replayId||'');
+  if(!Number.isInteger(round)||round<1||round>6||!/^(goal|pk)-\d+$/.test(id))return;
+  const match=(st.history||[]).find(m=>m.round===round&&m.replay?.version===1);
+  const replay=match?.replay,bridge=window.FXI_PHASE10_WATCH;
+  const status=document.getElementById('challengeReplayStatus');
+  const stage=document.getElementById('challengeReplayStage');
+  if(!replay||!bridge?.mountInline||!replayModal||!stage)return;
+  goalReplaySession?.destroy?.();goalReplaySession=null;
+  stage.textContent='';
+  if(status)status.textContent='Loading recorded '+(id.startsWith('pk-')?'penalty':'goal')+' replay…';
+  openDialog(replayModal);
+  let requested=false,readySession=null;
+  const start=session=>{
+   if(requested||!session)return;
+   requested=true;
+   if(!session.replayHighlight(id)&&status)status.textContent='Replay clip is unavailable.';
+  };
+  try{
+   goalReplaySession=bridge.mountInline({
+    preview:replay.preview,result:replay.result,container:stage,
+    // Read-only: the replay session is not allowed to write match results.
+    onRecord:()=>{if(status)status.textContent='This replay cannot record a new result.'},
+    onCancel:closeReplay,
+    onReady:session=>{
+     if(!replayModal?.open||goalReplaySession&&goalReplaySession!==session)return;
+     readySession=session;
+     if(status)status.textContent='2.5D reconstruction · official match events';
+     if(id.startsWith('pk-')){
+      if(!session.simToEnd()&&status)status.textContent='Penalty clip could not load.';
+     }else{
+      const duration=replay.result.durationMinutes===120?120:90;
+      if(session.seek(duration))start(session);
+      else if(status)status.textContent='Goal replay could not load.';
+     }
+    },
+    onProgress:progress=>{if(id.startsWith('pk-')&&progress.finished)start(readySession||goalReplaySession)},
+    onStatus:({state,message})=>{
+     if(state==='error'&&status)status.textContent=message||'Could not load replay.';
+    }
+   });
+  }catch(error){
+   goalReplaySession=null;
+   if(status)status.textContent='Replay unavailable: '+String(error?.message||error);
+  }
+ });
+}
+if(st.phase==='result'){
+ const modal=document.getElementById('challengeMatchResultModal');
+ const reopen=document.getElementById('openMatchResultModal');
+ const dismiss=()=>{matchResultDismissed=true;closeDialog(modal)};
+ if(reopen)reopen.onclick=()=>{matchResultDismissed=false;openDialog(modal)};
+ const close=document.getElementById('closeMatchResultModal'),footer=document.getElementById('closeMatchResultFooter');
+ if(close)close.onclick=dismiss;
+ if(footer)footer.onclick=dismiss;
+ if(modal){
+  modal.oncancel=()=>{matchResultDismissed=true};
+  modal.onclose=()=>{matchResultDismissed=true};
+  modal.onclick=e=>{if(e?.target===modal)dismiss()};
+  if(!matchResultDismissed)openDialog(modal);
+ }
+}
+if(isDraft){
+ const picker=document.getElementById('challengeDraftModal');
+ const openPicker=()=>{draftPickerOpen=true;openFloatingDialog(picker);mountDraftWindow()};
+ const closePicker=()=>{draftPickerOpen=false;draftWindowCleanup?.();draftWindowCleanup=null;closeDialog(picker)};
+ document.getElementById('openDraftPicker').onclick=openPicker;
+ document.getElementById('closeDraftPicker').onclick=closePicker;
+ if(picker){
+  picker.oncancel=()=>{draftPickerOpen=false};
+  picker.onkeydown=e=>{if(e.key==='Escape'){e.preventDefault?.();closePicker()}};
+  if(draftPickerOpen)openPicker();
+ }
+ const search=document.getElementById('draftSearch');
+ if(search)search.oninput=()=>{
+  const query=String(search.value||'').trim().toLocaleLowerCase();
+  const grid=document.getElementById('challengePickGrid');
+  let count=0;
+  for(const card of grid?.children||[]){
+   const pokemon=BY.get(Number(card.dataset?.speciesId));
+   const haystack=pokemon?[pokemon.name,pokemon.id,String(pokemon.id).padStart(4,'0'),...(pokemon.types||[])].join(' ').toLocaleLowerCase():'';
+   card.hidden=Boolean(query&&!haystack.includes(query));
+   if(!card.hidden)count++;
+  }
+  const status=document.getElementById('draftSearchCount');
+  if(status)status.textContent=count?'MATCHING POKÉMON':'NO MATCHING POKÉMON';
+ };
+}
+if(isShop){
+ mountShopWindow();
+ const toggle=()=>{
+  const drawer=document.getElementById('challengeShopDrawer');
+  shopScrollTop=drawer?.scrollTop||0;
+  shopDrawerOpen=!shopDrawerOpen;render();
+ };
+ document.getElementById('toggleShopDrawer').onclick=toggle;
+ document.getElementById('closeShopDrawer').onclick=()=>{
+  const drawer=document.getElementById('challengeShopDrawer');
+  shopScrollTop=drawer?.scrollTop||0;
+  shopDrawerOpen=false;render();
+ };
+}
+if(gauntletStarted){
+ const modal=document.getElementById('challengeOpponentModal');
+ const open=document.getElementById('openOpponentModal'),close=document.getElementById('closeOpponentModal');
+ if(modal&&open&&close){
+  open.onclick=()=>openDialog(modal);
+  close.onclick=()=>closeDialog(modal);
+  modal.onclick=e=>{if(e?.target===modal)closeDialog(modal)};
+ }
+}
+if(gauntletStarted&&st.history.length){
+ const historyModal=document.getElementById('challengeHistoryModal');
+ const closeHistory=()=>closeDialog(historyModal);
+ document.getElementById('openHistoryModal').onclick=()=>openDialog(historyModal);
+ document.getElementById('closeHistoryModal').onclick=closeHistory;
+ if(historyModal)historyModal.onclick=e=>{if(e?.target===historyModal)closeHistory()};
+}
+if(st.phase==='draft'){
+ const wasTriggered=pendingRollAnimation;
+ pendingRollAnimation=false;
+ slotAnimationBusy=wasTriggered;
+ const revealDraftCandidates=()=>{
+  slotAnimationBusy=false;
+  const candidates=document.getElementById('challengeDraftCandidates');
+  const note=document.getElementById('challengeDraftRollingNote');
+  if(candidates)candidates.hidden=false;
+  if(note)note.hidden=true;
+ };
+ if(SLOT){
+  SLOT.mount(document.getElementById('challengeSlotMachine'),{
+   gen:st.roll?.gen,type:st.roll?.type
+  },{animate:wasTriggered,pool:st.pool,onDone:revealDraftCandidates});
+ }else revealDraftCandidates();
+}else{SLOT?.cancel();slotAnimationBusy=false;pendingRollAnimation=false}
+// Per-render role cache and badge references keep hover light; committed clicks
+// reorder the grid in ONE DOM replacement, then animate only visible cards.
+let showingRole=roleGroup(slots[st.selected]);
+const draftPickButtons=st.phase==='draft'?Array.from(app.querySelectorAll('[data-pick]')):[];
+const draftBadges=draftPickButtons.map(button=>({
+ pokemon:BY.get(Number(button.dataset.pick)),
+ badge:button.closest?.('.pick')?.querySelector?.('[data-position-tier]')
+}));
+const initialDraftGrid=document.getElementById('challengePickGrid');
+let tierGroupStarts=initialDraftGrid?.children?Array.from(initialDraftGrid.children).filter(node=>node.classList?.contains('tier-group-start')):[];
+function displayDraftPosition(index,commit){
+ if(st.phase!=='draft'||!Number.isInteger(index)||index<0||index>=st.roster.length||st.roster[index])return;
+ const changed=st.selected!==index;
+ if(commit&&changed){st.selected=index;save()}
+ if(commit){const select=document.getElementById('draftPositionSelect');if(select)select.value=String(index)}
+ const currentRole=FORMS[st.formation][index],group=roleGroup(currentRole);
+ app.querySelectorAll('[data-slot-card]').forEach(card=>{
+  if(!card.classList)return;
+  const selected=Number(card.dataset.slotCard)===st.selected;
+  card.classList.toggle('active',selected);
+  card.classList.toggle('preview',!commit&&Number(card.dataset.slotCard)===index&&!selected);
+ });
+ const tag=document.getElementById('selectedDraftPosition');
+ if(tag)tag.textContent=currentRole+' POSITION'+(!commit&&index!==st.selected?' · PREVIEW':'');
+ if(showingRole!==group){
+  for(const {pokemon,badge} of draftBadges){
+   if(!pokemon||!badge)continue;
+   const tier=cachedDraftTier(pokemon,currentRole);
+   if(badge.textContent!==tier+' TIER')badge.textContent=tier+' TIER';
+   const className='pick-tier tier-'+tier.toLowerCase();
+   if(badge.className!==className)badge.className=className;
+  }
+  showingRole=group;
+ }
+ if(commit){draftPickerOpen=true;openFloatingDialog(document.getElementById('challengeDraftModal'));mountDraftWindow()}
+ if(!commit||!changed)return;
+ const grid=document.getElementById('challengePickGrid');
+ if(!grid||!grid.children||typeof grid.appendChild!=='function')return;
+ const previous=Array.from(grid.children).filter(node=>node?.dataset?.speciesId);
+ const cards=previous.slice().sort((a,b)=>{
+  const first=BY.get(Number(a.dataset.speciesId)),second=BY.get(Number(b.dataset.speciesId));
+  return first&&second?draftCompare(first,second,currentRole):0;
+ });
+ const changedOrder=cards.some((node,i)=>node!==previous[i]);
+ if(changedOrder){
+  // Update only the previous and next tier boundaries (at most five each).
+  // Keep the six base stats untouched: only position tiers are recalculated.
+  tierGroupStarts.forEach(node=>{
+   node.classList?.remove('tier-group-start');
+   if(node.dataset)delete node.dataset.tierGroup;
+  });
+  tierGroupStarts=[];
+  let previousTier=null;
+  for(const node of cards){
+   const pokemon=BY.get(Number(node.dataset.speciesId));
+   const tier=pokemon?cachedDraftTier(pokemon,currentRole):null;
+   if(!tier||tier===previousTier)continue;
+   node.classList?.add('tier-group-start');
+   if(node.dataset)node.dataset.tierGroup=tier+' TIER';
+   tierGroupStarts.push(node);
+   previousTier=tier;
+  }
+  // Avoid one costly layout update per card; preserve each card and its event handler.
+  if(typeof document.createDocumentFragment==='function'&&typeof grid.replaceChildren==='function'){
+   const batch=document.createDocumentFragment();
+   cards.forEach(node=>batch.appendChild(node));
+   grid.replaceChildren(batch);
+  }else cards.forEach(node=>grid.appendChild(node));
+  // A short, optional shuffle that never blocks drafting or re-roll controls.
+  // No geometry reads, timers, or forced paint; compositor-only transform/opacity.
+  if(!window.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches){
+   const before=new Map(previous.map((node,i)=>[node,i]));
+   cards.slice(0,12).forEach((node,i)=>{
+    const from=before.get(node);
+    if(from===i||typeof node.animate!=='function')return;
+    const distance=Math.max(-32,Math.min(32,(from-i)*12));
+    node.animate([
+     {transform:'translateY('+distance+'px) scale(.985)',opacity:.67},
+     {transform:'translateY(0px) scale(1)',opacity:1}
+    ],{duration:235,delay:Math.min(i,5)*13,easing:'cubic-bezier(.22,1,.36,1)'});
+   });
+  }
+ }
+ grid.scrollTop=0;
+}
+const positionSelect=document.getElementById('draftPositionSelect');
+if(st.phase==='draft'&&positionSelect)positionSelect.onchange=()=>displayDraftPosition(Number(positionSelect.value),true);
+app.querySelectorAll('[data-slot-card]').forEach(card=>{
+ const index=Number(card.dataset.slotCard);
+ card.onmouseenter=()=>displayDraftPosition(index,false);
+ card.onmouseleave=()=>displayDraftPosition(st.selected,false);
+ card.onclick=()=>displayDraftPosition(index,true);
+});
+app.querySelectorAll('[data-slot]').forEach(b=>{
+ const index=Number(b.dataset.slot);
+ b.onclick=()=>{
+  if(isShop&&selectedShopItem){
+   const result=equipShopItem(selectedShopItem,index);
+   shopMessage=result.ok?'Equipped '+selectedShopItem+' to '+(BY.get(st.roster[index])?.name||'Pokémon')+'.':result.error;
+   if(result.ok)render();
+   else{shopDrawerOpen=true;const status=document.getElementById('shopFeedback');if(status)status.textContent=shopMessage}
+  }else if(st.roster[index])openPokemonDetail(index);
+  else displayDraftPosition(index,true);
+ };
+ b.onfocus=()=>displayDraftPosition(index,false);
+ b.onblur=()=>displayDraftPosition(st.selected,false);
+});
+draftPickButtons.forEach(b=>b.onclick=()=>draftPokemon(Number(b.dataset.pick),st.selected));
+if(st.phase==='shop'){
+ const autoButton=document.getElementById('autoEquip');
+ if(autoButton)autoButton.onclick=()=>{
+  if(!ITEM_OPTIMIZER){showChallengeMessage('AUTO-EQUIP UNAVAILABLE','The item optimizer could not be loaded.');return}
+  const before=teamScore();
+  try{
+   const result=ITEM_OPTIMIZER.optimize({
+    roster:st.roster.map((id,i)=>({pokemon:BY.get(id),position:FORMS[st.formation][i]})),
+    items:shopCatalog(),budget:1000,
+    rate:rating,
+    canEquip:(pokemon,item)=>Boolean(itemFor(pokemon,item)),
+    isTransformation:(pokemon,item)=>Boolean(megaForm(pokemon,item))
+   });
+   const proposed=result.items;
+   const cost=proposed.reduce((sum,item,i)=>sum+(itemFor(BY.get(st.roster[i]),item)?.[1]||0),0);
+   if(cost>1000||new Set(proposed.filter(Boolean)).size!==proposed.filter(Boolean).length||
+    proposed.filter((item,i)=>Boolean(megaForm(BY.get(st.roster[i]),item))).length>1)
+    throw new Error('Optimizer returned an invalid equipment assignment.');
+   if(result.score+1e-6<before)throw new Error('Auto-equipment would lower your current team score.');
+   st.items=proposed;
+   save();
+   const after=teamScore();
+   autoEquipSummary='Optimized team score '+before.toFixed(2)+' → '+after.toFixed(2)+
+    ' (+'+Math.max(0,after-before).toFixed(2)+') · ₽'+cost+' / ₽1,000 · '+
+    proposed.filter(Boolean).length+' items.';
+   shopMessage='AI Auto-Equip completed. Review your XI and item assignments before locking.';
+   selectedShopItem=null;shopScrollTop=0;render();
+  }catch(error){showChallengeMessage('AUTO-EQUIP FAILED',error?.message||'Could not find a legal item combination.')}
+ };
+ app.querySelectorAll('[data-shop-stat]').forEach(button=>button.onclick=()=>{
+  const stat=button.dataset.shopStat;
+  if(!SHOP_STAT_FILTERS.some(([key])=>key===stat))return;
+  if(shopStatFilters.has(stat))shopStatFilters.delete(stat);
+  else shopStatFilters.add(stat);
+  selectedShopItem=null;shopMessage='';shopScrollTop=0;
+  render();
+ });
+ const restore=document.getElementById('challengeShopDrawer');
+ if(restore)restore.scrollTop=shopScrollTop;
+ app.querySelectorAll('[data-shop-pick]').forEach(b=>b.onclick=()=>{
+  const el=document.getElementById('challengeShopDrawer');
+  shopScrollTop=el?.scrollTop||0;
+  selectedShopItem=b.dataset.shopPick;shopMessage='';render();
+ });
+ const equip=document.getElementById('equipShopItem');
+ if(equip)equip.onclick=()=>{
+  const target=document.getElementById('shopTarget');
+  const result=equipShopItem(selectedShopItem,target?.value);
+  shopMessage=result.ok?'Equipped '+selectedShopItem+' successfully.':result.error;
+  if(!result.ok){const status=document.getElementById('shopFeedback');if(status)status.textContent=result.error;return}
+  render();
+ };
+ const remove=document.getElementById('removeSelectedItem');
+ if(remove)remove.onclick=()=>{
+  const current=st.items.indexOf(selectedShopItem);
+  if(current<0)return;
+  const result=equipShopItem(null,current);
+  shopMessage=result.ok?'Item removed and refunded.':result.error;
+  render();
+ };
+ app.querySelectorAll('[data-shop-clear]').forEach(b=>b.onclick=()=>{
+  const i=Number(b.dataset.shopClear),result=equipShopItem(null,i);
+  shopMessage=result.ok?'Item removed and refunded.':result.error;render();
+ });
+}
+if(st.phase==='draft'){document.getElementById('typeR').onclick=()=>{if(slotAnimationBusy)return;reroll('type');save();render()};document.getElementById('genR').onclick=()=>{if(slotAnimationBusy)return;reroll('gen');save();render()}}
+if(isDraft||isShop){
+ if(st.formationChanges>0){
+  document.getElementById('applyFormation').onclick=()=>{
+   const choice=document.getElementById('formationChange')?.value;
+   if(!FORMS[choice]||choice===st.formation)return;
+   formationWindowOpen=false;formationPreview=null;st.formation=choice;st.formationChanges--;
+   if(st.phase==='draft')st.selected=nextDraftSlot();
+   save();render();
+  };
+ }
+ if(st.moves>0&&filled>0){
+  document.getElementById('movePick').onclick=()=>{
+   const result=moveDraftedPokemon(document.getElementById('moveFrom')?.value,document.getElementById('moveTo')?.value);
+   if(result.ok)moveWindowOpen=false;
+   else showChallengeMessage('INVALID POKÉMON MOVE',result.error);
+  };
+ }
+}
+if(st.phase==='shop'){document.getElementById('tactic').onchange=e=>{st.tactic=e.target.value;save()};document.getElementById('lock').onclick=()=>{
+ if(st.roster.some(x=>!x)||used>1000)return;
+ showChallengeMessage('LOCK FINAL XI?','Your XI, formation, tactics and held items will be locked for all six Gauntlet matches.',{confirmLabel:'LOCK MY XI',onConfirm:()=>{
+  st.phase='locked';selectedShopItem=null;shopMessage='';shopScrollTop=0;shopStatFilters.clear();autoEquipSummary='';
+  st.locked=JSON.parse(JSON.stringify({roster:st.roster,items:st.items,formation:st.formation,tactic:st.tactic,score:teamScore()}));
+  save();render();
+ }});
+}}
+if(st.phase==='locked')document.getElementById('play').onclick=()=>{try{
+ matchResultDismissed=false;
+ st.result=playBoss();st.result.award=calculateMatchAward(st.result);st.history.push({...st.result});
+ st.phase=st.result.outcome!=='Victory'||st.round===5?'finished':'result';
+ if(st.phase==='finished'){runRecapDismissed=false;runRecapStage='match';savePersonalRecord();BOARD?.archive(st,localStorage)}
+ save();render()
+}catch(e){showChallengeMessage('QUICK SIM ERROR',e?.message||'Unable to finish this match. Please try again.')}};
+if(st.phase==='result'&&st.result?.outcome==='Victory')document.getElementById('next').onclick=()=>{if(st.round>=5)return;matchResultDismissed=false;st.round++;st.phase='locked';st.result=null;save();render()};
+if(st.phase==='finished'){
+ const runModal=document.getElementById('runCompleteModal');
+ const showRecapStage=stage=>{
+  runRecapStage=stage==='overview'?'overview':'match';
+  const match=document.getElementById('runFinishMatchStep'),overview=document.getElementById('runFinishOverviewStep');
+  if(match)match.hidden=runRecapStage!=='match';
+  if(overview)overview.hidden=runRecapStage!=='overview';
+  const heading=document.getElementById('runRecapModalTitle');
+  if(heading)heading.textContent=runRecapStage==='match'?'POKÉFC · MATCH RESULT':'POKÉFC · TOURNAMENT OVERVIEW';
+  if(runModal)runModal.scrollTop=0;
+ };
+ const closeRecap=()=>{runRecapDismissed=true;closeDialog(runModal)};
+ const openRecap=(stage=runRecapStage)=>{runRecapDismissed=false;showRecapStage(stage);openDialog(runModal)};
+ document.getElementById('closeRunModal').onclick=closeRecap;
+ document.getElementById('openRunModal').onclick=()=>openRecap('overview');
+ document.getElementById('openLastMatchModal').onclick=()=>openRecap('match');
+ document.getElementById('finishCloseMatch').onclick=closeRecap;
+ document.getElementById('continueTournamentOverview').onclick=()=>showRecapStage('overview');
+ document.getElementById('backToFinalMatch').onclick=()=>showRecapStage('match');
+ if(runModal){
+  runModal.oncancel=()=>{runRecapDismissed=true};
+  runModal.onclose=()=>{runRecapDismissed=true};
+  runModal.onclick=e=>{if(e?.target===runModal)closeRecap()};
+  if(!runRecapDismissed)openRecap(runRecapStage);
+ }
+ const cardState=()=>{
+  if(!RUN_CARD)throw new Error('Run card module unavailable.');
+  return RUN_CARD.summary(st,BY);
+ };
+ const createPreview=async()=>{
+  const canvas=document.getElementById('runCardPreview');
+  const status=document.getElementById('runCardPreviewStatus');
+  if(!canvas||!canvas.getContext||!status)return;
+  status.textContent='Preparing card with Pokémon sprites…';
+  try{
+   await RUN_CARD.preview(canvas,cardState());
+   canvas.hidden=false;
+   status.textContent='PNG card preview · 1200 × 1600 · saved locally on download';
+  }catch(err){status.textContent='Preview unavailable: '+err.message}
+ };
+ document.getElementById('downloadRunCard').onclick=async()=>{
+  const button=document.getElementById('downloadRunCard');
+  const status=document.getElementById('runShareStatus');
+  button.disabled=true;button.textContent='PREPARING PNG…';
+  try{
+   const file=await RUN_CARD.download(cardState());
+   if(status)status.textContent='Downloaded '+file;
+  }catch(err){
+   if(status)status.textContent='PNG download failed: '+err.message;
+   else showChallengeMessage('PNG DOWNLOAD FAILED',err?.message||'Could not download the run card.');
+  }finally{button.disabled=false;button.textContent='↓ DOWNLOAD PNG CARD'}
+ };
+ document.getElementById('shareRun').onclick=()=>{
+  const panel=document.getElementById('runSharePanel');
+  panel.hidden=!panel.hidden;
+  const button=document.getElementById('shareRun');
+  if(button.setAttribute)button.setAttribute('aria-expanded',String(!panel.hidden));
+  if(!panel.hidden)createPreview();
+ };
+ document.getElementById('startNewRun').onclick=()=>{
+  // Finished runs are archived in the local rankings before this result renders.
+  // Return to the Challenge mode chooser; never overwrite completed records.
+  closeDialog(document.getElementById('runCompleteModal'));
+  st=initial();challengeView='run';runRecapDismissed=false;runRecapStage='match';matchResultDismissed=false;
+  selectedShopItem=null;shopMessage='';shopScrollTop=0;dragStatus='';autoEquipSummary='';shopStatFilters.clear();
+  draftPickerOpen=true;shopDrawerOpen=true;draftWindowPosition=null;shopWindowPosition=null;
+  pendingRollAnimation=false;slotAnimationBusy=false;draftScrollTop=0;
+  save();render();
+ };
+ document.getElementById('copyRunSummary').onclick=()=>{
+  const value=runShareText(),status=document.getElementById('runShareStatus');
+  if(typeof navigator!=='undefined'&&navigator.clipboard?.writeText){
+   navigator.clipboard.writeText(value).then(()=>{status.textContent='Run summary copied to clipboard.'},()=>{
+    showChallengeMessage('COPY RUN SUMMARY','Clipboard access was denied. Select and copy the text below.',{copyText:value});
+   });
+  }else{
+   showChallengeMessage('COPY RUN SUMMARY','Clipboard access is unavailable. Select and copy the text below.',{copyText:value});
+  }
+ };
+}
+
+// Mouse drag/drop and touch/pen handles all call the same validated gameplay actions.
+if((st.phase==='draft'||st.phase==='shop')&&window.PFC_CHALLENGE_DND){
+ const candidateIds=new Set(st.phase==='draft'?eligible().map(s=>s.id):[]);
+ const canDrag=source=>{
+  if(formationPreview)return false; // do not drag or draft into a hypothetical layout
+  if(source.type==='candidate')return st.phase==='draft'&&candidateIds.has(Number(source.value));
+  if(source.type==='pokemon')return st.moves>0&&Boolean(st.roster[Number(source.value)]);
+  if(source.type==='item')return st.phase==='shop'&&itemTargets(source.value).length>0;
+  if(source.type==='held-item')return st.phase==='shop'&&Boolean(st.items[Number(source.value)]);
+  return false;
+ };
+ const dropItemName=source=>source.type==='held-item'?st.items[Number(source.value)]:source.value;
+ const canDrop=(source,index)=>{
+  if(!Number.isInteger(index)||index<0||index>10||!canDrag(source))return false;
+  if(source.type==='candidate')return !slotAnimationBusy&&!st.roster[index];
+  if(source.type==='pokemon')return index!==Number(source.value);
+  if(source.type==='item'||source.type==='held-item'){
+   const name=dropItemName(source);
+   return st.phase==='shop'&&Boolean(itemFor(BY.get(st.roster[index]),name))&&
+    (source.type!=='held-item'||index!==Number(source.value));
+  }
+  return false;
+ };
+ const onDrop=(source,index)=>{
+  if(source.type==='item'||source.type==='held-item'){
+   const name=dropItemName(source),result=equipShopItem(name,index);
+   selectedShopItem=name;
+   shopMessage=result.ok?'Equipped '+name+' to '+(BY.get(st.roster[index])?.name||'Pokémon')+'.':result.error;
+   dragStatus=shopMessage;
+   render();return;
+  }
+  const result=source.type==='candidate'?draftPokemon(source.value,index):moveDraftedPokemon(source.value,index);
+  if(!result.ok)showChallengeMessage('POKÉMON DROP NOT AVAILABLE',result.error);
+ };
+ window.PFC_CHALLENGE_DND.mount(app,{canDrag,canDrop,onDrop});
+}
+
+document.getElementById('reset').onclick=()=>showChallengeMessage('ABANDON CHALLENGE?','Your current run will be discarded. Completed leaderboard records will remain saved.',{confirmLabel:'ABANDON RUN',destructive:true,onConfirm:()=>{st=initial();runRecapDismissed=false;runRecapStage='match';matchResultDismissed=false;draftPickerOpen=true;shopDrawerOpen=true;draftWindowPosition=null;shopWindowPosition=null;save();render()}})}
+function savePersonalRecord(){
+ const cat=(st.pool===4?'classic':'national')+'-'+(st.legends?'legends':'standard');
+ const key='pokefc-challenge-personal-records-v1';
+ let records={};try{records=JSON.parse(localStorage.getItem(key))||{}}catch{}
+ const old=records[cat]||{attempts:0,best:0,champions:0};
+ records[cat]={attempts:old.attempts+1,best:Math.max(old.best,st.history.length),champions:old.champions+(st.history.length===6&&st.result?.outcome==='Victory'?1:0)};
+ try{localStorage.setItem(key,JSON.stringify(records))}catch{}
+}
+// Separate, seeded alpha shootout: each recorded attempt is generated here, not fabricated from match totals.
+function simulatePenaltyShootout(ours,theirs,seed){
+ const random=window.FXI_QUICK.randomizer(seed+':penalties');
+ const model=window.PFC_POSITION_EFFECTIVENESS;
+ const finishing=p=>model.finishingIndex(p.pokemonStats)*Math.max(.70,p.positionEfficiency??1);
+ const order=squad=>squad.lineup.slice(1).sort((a,b)=>finishing(b)-finishing(a));
+ const kickers={home:order(ours),away:order(theirs)};
+ const keepers={home:ours.lineup[0],away:theirs.lineup[0]};
+ let home=0,away=0;
+ const attempts=[];
+ let decided=false;
+ for(let round=1;round<=30&&!decided;round++){
+  for(const side of ['home','away']){
+   const player=kickers[side][(round-1)%kickers[side].length];
+   const defending=keepers[side==='home'?'away':'home'];
+   const shooter=player?finishing(player):65,reflexes=defending?model.preciseFit(defending.pokemonStats,'GK')*Math.max(.70,defending.positionEfficiency??1):65;
+   const chance=Math.min(.92,Math.max(.52,.72+(shooter-65)*.003-(reflexes-65)*.0015));
+   const scored=random()<chance;
+   attempts.push({round,side,kicker:player?.name||'Unknown',scored});
+   if(side==='home')home+=Number(scored);else away+=Number(scored);
+   if(round<=5){
+    const homeTaken=attempts.filter(x=>x.side==='home').length,awayTaken=attempts.length-homeTaken;
+    if(home>away+(5-awayTaken)||away>home+(5-homeTaken)){decided=true;break}
+   }else if(side==='away'&&home!==away){decided=true;break}
+  }
+ }
+ // Emergency deterministic resolution only if thirty pairs all tie.
+ if(!decided&&home===away){
+  const side=random()<.5?'home':'away',round=31;
+  attempts.push({round,side:'home',kicker:kickers.home[(round-1)%kickers.home.length]?.name||'Unknown',scored:side==='home'});
+  attempts.push({round,side:'away',kicker:kickers.away[(round-1)%kickers.away.length]?.name||'Unknown',scored:side==='away'});
+  if(side==='home')home++;else away++;
+ }
+ return {home,away,winner:home>away?'home':'away',attempts,provisional:true};
+}
+function playBoss(){
+ if(!window.FXI_QUICK)throw Error('Quick Sim library unavailable');
+ const boss=BOSSES[st.round];if(!boss||!Array.isArray(boss.roster)||boss.roster.length!==11)throw Error('Boss roster unavailable');
+ const role=pos=>pos==='GK'?'GK':['LB','RB','CB','LWB','RWB'].includes(pos)?'DEF':['ST','LW','RW'].includes(pos)?'FWD':'MID';
+ const build=(s,i,exactPos,prefix,item)=>{
+  const b=matchEffectiveStats(s,item),pos=role(exactPos);
+  const position=window.PFC_POSITION_EFFECTIVENESS?.competitiveProfile(b,exactPos);
+  return {id:prefix+i+'-'+s.id,name:displayPokemon(s,item).name,speciesId:s.spriteId||s.id,pos,
+   positionEfficiency:position?.efficiency??1,positionFit:position?.fit??null,exactPosition:exactPos,pokemonStats:b};
+ };
+ const ours={id:'challenger',tactic:st.tactic,lineup:st.roster.map((id,i)=>build(BY.get(id),i,FORMS[st.formation][i],'c',st.items[i]))};
+ const bossFormation=boss.formation||'4-3-3';
+ const theirs={id:boss.key,tactic:boss.tactic||'balanced',lineup:boss.roster.map((id,i)=>{
+  const s=BY.get(id),item=opponentHeldItem(boss,id);
+  return build(s,i,FORMS[bossFormation][i],'boss',item);
+ })};
+ const seed='challenge:'+st.rng+':'+st.round;
+ const preview={home:ours,away:theirs,seed};
+ const regulation=window.FXI_QUICK.simulate(preview,{seed,positionEffectiveness:'v2'});
+ const ko=window.PFC_KNOCKOUT?.resolve?.(preview,regulation,{seed,positionEffectiveness:'v2'})||null;
+ const out=ko?.match||regulation;
+ let outcome=out.score[0]>out.score[1]?'Victory':out.score[0]<out.score[1]?'Defeat':'Draw',
+  tiebreak=null,shootout=ko?.shootout||null;
+ if(shootout){
+  outcome=shootout.winner==='home'?'Victory':'Defeat';
+  tiebreak='Penalty shootout '+shootout.home+'–'+shootout.away+' · official modeled PSE kicks';
+ }else if(ko?.extraTime){
+  tiebreak='Extra time '+ko.extraTime.score.join('–')+' · 120-minute match result';
+ }else if(outcome==='Draw'){
+  shootout=simulatePenaltyShootout(ours,theirs,seed);
+  outcome=shootout.winner==='home'?'Victory':'Defeat';
+  tiebreak='Penalty shootout '+shootout.home+'–'+shootout.away+' · provisional seeded resolution';
+ }
+ return {boss:boss.leader,round:st.round+1,score:out.score,
+  ...(ko?{knockoutRules:'pse-knockout-v1',regulationScore:ko.regulationScore,
+   extraTime:ko.extraTime?{score:ko.extraTime.score,events:ko.extraTime.events}:null}:{}),
+  shots:out.stats.map(x=>x.shots),passes:out.stats.map(x=>x.passes),
+  outcome,tiebreak,shootout,seed,origin:'quick-sim',
+  report:MATCH_REPORT?.fromResult(out,preview)||null,
+  ...(out.origin==='quick-sim'?{replay:{version:1,preview:{home:ours,away:theirs},result:out}}:{})};
+}
+save();render();
+})();
+</script></body></html>

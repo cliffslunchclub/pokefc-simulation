@@ -1,0 +1,50 @@
+name: PokéFC Watch browser QA — no deployment
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - 'watch/**'
+      - 'assets/js/quick-sim.js'
+      - 'assets/js/pse-knockout.js'
+      - 'assets/js/position-effectiveness.js'
+      - 'tests/ci-pse-120-browser.cjs'
+      - 'tests/ci-pse-enclosed-browser.cjs'
+      - '.github/workflows/watch-browser-qa.yml'
+permissions:
+  contents: read
+jobs:
+  browser-and-static-package:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: '22'
+      - name: Build pinned MIT Soccer-JS renderer
+        run: bash watch/soccerjs/build-local.sh
+      - name: Prepare Chromium browser
+        run: |
+          npm install --no-save --no-audit --no-fund playwright@1.56.1
+          npx playwright install --with-deps chromium
+      - name: 120-minute Watch, replay and mobile browser test
+        run: node tests/ci-pse-120-browser.cjs
+      - name: Enclosed pitch and wall physics browser test
+        run: node tests/ci-pse-enclosed-browser.cjs
+      - name: Validate complete local release package (no uploading or publishing)
+        run: |
+          PFC_INCLUDE_SOCCERJS=1 bash scripts/build-siteground.sh
+          test -s dist/watch/soccerjs/dist/viewer.bundle.js
+          test -s dist/watch/soccerjs/dist/SOCCER-JS-LICENSE.txt
+          test ! -e dist/tests
+          test ! -e dist/watch/soccerjs/dist/fixture.json
+      - name: Save generated QA screenshots
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: pokefc-public-watch-qa
+          path: pse-browser-artifacts/
+          if-no-files-found: ignore
+          retention-days: 7

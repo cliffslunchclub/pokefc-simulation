@@ -1,0 +1,109 @@
+{
+  "kind": "event-definition-alignment-audit-v1",
+  "originalTacticMeshCommit": "603312dcf037bed0b0c817f8ba8a194eaebce8da",
+  "source": "saved-real-original-TacticMesh-46-minute-first-half",
+  "fullMatch": false,
+  "productionCalibrated": false,
+  "fixture": {
+    "home": "Oreburgh City FC",
+    "away": "Sunyshore City FC",
+    "seed": 3402825588,
+    "matchId": "fxi-3402825588",
+    "clubId": 24
+  },
+  "quickSimReplicates": 5000,
+  "quickModel": "provisional-with-tackle-attempt-events",
+  "tackleSuccessRateInTM": 0.27615062761506276,
+  "provisionalQuickAttemptWinProbability": 0.28,
+  "definitions": {
+    "passes": "pass attempts",
+    "completedPasses": "passes received/controlled by a different teammate",
+    "shots": "shot attempts (NOT shots on target)",
+    "tackleAttempts": "all tackle challenges, including failed tackles, by any outfield position",
+    "tackles": "successful challenges only",
+    "goals": "official goal events",
+    "assists": "credited goal assistance",
+    "possession": "controlled-ball time percentage (TM); possession model estimate (Quick Sim)",
+    "shotsOnTarget": "not comparable: original TacticMesh value unavailable",
+    "saves": "not comparable: Quick Sim approximate saves versus TM shotStops"
+  },
+  "teams": [
+    {
+      "team": "Oreburgh City FC",
+      "actual": {
+        "goals": 0,
+        "shots": 2,
+        "passes": 271,
+        "completedPasses": 139,
+        "tackleAttempts": 110,
+        "tackles": 30,
+        "assists": 0
+      },
+      "quickExpected": {
+        "goals": 0.45,
+        "shots": 5.19,
+        "passes": 194.17,
+        "completedPasses": 132.13,
+        "tackleAttempts": 28.1,
+        "tackles": 7.83,
+        "assists": 0.32
+      }
+    },
+    {
+      "team": "Sunyshore City FC",
+      "actual": {
+        "goals": 1,
+        "shots": 3,
+        "passes": 362,
+        "completedPasses": 224,
+        "tackleAttempts": 129,
+        "tackles": 36,
+        "assists": 0
+      },
+      "quickExpected": {
+        "goals": 0.65,
+        "shots": 5.38,
+        "passes": 221.04,
+        "completedPasses": 150.31,
+        "tackleAttempts": 29.11,
+        "tackles": 8.17,
+        "assists": 0.47
+      }
+    }
+  ],
+  "aggregate": {
+    "goals": {
+      "tm": 1,
+      "quick": 1.1
+    },
+    "shots": {
+      "tm": 5,
+      "quick": 10.57
+    },
+    "passes": {
+      "tm": 633,
+      "quick": 415.21
+    },
+    "completedPasses": {
+      "tm": 363,
+      "quick": 282.44
+    },
+    "tackleAttempts": {
+      "tm": 239,
+      "quick": 57.21
+    },
+    "tackles": {
+      "tm": 66,
+      "quick": 16
+    },
+    "assists": {
+      "tm": 0,
+      "quick": 0.79
+    }
+  },
+  "warnings": [
+    "One observed TM half, including 1 minute of stoppage time vs 45-minute Quick Sim expectation; no production fitting.",
+    "Quick Sim tackle attempts are modeled events, not real physics outcomes.",
+    "Differences in metric frequency remain and require independent full-match references; aligning names/definitions does not eliminate them."
+  ]
+}

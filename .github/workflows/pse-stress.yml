@@ -1,0 +1,30 @@
+name: PokéFC PSE stress and calibration — no deployment
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  deep-simulation:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: '22'
+      - name: Simulation calibration and deterministic outcomes
+        run: |
+          node tests/test-calibration.cjs
+          node tests/test-calibration-diagnostics.cjs
+          node tests/test-quick-seed-compat.cjs
+          node tests/test-pse-watch-events.cjs
+          node tests/test-pse-knockout.cjs
+          node tests/test-pse-enclosed-pitch.cjs
+          node tests/test-position-effectiveness.cjs
+          node tests/test-realistic-position-swaps.cjs
+      - name: Full league and season turnover
+        run: |
+          node tests/test-v08-league.cjs
+          node tests/test-node.cjs

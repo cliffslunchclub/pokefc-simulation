@@ -1,0 +1,174 @@
+/* PokéFC Franchise: Soccer-JS 2.5D Watch adapter.
+ * Locked official Quick Sim fixture drives the viewer. No state mutation
+ * until an official full-time Record or verified Sim-to-End completion;
+ * Franchise simWeek still owns all XP, results and saves.
+ */
+(function(root){'use strict';
+ let current=null;
+ const $=id=>document.getElementById(id);
+ const escape=s=>String(s??'').replace(/[&<>"']/g,x=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[x]));
+ const clock=m=>String(Math.floor(m)).padStart(2,'0')+':'+String(Math.floor((m-Math.floor(m))*60)).padStart(2,'0');
+ function details(m){
+  const official=m.data.result;
+  const player=new Map([...m.data.home.lineup,...m.data.away.lineup].map(p=>[String(p.id),String(p.species||p.name||p.id)]));
+  const team=new Map([[String(m.data.home.id),m.data.home.name],[String(m.data.away.id),m.data.away.name]]);
+  const events=(official.events||[]).filter(e=>Number.isFinite(e.minute)&&e.minute<=m.minute).slice(-65);
+  $('viewerEvents').innerHTML='<p>Kick-off · 0′</p>'+events.map(e=>{
+    let description=String(e.type||'event').toUpperCase()+' · '+(team.get(String(e.team))||'Match');
+    if(e.player)description+=' · '+(player.get(String(e.player))||'Pokémon');
+    if(e.assist)description+=' (assist: '+(player.get(String(e.assist))||'Pokémon')+')';
+    return '<p><strong>'+escape(Math.floor(e.minute))+'′ '+escape(description)+'</strong></p>';
+  }).join('')+(m.minute>=90?'<p><strong>90′ Full-time</strong></p>':'');
+ }
+ function stats(m){
+  const a=m.data.result.stats||[];
+  const fields=[['Goals','goals'],['Shots','shots'],['Shots on target','shotsOnTarget'],['Passes','passes'],['Possession','possession'],['Tackles','tackles'],['Saves','saves']];
+  const perPlayer=[m.data.home,m.data.away].flatMap((team,side)=>
+   team.lineup.map(p=>({side,name:p.species||p.name||String(p.id),
+    count:Number(m.data.result.box?.[p.id]?.shotsOnTarget??0)})))
+   .filter(p=>Number.isInteger(p.count)&&p.count>0)
+   .sort((x,y)=>x.side-y.side||y.count-x.count||x.name.localeCompare(y.name));
+  $('viewerStats').innerHTML='<p class="tiny muted">Official full-time Quick Sim statistics</p>'+
+   fields.map(([label,key])=>'<div class="viewer-stat"><span>'+escape(a[0]?.[key]??'—')+'</span><small>'+escape(label)+'</small><span>'+escape(a[1]?.[key]??'—')+'</span></div>').join('')+
+   '<h4>Pokémon shots on target</h4>'+
+   (perPlayer.length?perPlayer.map(p=>'<div class="viewer-stat"><span>'+escape(p.side?'AWAY':'HOME')+
+    '</span><small>'+escape(p.name)+'</small><span>'+p.count+' SOT</span></div>').join(''):
+    '<p class="tiny muted">No individual shots on target were recorded.</p>')+
+   '<p class="tiny muted">Enclosed pitch: the ball stays in play; there are no corners, free kicks or in-match penalties.</p>';
+ }
+ function update(m,score){
+  if(current!==m)return;
+  $('liveScore').textContent=score.join(' – ');$('liveClock').textContent=clock(m.minute);
+  const seek=$('viewerSeek');seek.value=m.minute;seek.disabled=m.handedOff||m.recorded||m.failed;
+  $('viewerPlay').textContent=m.playing?'Ⅱ Pause':'▶ Play';
+  $('viewerPlay').disabled=!m.ready||m.finished||m.handedOff||m.failed;
+  $('viewerComplete').textContent=m.finished?'FULL TIME':m.handedOff?'Finishing with Quick Sim…':'⚡ SIM TO END';
+  $('viewerComplete').disabled=!m.ready||m.finished||m.handedOff||m.failed;
+  $('viewerReset').disabled=!m.ready||m.handedOff||m.recorded||m.failed;
+  $('viewerSoccerRecord').disabled=!m.finished||m.recorded||m.failed;
+  $('viewerSoccerCancel').disabled=m.recorded;
+  $('viewerHighlights').disabled=!m.ready||m.failed;
+  // Mode switching while a watched match is running would abandon its
+  // recorded prefix and misleadingly look like Sim → Watch. Cancel first.
+  $('viewerMode').disabled=!!m.ready&&!m.failed;
+  details(m);stats(m);
+ }
+ function unmount(){
+  const m=current;if(!m)return;
+  current=null;
+  if(root.FXI_PHASE10_WATCH?.fullscreenActive?.(m.pitch))void root.FXI_PHASE10_WATCH.leaveFullscreen(m.pitch);
+  m.session?.destroy();
+  m.canvas.hidden=false;
+  if($('viewerFullscreen'))$('viewerFullscreen').hidden=true;
+  if($('viewerHighlights'))$('viewerHighlights').hidden=true;
+  m.pitch.classList.remove('soccerjs-franchise-active');
+  if($('viewerSoccerRecord')){$('viewerSoccerRecord').hidden=true;$('viewerSoccerRecord').disabled=true}
+  if($('viewerSoccerCancel'))$('viewerSoccerCancel').hidden=true;
+  if($('viewerMode'))$('viewerMode').disabled=false;
+ }
+ function mount(data,finish,options={}){
+  unmount();
+  const bridge=root.FXI_PHASE10_WATCH,canvas=$('tacticalPitch');
+  const pitch=canvas?.parentElement,note=$('engineInstallStatus');
+  if(!bridge?.mountInline||!pitch){if(note)note.textContent='Soccer-JS 2.5D unavailable. Select the Quick Sim schematic instead.';return false}
+  const m={data,finish,canvas,pitch,session:null,ready:false,failed:false,minute:0,finished:false,handedOff:false,recorded:false,playing:false};
+  current=m;canvas.hidden=true;pitch.classList.add('soccerjs-franchise-active');
+  $('viewerSoccerRecord').hidden=false;$('viewerSoccerRecord').disabled=true;
+  $('viewerFullscreen').hidden=true;
+  $('viewerHighlights').hidden=false;$('viewerHighlights').disabled=true;
+  $('viewerSoccerCancel').hidden=false;$('viewerSoccerCancel').disabled=false;
+  $('viewerProjection').value='orthographic';$('viewerCamera').value='follow';
+  $('viewerComplete').textContent='⚡ SIM TO END';
+  $('viewerComplete').disabled=true;$('viewerPlay').disabled=true;$('viewerReset').disabled=true;
+  const lookup=()=>current===m;
+  $('viewerPlay').onclick=()=>{
+   if(!lookup()||!m.ready||m.finished||m.handedOff)return;
+   m.playing=!m.playing;
+   if(m.playing)m.session.play(Number($('viewerSpeed').value)||1);else m.session.pause();
+   update(m,bridge.scoreAt(m.session.fixture,m.minute));
+  };
+  $('viewerComplete').onclick=()=>{
+   if(!lookup()||!m.ready||m.handedOff||m.finished)return;
+   const accepted=m.session.simToEnd();
+   // The bridge may complete and call finish() synchronously in a test.
+   // finish() rerenders Franchise, so do not touch its old viewer after that.
+   if(!accepted||!lookup())return;
+   m.handedOff=true;m.playing=false;
+   if(note)note.textContent='Watch → Sim to End: finalizing the same locked official result.';
+   update(m,bridge.scoreAt(m.session.fixture,m.minute));
+  };
+  $('viewerSoccerRecord').onclick=()=>{
+   if(!lookup()||!m.finished||m.recorded)return;
+   try{m.session.record()}catch(error){if(note)note.textContent='Recording error: '+error.message}
+  };
+  $('viewerSoccerCancel').onclick=()=>{if(lookup()&&!m.recorded)m.session.cancel()};
+  $('viewerReset').onclick=()=>{if(!lookup()||m.handedOff||m.recorded)return;m.session.seek(0);m.session.pause();m.playing=false};
+  $('viewerHighlights').onclick=()=>{if(lookup()&&m.ready)m.session.openHighlights?.()};
+  $('viewerSeek').oninput=e=>{if(lookup()&&!m.handedOff&&!m.recorded)m.session.seek(Number(e.target.value))};
+  $('viewerSpeed').onchange=e=>{if(lookup()&&m.ready)m.session.setSpeed(Number(e.target.value)||1)};
+  $('viewerProjection').onchange=e=>{if(lookup()&&m.ready)m.session.setProjection(e.target.value)};
+  $('viewerCamera').onchange=e=>{if(lookup()&&m.ready)m.session.setCamera(e.target.value)};
+  $('viewerFullscreen').onclick=()=>{
+   if(!lookup()||!m.ready||!bridge.toggleFullscreen)return;
+   void bridge.toggleFullscreen(pitch).catch(error=>{
+    if(note)note.textContent='Fullscreen unavailable: '+String(error?.message||error);
+   });
+  };
+  if(note)note.textContent='Loading native Soccer-JS 2.5D Pokémon match…';
+  try{
+   m.session=bridge.mountInline({
+    preview:{home:data.home,away:data.away},result:data.result,container:pitch,
+    autoRecordOnSimToEnd:true,
+    viewerUrl:options.viewerUrl||'../watch/soccerjs/dist/index.html?embedded=1&inline=1&v=16',
+    onReady:session=>{
+     if(!lookup())return;
+     m.ready=true;session.setProjection('orthographic');session.setCamera('follow');
+      $('viewerFullscreen').hidden=false;
+     if(note)note.textContent='2.5D ready. Score, goals and statistics are locked by Quick Sim; Play to watch.';
+     update(m,[0,0]);
+    },
+    onProgress:({minute,score,finished,handedOff})=>{
+     if(!lookup())return;
+     m.minute=minute;m.finished=finished;m.handedOff=m.handedOff||!!handedOff;
+     if(finished){
+      m.playing=false;
+      if(note)note.textContent=handedOff?'Full time. Saving matchweek results…':
+       'Full time. Record official result to advance this matchweek.';
+     }
+     update(m,score);
+    },
+    onRecord:({result})=>{
+     if(!lookup()||m.recorded)return;
+     m.recorded=true;
+     // Franchise accepts this exact precomputed result. No simulation occurs twice.
+     m.finish({...m.data,result});
+    },
+    onCancel:()=>{
+     if(!lookup())return;
+     unmount();
+     $('viewerSoccerRecord').hidden=true;$('viewerSoccerCancel').hidden=true;
+     $('viewerMode').disabled=false;
+     if(note)note.textContent='Watch canceled — no results, XP or standings saved. Change mode or leave and reopen Tactical Viewer to retry.';
+    },
+    onStatus:({state,message})=>{
+     if(!lookup())return;
+     if(state==='error'){
+      m.failed=true;m.playing=false;
+      if(note)note.textContent=message||'Soccer-JS Watch failed; cancel to use an alternate viewer.';
+      update(m,[0,0]);
+     }
+    }
+   });
+   update(m,[0,0]);
+   return m;
+  }catch(error){
+   unmount();
+   $('viewerSoccerRecord').hidden=true;$('viewerSoccerCancel').hidden=true;
+   $('viewerMode').disabled=false;
+   if(note)note.textContent='Could not start 2.5D Watch: '+error.message;
+   return false;
+  }
+ }
+ root.FXI_SOCCERJS_FRANCHISE={mount,unmount,isActive:()=>!!current};
+ if(typeof module!=='undefined'&&module.exports)module.exports={mount,unmount};
+})(typeof window!=='undefined'?window:globalThis);

@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#0b0d10"><title>PokéFC | Real Quick Sim → Soccer-JS</title>
+<link rel="stylesheet" href="./viewer.css?v=10"><script defer src="./viewer.bundle.js?v=16"></script></head>
+<body>
+<header><a href="/" aria-label="PokéFC home"><span class="mini-ball" aria-hidden="true"></span>POKÉ<span>FC</span></a><strong>PHASE 10 · REAL MATCH REPLAY</strong><small>PRIVATE STAGING BUILD</small></header>
+<main><section class="intro">
+<div class="eyebrow">QUICK SIM × SOCCER-JS</div>
+<h1>A real match. <em>One official result.</em></h1>
+<p>This is a real PokéFC Quick Sim v0.7b result replayed by Soccer-JS's original pitch and ball drawing systems, with Pokémon sprite billboards. Controls never run Soccer-JS's competing match simulation.</p>
+<div class="caution" id="notice"><b>Early technical preview.</b> Goals and goalkeeper saves have official PSE timestamps. The Pokémon sprite art is original game artwork. Animated passes, challenges, shot paths and goalkeeper reactions are illustrative—not official Quick Sim events. Enclosed pitch, continuous play: no throw-ins, corners, fouls, free kicks or in-match penalties. Results come exclusively from PSE. Knockout fixtures may include 30 minutes of extra time and a separate official kick-by-kick penalty sequence.</div>
+</section>
+<section class="scoreline"><div class="team"><span>PEWTER CITY</span><small>HOME</small></div><div class="result"><strong id="score">0 – 0</strong><div id="clock">0'</div><small id="status" role="status" aria-live="polite">LOADING…</small></div><div class="team visitor"><span>CERULEAN CITY</span><small>AWAY</small></div></section>
+<div class="layout"><section class="viewer"><div class="cap"><h2>SOCCER-JS ORIGINAL VISUAL ENGINE</h2><small>Original Pokémon game sprites • club-colored jersey numbers • official Quick Sim score</small></div>
+<div class="pitchwrap"><canvas id="pitch" width="1120" height="650" aria-label="Soccer-JS pitch animated with official PSE match events"></canvas><span id="toast" hidden></span>
+<div class="watch-zoom-controls" role="group" aria-label="Match camera zoom">
+ <button id="zoomOut" type="button" aria-label="Zoom out" title="Zoom out">−</button>
+ <output id="zoomValue" aria-live="polite" aria-label="Camera zoom level">100%</output>
+ <button id="zoomIn" type="button" aria-label="Zoom in" title="Zoom in">+</button>
+</div>
+<div class="highlight-hud">
+<button id="highlightToggle" class="highlight-toggle" type="button" aria-expanded="false" aria-controls="highlightDrawer">⚽ HIGHLIGHTS <span id="highlightCount">0</span></button>
+<div id="highlightNotice" class="highlight-notice" role="dialog" aria-modal="true" aria-labelledby="highlightNoticeTitle" hidden>
+ <div class="goal-prompt-card">
+  <small class="goal-prompt-eyebrow">● OFFICIAL PSE GOAL</small>
+  <strong id="highlightNoticeTitle">GOAL!</strong>
+  <p>Ball in the net. Match paused. Watch the illustrative buildup again or continue at the selected speed.</p>
+  <div class="goal-prompt-actions">
+   <button id="highlightNoticePlay" type="button">↺ VIEW REPLAY</button>
+   <button id="highlightNoticeDismiss" type="button" aria-label="Continue match after goal">▶ CONTINUE</button>
+  </div>
+ </div>
+</div>
+<section id="highlightDrawer" class="highlight-drawer" aria-label="Official match highlights" hidden>
+ <header class="highlight-head"><strong>⚽ MATCH HIGHLIGHTS</strong><button id="highlightClose" type="button" aria-label="Close highlights">✕</button></header>
+ <div class="highlight-filters" role="group" aria-label="Filter highlights">
+  <button type="button" class="active" data-highlight-filter="all" aria-pressed="true">ALL</button>
+  <button type="button" data-highlight-filter="goal" aria-pressed="false">GOALS</button>
+  <button type="button" data-highlight-filter="set" aria-pressed="false">SHOOTOUTS</button>
+ </div>
+ <div id="highlightList" class="highlight-list" aria-live="polite"><p class="highlight-empty">Highlights appear as official incidents happen.</p></div>
+ <p class="highlight-footnote">Only recorded PSE goals and knockout shootout kicks appear here. Animation is illustrative.</p>
+</section>
+<section id="highlightReplay" class="highlight-replay" role="group" aria-label="Instant replay" hidden>
+ <div class="highlight-replay-top"><strong>● REPLAY</strong><span id="highlightReplayTitle">GOAL</span></div>
+ <div class="highlight-replay-bottom">
+  <span id="highlightReplayProgress">0%</span>
+  <button id="highlightReplaySpeed" type="button" aria-label="Toggle replay speed">0.5× SLOW MO</button>
+  <button id="highlightReplayReturn" type="button">↩ BACK TO MATCH</button>
+ </div>
+</section>
+</div>
+<div id="fullscreenPlayback" class="watch-floating-controls" role="group" aria-label="Fullscreen Watch playback" hidden>
+ <button type="button" id="fullscreenPause">Ⅱ PAUSE</button>
+ <button type="button" id="fullscreenResume" hidden>▶ RESUME</button>
+ <label for="fullscreenSpeed">SPEED <select id="fullscreenSpeed" aria-label="Fullscreen playback speed">
+ <option value="1">1×</option><option value="2">2×</option><option value="4">4×</option><option value="8">8×</option><option value="16">16×</option>
+ </select></label>
+</div>
+<section id="commentaryPanel" class="watch-commentary" aria-label="PokéFC live match commentary">
+ <div class="watch-commentary-head">
+  <strong>● LIVE COMMENTARY <span class="watch-commentary-visual">· PLAY-BY-PLAY</span></strong>
+  <span id="commentaryMinute" class="watch-commentary-minute">0′</span>
+  <button id="commentaryToggle" type="button" aria-controls="commentaryHistory" aria-expanded="false">HISTORY ▴</button>
+ </div>
+ <p id="commentaryLine" class="watch-commentary-line" role="status" aria-live="polite" aria-atomic="true">Awaiting kickoff…</p>
+ <ol id="commentaryHistory" class="watch-commentary-history" aria-label="Match commentary history" hidden></ol>
+</section>
+<div class="shootout-overlay" id="shootoutOverlay" hidden role="group" aria-label="Official PSE penalty shootout">
+<strong id="shootoutScore" aria-live="polite">PENALTIES 0 – 0</strong>
+<span id="shootoutDetail" aria-live="polite">Awaiting first penalty</span>
+<button id="shootoutAdvance" type="button">NEXT PENALTY</button></div></div>
+<div class="controls"><button id="play" disabled class="primary">▶ Play</button><button id="playFive" disabled>▶ Next 5′</button><button id="pause" disabled>Ⅱ Pause</button><button id="restart" disabled>↺ Replay</button><button id="nextGoal" disabled>⚽ Next goal</button><button id="nextKick" type="button" hidden disabled>◎ Next penalty</button><button id="skip" disabled>⏭ Final result</button>
+<label>Speed <select id="speed"><option value="1" selected>1× · Real time</option><option value="2">2×</option><option value="4">4×</option><option value="8">8×</option><option value="16">16×</option></select></label>
+<label>View <select id="projection" aria-label="Soccer-JS projection"><option value="orthographic" selected>Broadcast</option><option value="isometric">2.5D Isometric</option><option value="topdown">Top-down</option></select></label>
+<label class="sprite-toggle"><input id="showNumbers" type="checkbox" checked> Jersey numbers</label>
+<label>Camera <select id="camera" aria-label="Camera framing"><option value="follow" selected>Follow ball</option><option value="wide">Wide pitch</option></select></label></div>
+<div id="motionStatus" class="motion-status" role="status">Loading illustrated match sequence…</div>
+<div class="seek"><span>0'</span><input id="scrub" type="range" min="0" max="90" step=".05" value="0" disabled aria-label="Scrub match minute"><span id="seekEnd">90'</span><b id="played">0/90'</b></div>
+</section>
+<aside><section class="panel"><h2>MATCH HIGHLIGHTS</h2><div id="goals">Official highlights appear as the match progresses. Use Replay to review a moment.</div></section><section class="panel"><h2>QUICK SIM FINAL STATISTICS</h2><div id="stats">Loading...</div><p>These are final official match totals, not live running shot counts. PSE extra-time goals count toward the 120-minute match score, while shootout kicks have a separate tally. Goal and goalkeeper-save timestamps come from PSE; other animated shot paths remain illustrative. Soccer-JS cannot generate extra goals or scoring events.</p></section><section class="panel"><h2>WHAT THIS PROVES</h2><p>Quick Sim can supply match events to a browser replay that uses Soccer-JS's existing visual renderer. Watch the first five minutes with animated passes, dribbles and challenges. These are visual demonstrations, not verified possession data. Continuous match realism and full-match performance still need development.</p></section></aside></div>
+<footer>PokéFC Phase 10 · Free public test · No login · No private source code published · Soccer-JS MIT license retained</footer></main>
+</body></html>

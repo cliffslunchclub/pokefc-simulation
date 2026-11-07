@@ -1,46 +1,48 @@
-# PokéFC Simulation Lab
+# PokéFC — Public Development and Testing Mirror
 
-**Public, non-production research and testing repository** for the private game [`cliffslunchclub/PokeFC`](https://github.com/cliffslunchclub/PokeFC). The playable public alpha is [pfc.cliffslunchclub.com](https://pfc.cliffslunchclub.com/), **not** GitHub Pages.
+This is the **public development/testing mirror** of [cliffslunchclub/PokeFC](https://github.com/cliffslunchclub/PokeFC), the private production repository.
 
-Updated 2026-11-05. See [RESEARCH_TODO.md](RESEARCH_TODO.md) for current experiments and unimplemented items.
+## What's included
 
-## Purpose and boundaries
+- PokéFC Sim Engine (PSE), including `assets/js/quick-sim.js`, shared match rules and positional ratings.
+- Quick Play, Challenges, Franchise, formation builder, match reports, calibration data and regression tests.
+- Soccer-JS 2.5D Watch integration and a build of its pinned MIT-licensed upstream renderer.
 
-This repository runs/reproduces isolated soccer simulation, calibration, viewer feasibility and public browser tests. It contains research helpers, verified test inputs where available, and an original MIT-licensed TacticMesh reference tree. It is **not** the app, a second official game engine, a Pokémon account backend, or an alternative public Soccer-JS game page.
+**This repository must not deploy PokéFC.** It has no SiteGround publishing jobs, production credentials, private Git history, or automation that writes to the private production repository. The production site at https://pfc.cliffslunchclub.com is deployed **only from the private repository**.
 
-Do not publish private PokeFC Quick Sim source, SiteGround credentials, private user fixtures or browser local-save data here. Native research outputs are never assumed to be authoritative PokeFC gameplay outcomes.
+## Snapshot
 
-## Implemented research capabilities
+Initial source copied from private `PokeFC/main` at commit `31b87aafa528b0747a67f7e9d74a22174b8fba5a` (2026-11-06). The mirror is a sanitized source snapshot, **not a full Git clone** and not a backup of the private repository's history.
 
-| Area | What exists | Important limit |
-| --- | --- | --- |
-| TacticMesh reference | Baseline engine integration, native full-match/checkpoint helpers, calibration scripts and GitHub Actions workflows | Tests characterize **TacticMesh**, not the final Quick Sim model; baseline is exploratory |
-| Comparisons | Scripts and workflow paths for matched Quick Sim/TacticMesh reference comparisons and report summarization | Source fixtures and valid statistical ground truth must be audited before calibration claims |
-| Match continuation | Reference checkpoint/handoff smoke checks | Not proof of production cross-engine mid-match tactical resumption |
-| Soccer-JS feasibility | Public renderer/browser tests, a 22-Pokémon isometric fixture, official Quick Sim replay and Watch→Sim handoff | Native 2.5D opt-in Quick Play was merged into product `main` in PR #21; complete Challenges/Franchise and mobile parity remain pending |
-| Browser artifacts | The new [inline 2.5D Chromium regression](https://github.com/cliffslunchclub/pokefc-simulation/actions/runs/42082614996) passed with 22 original sprites, correct red/white markers, isometric projection and record-once/cancel behavior | Public fixture proof does not itself prove the actual SiteGround page; a separate hosted-site browser smoke is used |
+The old public TacticMesh research code remains in earlier Git history. It is not part of the current `main` source tree and its old workflows are retired.
 
-The earlier public proof was in [this native Soccer-JS run](https://github.com/cliffslunchclub/pokefc-simulation/actions/runs/41965539911) and [this Watch → Sim handoff run](https://github.com/cliffslunchclub/pokefc-simulation/actions/runs/41968855684), both from experimental branches. Artifact retention is limited by GitHub; preserve reports and test sources before pruning branches.
+## Development flow
 
-## Current project architecture
+1. Make a public feature branch and pull request. Run public PSE, gameplay, UI, native Watch and browser tests.
+2. Review and merge tested development changes into this public repository.
+3. Separately approve and transfer the relevant source changes into the private production repo.
+4. Run final production checks and deploy exclusively from the private repository.
 
-- Product `PokeFC/main`: Quick Play, Challenges and Gen I–IV 32-Gym Franchise with Quick Sim and legacy TacticMesh Watch.
-- Product [PR #21](https://github.com/cliffslunchclub/PokeFC/pull/21) is **merged**: native Soccer-JS 2.5D is connected to the Quick Play match screen and deployed as an **opt-in preview** at `/play/?watch=soccerjs`. Normal Watch remains TacticMesh until all modes pass.
-- Planned: full natural Match Director, complete player/ball sequences, in-game tactical changes via resumable Quick Sim, Challenge/Franchise Soccer-JS parity, and eventual TacticMesh removal.
+Public PRs and GitHub Actions must not receive FTPS credentials, GitHub personal-access tokens, production environment files, or private saved-game exports.
 
-**Soccer-JS GitHub Pages demo is retired.** Its separate `gh-pages` hosting was a development proof, not a fourth game route. The necessary embedded Soccer-JS `index.html` is now shipped as an internal iframe runtime in the private product deploy. It is not a standalone demo page.
+## Run locally
 
-## How to use this repo
+Node.js 22+, Python 3, and (for native Watch testing) Git/npm are recommended.
 
-- Select a relevant existing workflow in **Actions** and use `workflow_dispatch` only for a defined test. Some full-match jobs are resource intensive.
-- For local reproduction, inspect `scripts/`, `engines/`, `config/` and the corresponding workflow YAMLs. Use a local Node/Python environment where required.
-- Keep heavy browser/renderer tests **public**, but share only non-sensitive fixtures and test harnesses. Don't automatically trigger expensive private GitHub Actions.
-- Preserve upstream MIT licenses and third-party notices; Pokémon artwork and sprite rights require separate review.
+```sh
+node tests/test-node.cjs
+node tests/test-national-dex.cjs
+node tests/test-pse-knockout.cjs
+node tests/test-challenge-v1-flow.cjs
+node watch/soccerjs/test-possession-continuity.cjs
+bash scripts/build-siteground.sh
+python3 -m http.server 8765 --directory dist
+```
 
-The repository previously included step-by-step instructions to create a new repo. Those are obsolete because both repositories already exist.
+The historical `scripts/build-siteground.sh` is **a local static packaging script only**. Running it does not upload files or connect to SiteGround. The public Actions workflows never deploy to a website.
 
-## Maintenance
+For the native Watch renderer, use `bash watch/soccerjs/build-local.sh` and the manual **Watch browser QA** action. CI will validate all game modes without a production upload.
 
-[Research TODO](RESEARCH_TODO.md) · [Cleanup policy](docs/REPOSITORY_CLEANUP.md) · [Watched-match controls notes](docs/watched-match-controls.md)
+## Security and ownership
 
-This repository has no official affiliation with The Pokémon Company, Nintendo, FIFA/EA or the Soccer-JS authors.
+Read [SECURITY.md](SECURITY.md) and [RIGHTS_AND_ATTRIBUTION.md](RIGHTS_AND_ATTRIBUTION.md) before contributing. Public visibility does not automatically authorize reuse of original PokéFC source or Pokémon-related intellectual property. The game is an unofficial fan project, not affiliated with Nintendo, The Pokémon Company, Creatures Inc. or GAME FREAK.

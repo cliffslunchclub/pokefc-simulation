@@ -1,0 +1,247 @@
+:root{font-family:Inter,system-ui,sans-serif;color:#ecf4ff;background:#0b172a}*{box-sizing:border-box}body{margin:0;background:radial-gradient(circle at 50% 0,#1d3a57,#0b172a 70%) fixed}header{padding:19px max(16px,calc((100vw - 1320px)/2));border-bottom:1px solid #354a63;background:#0c1b2e;display:flex;justify-content:space-between;align-items:center;font-size:12px;letter-spacing:.08em}header a{color:#fff;font-weight:950;font-size:23px;text-decoration:none}header a span{color:#dce871}header small{color:#9ab0c5}main{max-width:1320px;margin:auto;padding:24px 15px}.eyebrow{color:#e3e876;font-weight:900;letter-spacing:.13em;font-size:11px}h1{font-size:clamp(30px,4vw,52px);line-height:1.05;margin:12px 0}h1 em{font-style:normal;color:#dce86f}.intro>p{max-width:780px;color:#c6d7e8;line-height:1.6;font-size:14px}.caution{background:#30351e;border:1px solid #626e40;padding:13px 16px;border-radius:9px;margin:18px 0;color:#f0f1cf;font-size:12px;line-height:1.6}.scoreline{display:grid;grid-template-columns:1fr 1fr 1fr;align-items:center;padding:14px 20px;background:#132440;border:1px solid #344767;border-radius:11px;margin:16px 0}.team{font-size:clamp(12px,1.5vw,19px);font-weight:900;display:flex;flex-direction:column;gap:7px}.team small{font-size:10px;color:#8ba6c0}.visitor{text-align:right}.result{text-align:center}.result strong{font-size:42px}.result #clock{font-size:18px;color:#e1e974;font-weight:800}.result small{display:block;font-size:10px;color:#9dd3cc}.layout{display:grid;grid-template-columns:minmax(0,1.8fr) minmax(250px,.7fr);gap:15px}.viewer,.panel{background:#13233c;border:1px solid #34435c;border-radius:11px;overflow:hidden}.cap{padding:13px 16px}.cap h2,.panel h2{font-size:12px;letter-spacing:.1em;margin:0}.cap small{color:#93aeca;font-size:11px}.pitchwrap{margin:0 9px;position:relative;background:#194032;border:2px solid #45715a;border-radius:7px;overflow:hidden}.pitchwrap canvas{display:block;width:100%;height:auto;aspect-ratio:1120/650}#toast:not([hidden]){position:absolute;bottom:10%;left:50%;transform:translateX(-50%);padding:8px 15px;background:#081a2aea;border:1px solid #dbe876;color:#fff;border-radius:7px;font-weight:900;white-space:nowrap}.controls{display:flex;gap:7px;flex-wrap:wrap;padding:14px 9px}.controls button,.controls select{background:#263953;color:#fff;border:1px solid #4a607c;border-radius:8px;padding:10px;font-size:12px;cursor:pointer}.controls button:first-child{background:#e6eb7b;color:#1a2740;border-color:#e6eb7b;font-weight:900}.controls button:disabled{opacity:.45;cursor:default}.controls label{display:flex;align-items:center;gap:6px;color:#9eb6d2;margin-left:auto;font-size:12px}.seek{padding:13px;display:flex;align-items:center;gap:10px;border-top:1px solid #354861;font-size:12px}.seek input{flex:1;accent-color:#e2e875}.seek b{color:#a8bfd8}.panel{padding:16px;margin-bottom:15px}.panel h2{color:#d8e9f7}.panel p{font-size:12px;color:#a6bdd1;line-height:1.65}.panel #goals div{border-top:1px solid #30425c;padding:11px 0;font-size:12px}.panel #stats{font-size:12px;color:#e3ea77;line-height:1.7}footer{font-size:11px;color:#8299b0;padding:22px 0}@media(max-width:850px){.layout{grid-template-columns:1fr}aside{display:grid;grid-template-columns:1fr 1fr;gap:12px}}@media(max-width:550px){header strong,header small{display:none}.scoreline{padding:12px 10px}.team{font-size:11px}.result strong{font-size:31px}aside{grid-template-columns:1fr}.controls label{width:100%;justify-content:flex-end}}
+/* Phase 10C: projection controls and illustrative movement indicator */
+.controls label{white-space:nowrap}
+.controls select:focus-visible,.controls button:focus-visible{outline:2px solid #e2e875;outline-offset:2px}
+.motion-status{color:#bfe4d9;padding:0 15px 12px;font-size:12px;font-weight:700;min-height:22px;letter-spacing:.015em}
+#projection{min-width:135px}
+#camera{min-width:104px}
+@media(max-width:680px){.controls label{margin-left:0}.motion-status{font-size:11px}}
+
+.sprite-toggle{display:flex;align-items:center;gap:6px;font-size:12px;color:#DCEBEA}
+.sprite-toggle input{width:16px;height:16px;accent-color:#EBC63C}
+
+
+/* In-match embedded 2.5D: the Quick Play UI owns scoreboard and controls. */
+html.pfc-inline,html.pfc-inline body{width:100%;height:100%;min-height:0;margin:0;overflow:hidden;background:#0b2230}
+html.pfc-inline body>header,html.pfc-inline main>.intro,html.pfc-inline main>.scoreline,html.pfc-inline main>footer,html.pfc-inline main>.layout>aside{display:none!important}
+html.pfc-inline main{width:100%;max-width:none;height:100%;padding:0;margin:0}
+html.pfc-inline main>.layout{display:block;width:100%;height:100%;margin:0}
+html.pfc-inline main>.layout>.viewer{width:100%;height:100%;min-height:0;border:0;border-radius:0;background:#103127}
+html.pfc-inline .viewer>.cap,html.pfc-inline .viewer>.controls,html.pfc-inline .viewer>.seek,html.pfc-inline .viewer>.motion-status{display:none!important}
+html.pfc-inline .pitchwrap{position:relative;display:flex;align-items:center;justify-content:center;width:100%;height:100%;margin:0;border:0;border-radius:0;background:#123d35}
+html.pfc-inline .pitchwrap canvas{display:block;width:100%;height:100%;object-fit:contain;aspect-ratio:1120 / 650}
+html.pfc-inline #toast:not([hidden]){bottom:5%;max-width:90%;white-space:normal;text-align:center;font-size:clamp(10px,1.2vw,14px)}
+
+/* Newtro standalone Watch shell; embedded mode still inherits only pitch sizing. */
+:root { --watch-red:#e53935;--watch-white:#f7f7f5;--watch-black:#0b0d10; }
+body { color:var(--watch-white);background:radial-gradient(ellipse at 80% -20%,#481f24,#0b0d10 65%) fixed; }
+header { background:#13151a;border-top:4px solid var(--watch-red);border-bottom:1px solid #55565e; }
+header a { color:#fff;display:inline-flex;align-items:center;gap:8px; }
+header a span:not(.mini-ball) { color:#ff6963; }
+.mini-ball { position:relative;display:inline-block;width:28px;height:28px;border:2px solid #0b0d10;border-radius:50%;background:linear-gradient(#e53935 0 44%,#0b0d10 44% 56%,#fff 56%);box-shadow:0 0 0 1px #b9bcc4;flex-shrink:0; }
+.mini-ball::after { content:"";position:absolute;width:9px;height:9px;left:50%;top:50%;transform:translate(-50%,-50%);border:2px solid #0b0d10;border-radius:50%;background:#fff; }
+header small,.intro>p,.cap small,.panel p,footer { color:#b8bdc6; }
+.eyebrow,h1 em,.result #clock { color:#ff6963; }
+.caution { background:#2a2428;border-color:#855756;color:#f0e0e0; }
+.scoreline,.viewer,.panel { background:#1a1c22;border:1px solid #4c4f58;border-radius:12px; }
+.panel #stats,.result small { color:#ffaaa6; }
+.cap,.panel h2 { color:#fff; }
+.controls button,.controls select { background:#282b32;border-color:#595c65;color:#fff;min-height:42px; }
+.controls button:first-child { background:var(--watch-red);border-color:#fa6660;color:#fff; }
+.controls button:hover:not(:disabled) { border-color:#ff7973; }
+.controls button:focus-visible,.controls select:focus-visible { outline:2px solid #ff6963;outline-offset:2px; }
+.seek input,.sprite-toggle input { accent-color:var(--watch-red); }
+#toast:not([hidden]) { border-color:#ff6963;background:#1d1b20eb; }
+html.pfc-inline,html.pfc-inline body { background:#0b0d10; }
+html.pfc-inline main>.layout>.viewer { border:0;border-radius:0; }
+@media(prefers-reduced-motion:reduce) { .controls button { transition:none; } }
+
+/* PSE 120-minute knockout: anchored, accessible shootout result panel. */
+.shootout-overlay:not([hidden]){position:absolute;z-index:5;bottom:15px;left:50%;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:6px;min-width:min(320px,90%);max-width:94%;padding:13px 17px;border:2px solid #dbe5eb;border-radius:12px;background:rgba(12,22,35,.94);color:#fff;text-align:center;box-shadow:0 8px 28px rgba(0,0,0,.35)}
+.shootout-overlay strong{font-size:clamp(14px,2vw,19px);letter-spacing:.04em}
+.shootout-overlay span{font-size:12px;line-height:1.35}
+.shootout-overlay button{min-height:44px;min-width:160px;padding:10px 16px;border-radius:7px;border:1px solid #ebf0f4;color:#fff;background:#bb1728;font-weight:800;touch-action:manipulation;cursor:pointer}
+.shootout-overlay button:disabled{opacity:.5;cursor:not-allowed}
+.shootout-overlay button:focus-visible{outline:3px solid #fff;outline-offset:3px}
+@media(max-width:580px){.shootout-overlay:not([hidden]){bottom:8px;padding:8px 10px;gap:4px}.shootout-overlay span{font-size:11px}}
+
+
+/* Official Match Highlights — Newtro Poké Ball palette, identical in every Watch mode. */
+.highlight-hud{position:absolute;inset:0;pointer-events:none;z-index:8;font-family:Inter,system-ui,sans-serif}
+.highlight-hud button{font:inherit;cursor:pointer;touch-action:manipulation}
+.highlight-hud button:focus-visible{outline:3px solid #ff7370;outline-offset:2px}
+.highlight-toggle:not([hidden]){position:absolute;top:11px;left:11px;z-index:3;pointer-events:auto;border:1px solid #ddd;background:#14161bec;color:#fff;border-radius:9px;min-height:42px;padding:8px 13px;font-size:12px;font-weight:850;box-shadow:0 4px 15px #0006}
+.highlight-toggle span{display:inline-grid;place-items:center;min-width:22px;margin-left:5px;padding:2px 5px;background:#e53935;border-radius:7px;font-variant-numeric:tabular-nums}
+.highlight-notice:not([hidden]){position:absolute;left:50%;top:12%;transform:translateX(-50%);z-index:4;pointer-events:auto;display:flex;align-items:center;gap:8px;max-width:94%;padding:10px 12px;border:2px solid #e53935;border-radius:12px;color:#fff;background:#14161bf4;box-shadow:0 6px 22px #0008}
+.highlight-notice div{display:flex;flex-direction:column;gap:4px;min-width:0}
+.highlight-notice strong{font-size:clamp(13px,1.6vw,18px);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.highlight-notice small{font-size:10px;letter-spacing:.05em;color:#f4b5b3}
+.highlight-notice button{flex:none;min-height:44px;padding:9px 11px;border-radius:7px;border:1px solid #f6f6f6;background:#e53935;color:#fff;font-size:12px;font-weight:800}
+.highlight-notice #highlightNoticeDismiss{background:#31343b;min-width:44px}
+.highlight-drawer:not([hidden]){position:absolute;right:8px;top:8px;bottom:8px;z-index:6;display:flex;flex-direction:column;pointer-events:auto;width:min(385px,calc(100% - 16px));max-height:calc(100% - 16px);background:#17191ff7;color:#fff;border:1px solid #8d929e;border-top:4px solid #e53935;border-radius:12px;box-shadow:0 15px 32px #000b;overflow:hidden}
+.highlight-head{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:13px 14px;border-bottom:1px solid #454951;background:transparent;font-size:13px}
+.highlight-head button{background:#32363d;color:#fff;border:1px solid #777;border-radius:7px;min-width:42px;min-height:42px;font-size:17px}
+.highlight-filters{display:flex;gap:5px;padding:10px 12px}
+.highlight-filters button{min-height:38px;padding:7px 9px;border-radius:7px;border:1px solid #555965;background:#25272e;color:#fff;font-size:11px;font-weight:750;flex:1}
+.highlight-filters button.active{background:#e53935;border-color:#ff7975}
+.highlight-list{flex:1;min-height:0;overflow:auto;overscroll-behavior:contain;padding:5px 12px}
+.highlight-entry{display:flex;align-items:center;gap:9px;border-bottom:1px solid #383b43;padding:9px 1px}
+.highlight-entry-time{font-size:12px;min-width:40px;font-variant-numeric:tabular-nums;color:#ffc6c3;font-weight:800}
+.highlight-entry-info{min-width:0;flex:1;display:flex;flex-direction:column;gap:2px}
+.highlight-entry-info strong{font-size:12px;white-space:nowrap}
+.highlight-entry-info small{font-size:11px;color:#c2c4ce;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.highlight-entry button{min-height:44px;border:1px solid #e53935;border-radius:8px;background:#332326;color:#fff;padding:7px 10px;font-size:11px;font-weight:800}
+.highlight-empty{font-size:12px;color:#d1d2dc;line-height:1.4}
+.highlight-footnote{margin:0;border-top:1px solid #454951;padding:10px 12px;font-size:10px;color:#b9bcc5;line-height:1.4}
+.highlight-replay:not([hidden]){position:absolute;inset:0;display:flex;flex-direction:column;justify-content:space-between;z-index:9;pointer-events:none;color:#fff}
+.highlight-replay-top,.highlight-replay-bottom{display:flex;align-items:center;gap:10px;padding:11px 14px;background:#14161bdc;max-width:100%}
+.highlight-replay-top{align-self:flex-start;margin:10px;border-left:4px solid #e53935;border-radius:6px;font-size:12px}
+.highlight-replay-top strong{color:#ff7975}
+.highlight-replay-top span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.highlight-replay-bottom{align-self:center;justify-content:center;flex-wrap:wrap;margin-bottom:10px;border:1px solid #85878e;border-radius:11px;pointer-events:auto}
+.highlight-replay-bottom span{font-size:12px;font-variant-numeric:tabular-nums;min-width:40px}
+.highlight-replay-bottom button{border:1px solid #aaa;background:#282b33;color:#fff;min-height:44px;padding:8px 12px;border-radius:8px;font-size:12px;font-weight:800}
+.highlight-replay-bottom #highlightReplayReturn{background:#e53935;border-color:#e53935}
+@media(max-width:620px){
+ .highlight-toggle:not([hidden]){top:6px;left:6px;font-size:11px;padding:6px 8px}
+ .highlight-notice:not([hidden]){top:16%;padding:7px;gap:5px;width:max-content;max-width:96%}
+ .highlight-notice strong{font-size:12px}.highlight-notice small{font-size:8px}
+ .highlight-notice button{padding:7px;font-size:11px}
+ .highlight-drawer:not([hidden]){top:auto;bottom:4px;right:4px;left:4px;width:auto;max-height:78%;border-radius:10px}
+ .highlight-head{padding:6px 10px}
+ .highlight-filters{padding:5px 9px}
+ .highlight-replay-top{margin:5px}
+ .highlight-replay-bottom{gap:4px;padding:6px;margin-bottom:4px}
+}
+@media(prefers-reduced-motion:reduce){.highlight-hud *{scroll-behavior:auto;transition:none!important;animation:none!important}}
+
+/* v2 centered goal pause and pitch-contained Highlights UI. */
+.highlight-notice:not([hidden]){
+ inset:0;left:0;right:0;top:0;bottom:0;transform:none;
+ display:grid;place-items:center;max-width:none;width:100%;padding:14px;
+ border:0;border-radius:0;box-shadow:none;background:rgba(7,9,13,.65);
+ z-index:14;overflow:auto;
+}
+.highlight-notice .goal-prompt-card{
+ width:min(420px,100%);min-width:0;padding:22px 20px;
+ display:flex;flex-direction:column;align-items:center;text-align:center;gap:12px;
+ border:2px solid #e53935;border-radius:14px;background:#17191ff7;
+ box-shadow:0 18px 48px #000b;
+}
+.highlight-notice .goal-prompt-eyebrow{font-size:11px;color:#ffadaa;letter-spacing:.12em;font-weight:900}
+.highlight-notice #highlightNoticeTitle{font-size:clamp(21px,3vw,33px);max-width:100%;white-space:normal;overflow-wrap:anywhere}
+.highlight-notice p{font-size:12px;line-height:1.5;margin:0;color:#dadde5}
+.highlight-notice .goal-prompt-actions{width:100%;display:flex;flex-direction:row;gap:9px}
+.highlight-notice .goal-prompt-actions button{flex:1;min-width:0;font-weight:850;min-height:44px;padding:9px}
+.highlight-notice #highlightNoticeDismiss{background:#e53935;border-color:#e53935;min-width:0}
+.highlight-notice #highlightNoticePlay{background:#31343b;border-color:#777;min-width:0}
+.highlight-drawer:not([hidden]){
+ left:50%;right:auto;top:50%;bottom:auto;transform:translate(-50%,-50%);
+ width:min(450px,calc(100% - 18px));max-height:88%;min-width:0;
+}
+.watch-floating-controls[hidden]{display:none!important}
+.watch-floating-controls:not([hidden]){
+ position:absolute;z-index:12;bottom:12px;left:50%;transform:translateX(-50%);
+ display:flex;align-items:center;justify-content:center;gap:8px;
+ max-width:calc(100% - 20px);padding:7px 11px;
+ border-radius:12px;border:1px solid #b4b6bc;
+ background:rgba(16,18,23,.84);box-shadow:0 8px 22px #0008;
+ opacity:.65;transition:opacity .2s;
+}
+.watch-floating-controls:hover,.watch-floating-controls:focus-within{opacity:1}
+.watch-floating-controls button,.watch-floating-controls select{
+ border:1px solid #777d8a;border-radius:8px;background:#292c33;
+ padding:8px 10px;color:#fff;font-size:12px;min-height:42px;
+ font-weight:800;cursor:pointer;
+}
+.watch-floating-controls label{display:flex;align-items:center;gap:6px;font-size:11px;font-weight:800;color:#eceef5}
+@media(max-width:620px){
+ .highlight-notice:not([hidden]){inset:0;width:100%;max-width:none;transform:none;padding:10px}
+ .highlight-notice .goal-prompt-card{padding:16px 11px;gap:8px}
+ .highlight-notice #highlightNoticeTitle{font-size:21px}
+ .highlight-drawer:not([hidden]){left:50%;right:auto;top:50%;bottom:auto;transform:translate(-50%,-50%);width:calc(100% - 12px);max-height:90%}
+ .watch-floating-controls:not([hidden]){bottom:6px;gap:5px;padding:5px 8px}
+ .watch-floating-controls button,.watch-floating-controls select{padding:6px;font-size:11px}
+}
+@media(prefers-reduced-motion:reduce){.watch-floating-controls{transition:none}}
+
+/* Same embedded Watch canvas is shared by Quick Play, Challenges and Franchise.
+   Zoom lives inside the pitch, below the outer Fullscreen control. */
+.watch-zoom-controls{
+ position:absolute;z-index:8;top:54px;right:9px;
+ display:flex;align-items:center;gap:4px;
+ padding:4px;border:1px solid #a2aba7;border-radius:9px;
+ color:#fff;background:rgba(12,17,19,.88);
+ box-shadow:0 4px 13px #0009;
+ font-size:12px;font-weight:800;
+}
+.watch-zoom-controls button{
+ display:grid;place-items:center;min-width:38px;min-height:38px;
+ border:1px solid #616f6d;border-radius:6px;
+ background:#292f31;color:#fff;font-size:22px;font-weight:800;
+ cursor:pointer;touch-action:manipulation;
+}
+.watch-zoom-controls button:disabled{opacity:.4;cursor:default}
+.watch-zoom-controls button:focus-visible{
+ outline:2px solid #f4f4f4;outline-offset:2px;
+}
+.watch-zoom-controls output{
+ min-width:43px;text-align:center;font-variant-numeric:tabular-nums;
+}
+@media(max-width:620px){
+ .watch-zoom-controls{top:49px;right:5px;gap:3px;padding:3px}
+ .watch-zoom-controls button{min-width:36px;min-height:36px}
+}
+
+/* Broadcast-style lower third. Intentionally contained inside the same
+   Soccer-JS canvas frame used by Quick Play, Challenges, and Franchise. */
+.watch-commentary{
+ /* Below replay (z9), fullscreen controls (z12) and goal modal (z14). */
+ position:absolute;z-index:7;bottom:8px;left:8px;right:8px;
+ border:1px solid #899199;border-left:4px solid #e53935;
+ border-radius:8px;background:rgba(13,15,20,.92);
+ color:#f7f7f5;box-shadow:0 7px 20px #0009;
+ max-width:100%;font-family:inherit;
+ /* Keep replay and shootout buttons clickable through passive captions. */
+ pointer-events:none;
+}
+.watch-commentary-head{
+ display:flex;align-items:center;gap:8px;
+ padding:6px 10px 2px;font-size:10px;letter-spacing:.065em;
+}
+.watch-commentary-head strong{font-weight:950;color:#ff8e89}
+.watch-commentary-minute{
+ margin-left:auto;font-size:11px;font-weight:850;
+ color:#f7f7f5;font-variant-numeric:tabular-nums;
+}
+.watch-commentary-head button{
+ pointer-events:auto;
+ min-height:28px;padding:3px 8px;border:1px solid #66717a;
+ border-radius:5px;background:#24282f;color:#fff;
+ font-weight:800;font-size:10px;cursor:pointer;
+ touch-action:manipulation;
+}
+.watch-commentary-head button:focus-visible{
+ outline:2px solid #fff;outline-offset:2px;
+}
+.watch-commentary-line{
+ font-size:clamp(11px,1.45vw,15px);font-weight:800;
+ line-height:1.34;margin:0;padding:3px 12px 9px;
+ max-height:4.1em;overflow:hidden;overflow-wrap:anywhere;
+}
+.watch-commentary-history[hidden]{display:none!important}
+.watch-commentary-history:not([hidden]){
+ pointer-events:auto;
+ position:absolute;left:-4px;right:-1px;bottom:calc(100% + 5px);
+ max-height:min(52vh,230px);overflow-y:auto;overscroll-behavior:contain;
+ margin:0;padding:5px 12px 6px 38px;list-style:decimal;
+ border:1px solid #899199;border-radius:8px;
+ background:#12151aeF;color:#e6e8ed;
+ box-shadow:0 -7px 18px #0008;font-size:12px;
+}
+.watch-commentary-history li{padding:6px 0;border-bottom:1px solid #343942}
+.watch-commentary-history li:last-child{border:0}
+.watch-commentary-history time{
+ margin-right:7px;color:#ffa3a0;font-weight:850;font-variant-numeric:tabular-nums;
+}
+.watch-commentary-history .official{color:#ffcf96;font-weight:800}
+html.pfc-watch-fullscreen .watch-commentary{bottom:74px}
+@media(max-width:620px){
+ .watch-commentary{left:5px;right:5px;bottom:5px;border-left-width:3px}
+ .watch-commentary-head{padding:3px 7px 0;gap:5px}
+ .watch-commentary-line{padding:2px 9px 6px;font-size:11px}
+ .watch-commentary-visual{display:none}
+ .watch-commentary-head button{min-height:31px;padding:2px 6px}
+ html.pfc-watch-fullscreen .watch-commentary{bottom:62px}
+ .watch-commentary-history:not([hidden]){max-height:40vh;font-size:11px}
+}

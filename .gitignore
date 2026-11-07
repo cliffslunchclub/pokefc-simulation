@@ -1,3 +1,29 @@
-results/
+# Secrets and local configuration
+.env
+.env.*
+!.env.example
+*.pem
+*.p12
+*.pfx
+*.key
+id_rsa
+id_ed25519
+*.credentials.json
+secrets/
+private/
+# Generated builds, dependencies and browser QA
+dist/
 node_modules/
+soccer-js-upstream/
+watch/soccerjs/dist/
+pse-browser-artifacts/
+playwright-report/
+test-results/
+results/
+coverage/
+.tmp/
+tmp/
+*.log
 .DS_Store
+# Internal branch-prune audit results
+prune-audit/

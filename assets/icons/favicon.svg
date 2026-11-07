@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64" role="img" aria-label="PokéFC Poké Ball emblem">
+  <title>PokéFC — Poké Ball</title>
+  <rect width="64" height="64" rx="13" fill="#0b0d10"/>
+  <circle cx="32" cy="32" r="26.5" fill="#f7f7f5" stroke="#0b0d10" stroke-width="2"/>
+  <path d="M8 32a24 24 0 0 1 48 0Z" fill="#e53935"/>
+  <path d="M8.3 29.3h47.4v5.4H8.3Z" fill="#0b0d10"/>
+  <circle cx="32" cy="32" r="10.9" fill="#0b0d10"/>
+  <circle cx="32" cy="32" r="7.1" fill="#fff" stroke="#0b0d10" stroke-width="1.5"/>
+  <circle cx="32" cy="32" r="3.7" fill="#e6e8e9"/>
+  <path d="M15 18c5-6.5 11-9.5 19-9.6" stroke="#fff" stroke-opacity=".34" stroke-width="2.4" stroke-linecap="round" fill="none"/>
+</svg>

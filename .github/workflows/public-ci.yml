@@ -1,0 +1,101 @@
+name: PokéFC public CI — no deployment
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: pokefc-public-ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  source-safety:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+      - name: Verify mirror has no production automation or obvious credential files
+        shell: bash
+        run: |
+          set -euo pipefail
+          node - <<'NODE'
+          const fs=require('fs'),cp=require('child_process');
+          const files=cp.execFileSync('git',['ls-files'],{encoding:'utf8'}).trim().split('\n');
+          const blocked=[
+            /^\.github\/workflows\/deploy-/,
+            /^\.github\/workflows\/prune-/,
+            /^scripts\/prune-merged-branches\.sh$/,
+            /^SITEGROUND_DEPLOY\.md$/,
+            /^engines\/tacticmesh\//,
+            /(^|\/)\.env(\.|$)/,
+            /(^|\/)(?:id_rsa|id_ed25519)(?:\.pub)?$/
+          ];
+          for(const file of files) {
+            if(blocked.some(p=>p.test(file)))throw Error('Disallowed tracked file: '+file);
+            const data=fs.readFileSync(file,'utf8');
+            if(/-----BEGIN (?:RSA |EC |OPENSSH )?PRIVATE KEY-----|\b(?:github_pat_[a-z0-9_]{20,}|gh[pousr]_[a-z0-9]{20,}|AKIA[0-9A-Z]{16})\b/i.test(data))
+              throw Error('Possible hardcoded secret in: '+file);
+          }
+          for(const file of files.filter(x=>x.startsWith('.github/workflows/'))) {
+            const body=fs.readFileSync(file,'utf8');
+            const banned=[
+              ['FT','P-Deploy-Action'].join(''),
+              ['SG','_FTP_'].join(''),
+              ['pull_request','_target'].join(''),
+              ['contents:', ' write'].join(''),
+            ];
+            for(const needle of banned)if(body.includes(needle))throw Error('Unsafe workflow: '+file);
+          }
+          console.log('PASS '+files.length+' tracked files; no production workflows or recognizable credentials');
+          NODE
+
+  regression:
+    needs: source-safety
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: '22'
+      - name: Validate source syntax
+        shell: bash
+        run: |
+          set -euo pipefail
+          for f in assets/js/*.js play/*.js challenge/*.js match-director/*.js watch/soccerjs/*.cjs; do
+            node --check "$f"
+          done
+      - name: Run all game, PSE, and Watch regression tests (report every failure)
+        shell: bash
+        run: |
+          set -uo pipefail
+          failures=0
+          count=0
+          for f in tests/test-*.cjs watch/soccerjs/test-*.cjs; do
+            echo "::group::$f"
+            if node "$f"; then
+              echo "PASS $f"
+            else
+              echo "::error file=$f::Regression failed"
+              failures=$((failures+1))
+            fi
+            count=$((count+1))
+            echo "::endgroup::"
+          done
+          echo "Completed $count tests; failures=$failures"
+          test "$failures" -eq 0
+      - name: Validate local static build, without native bundle or publishing
+        run: |
+          bash scripts/build-siteground.sh
+          test -s dist/index.html
+          test -s dist/assets/js/quick-sim.js
+          test -s dist/challenge/index.html
+          test -s dist/franchise/index.html
+          test ! -e dist/.git
+          echo 'PASS static test build; nothing deployed'
