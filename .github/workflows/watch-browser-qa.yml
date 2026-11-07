@@ -14,7 +14,7 @@ permissions:
   contents: read
 jobs:
   browser-and-static-package:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 35
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
