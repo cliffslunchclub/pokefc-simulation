@@ -1,0 +1,13 @@
+{
+  "name": "pokefc-public-qa",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Locked build and browser QA tools for the public Pok\u00e9FC testing repository",
+  "engines": {
+    "node": ">=22"
+  },
+  "devDependencies": {
+    "esbuild": "0.28.1",
+    "playwright": "1.56.1"
+  }
+}
